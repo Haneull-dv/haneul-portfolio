@@ -1,0 +1,157 @@
+/* NAVBAR */
+.nav {
+  height: 56px;
+  background: var(--light, #F9F9F9);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  grid-gap: 24px;
+  font-family: var(--lato, 'Lato', sans-serif);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    bottom: -40px;
+    left: 0;
+    border-radius: 50%;
+    box-shadow: -20px -20px 0 var(--light);
+  }
+
+  a {
+    color: var(--dark);
+    text-decoration: none;
+  }
+
+  .bx.bx-menu {
+    cursor: pointer;
+  }
+
+  .navLink {
+    &:hover {
+      color: var(--blue);
+    }
+  }
+}
+
+.form {
+  position: absolute;
+  left: 420px;
+  right: 24px;
+  transition: 0.3s ease;
+
+  .formInput {
+    position: relative;
+
+    input {
+      width: 40px;
+      height: 40px;
+      background: var(--grey);
+      border-radius: 36px;
+      border: none;
+      outline: none;
+      padding-left: 16px;
+      transition: 0.3s ease;
+
+      &:focus {
+        width: 320px;
+      }
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      outline: none;
+      background: var(--blue);
+      color: var(--light);
+      cursor: pointer;
+    }
+  }
+}
+
+.switchLm {
+  display: block;
+  min-width: 50px;
+  height: 25px;
+  border-radius: 25px;
+  background: var(--grey);
+  cursor: pointer;
+  position: relative;
+
+  .ball {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: var(--blue);
+    transition: 0.3s ease;
+  }
+}
+
+.checkbox:checked + .switchLm .ball {
+  transform: translateX(24px);
+}
+
+.bxs-moon {
+  font-size: 1.4rem;
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+}
+
+.bx-sun {
+  font-size: 1.4rem;
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  color: var(--yellow);
+}
+
+// Responsive styles
+@media screen and (max-width: 768px) {
+  .navLink {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .form {
+    &.formInput input {
+      border-radius: 0;
+      width: 100%;
+    }
+
+    &.formInput button {
+      width: 56px;
+      border-radius: 0 36px 36px 0;
+    }
+
+    &.show .formInput input {
+      width: calc(100% - 56px);
+    }
+
+    &.show .formInput button {
+      width: 56px;
+    }
+
+    &.show ~ .notification,
+    &.show ~ .profile {
+      display: none;
+    }
+  }
+} 
