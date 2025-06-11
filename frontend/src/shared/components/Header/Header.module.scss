@@ -1,27 +1,17 @@
 /* NAVBAR */
 .nav {
-  height: 56px;
-  background: var(--light, #F9F9F9);
+  height: 64px;
+  background: var(--light); // 카드와 동일한 배경색
   padding: 0 24px;
   display: flex;
   align-items: center;
-  grid-gap: 24px;
+  gap: 24px;
   font-family: var(--lato, 'Lato', sans-serif);
   position: sticky;
   top: 0;
   left: 0;
   z-index: 1000;
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    bottom: -40px;
-    left: 0;
-    border-radius: 50%;
-    box-shadow: -20px -20px 0 var(--light);
-  }
+  border-bottom-left-radius: 20px; // 왼쪽 하단만 둥글게
 
   a {
     color: var(--dark);
@@ -41,7 +31,7 @@
 
 .form {
   position: absolute;
-  left: 420px;
+  left: 300px;
   right: 24px;
   transition: 0.3s ease;
 
@@ -153,5 +143,36 @@
     &.show ~ .profile {
       display: none;
     }
+  }
+}
+
+// Dark mode support
+[data-theme="dark"] {
+  .nav {
+    background: var(--dark-grey);
+    border-bottom-left-radius: 20px; // 왼쪽 하단만 둥글게
+    
+    a {
+      color: var(--light);
+      
+      &:hover {
+        color: var(--blue);
+      }
+    }
+  }
+  
+  .form .formInput {
+    input {
+      background: var(--dark);
+      color: var(--light);
+      
+      &::placeholder {
+        color: var(--dark-grey);
+      }
+    }
+  }
+  
+  .switchLm {
+    background: var(--dark);
   }
 } 

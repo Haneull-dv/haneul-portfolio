@@ -1,0 +1,104 @@
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 36px;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    a, span {
+      color: var(--dark-grey);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+      
+      &:hover {
+        color: var(--blue);
+      }
+      
+      &.active {
+        color: var(--blue);
+        font-weight: 500;
+      }
+    }
+    
+    i {
+      font-size: 16px;
+      color: var(--dark-grey);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+// Dark mode support
+[data-theme="dark"] {
+  .title {
+    color: var(--light);
+  }
+  
+  .breadcrumb li {
+    a, span {
+      color: var(--light);
+      
+      &:hover {
+        color: var(--blue);
+      }
+      
+      &.active {
+        color: var(--blue);
+      }
+    }
+    
+    i {
+      color: var(--light);
+    }
+  }
+}
+
+// Responsive design
+@media screen and (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+  
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+} 

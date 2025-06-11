@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, usePathname } from 'next/navigation';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
 import styles from './Sidebar.module.scss';
 
@@ -8,11 +9,11 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', icon: 'bxs-dashboard', text: 'Dashboard', href: '#' },
-  { id: 'store', icon: 'bxs-shopping-bag-alt', text: 'About Me', href: '#' },
-  { id: 'analytics', icon: 'bxs-doughnut-chart', text: 'Skills', href: '#' },
-  { id: 'message', icon: 'bxs-message-dots', text: 'Projects', href: '#' },
-  { id: 'team', icon: 'bxs-group', text: 'Contact', href: '#' },
+  { id: 'dashboard', icon: 'bxs-dashboard', text: 'Dashboard', href: '/dashboard' },
+  { id: 'about', icon: 'bxs-shopping-bag-alt', text: 'About Me', href: '/about' },
+  { id: 'skills', icon: 'bxs-doughnut-chart', text: 'Skills', href: '/skills' },
+  { id: 'projects', icon: 'bxs-message-dots', text: 'Projects', href: '/projects' },
+  { id: 'contact', icon: 'bxs-group', text: 'Contact', href: '/contact' },
 ];
 
 const bottomMenuItems = [
@@ -21,30 +22,40 @@ const bottomMenuItems = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
+  const router = useRouter();
+  const pathname = usePathname();
   const { activeMenu, setActive } = useActiveMenu();
 
-  const handleMenuClick = (menuId: string) => {
+  const handleMenuClick = (menuId: string, href: string) => {
+    if (href !== '#') {
+      router.push(href);
+    }
     setActive(menuId);
+  };
+
+  // Set active menu based on current pathname
+  const getActiveMenuFromPath = () => {
+    const path = pathname.split('/')[1];
+    return path || 'dashboard';
   };
 
   return (
     <section id="sidebar" className={`${styles.sidebar} ${isHidden ? styles.hide : ''}`}>
       <a href="#" className={styles.brand}>
-        <i className='bx bxs-smile bx-lg'></i>
-        <span className={styles.text}>AdminHub</span>
+        <span className={styles.text}>Haneul Kim</span>
       </a>
       
       <ul className={`${styles.sideMenu} ${styles.top}`}>
         {menuItems.map((item) => (
           <li 
             key={item.id} 
-            className={activeMenu === item.id ? styles.active : ''}
+            className={getActiveMenuFromPath() === item.id ? styles.active : ''}
           >
             <a 
               href={item.href} 
               onClick={(e) => {
                 e.preventDefault();
-                handleMenuClick(item.id);
+                handleMenuClick(item.id, item.href);
               }}
             >
               <i className={`bx ${item.icon} bx-sm`}></i>
@@ -62,7 +73,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
               className={item.isLogout ? styles.logout : ''}
               onClick={(e) => {
                 e.preventDefault();
-                handleMenuClick(item.id);
+                handleMenuClick(item.id, item.href);
               }}
             >
               <i className={`bx ${item.icon} bx-sm ${item.extraClass || ''}`}></i>

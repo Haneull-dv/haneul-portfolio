@@ -1,0 +1,97 @@
+// Layout Variables
+:root {
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 120px; // "Haneul Kim" 텍스트가 겹치지 않도록 조정
+  --header-height: 64px;
+  --layout-bg: var(--light); // 카드와 동일한 배경색
+}
+
+// Main Layout Container
+.layout-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--grey); // 메인 배경은 회색 유지
+}
+
+// Sidebar Styles
+.layout-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--layout-bg); // 카드와 동일한 흰색 배경
+  z-index: 2000;
+  transition: width 0.3s ease;
+
+  &.collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+}
+
+// Content Area
+.layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+
+  &.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+}
+
+// Header Styles
+.layout-header {
+  height: var(--header-height);
+  background: var(--layout-bg); // 카드와 동일한 흰색 배경
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 24px;
+}
+
+// Main Content Area
+.layout-main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--grey);
+}
+
+// Responsive Design
+@media screen and (max-width: 768px) {
+  .layout-content {
+    margin-left: 0;
+    
+    &.sidebar-collapsed {
+      margin-left: 0;
+    }
+  }
+  
+  .layout-sidebar {
+    transform: translateX(-100%);
+    
+    &.mobile-open {
+      transform: translateX(0);
+    }
+  }
+}
+
+// Dark Mode Support
+[data-theme="dark"] {
+  .layout-sidebar,
+  .layout-header {
+    background: var(--dark-grey);
+  }
+  
+  .layout-main {
+    background: var(--dark);
+  }
+} 

@@ -4,42 +4,53 @@
   top: 0;
   left: 0;
   width: 220px;
-  height: 100%;
-  background: var(--light, #F9F9F9);
+  height: 100vh;
+  background: var(--light); // 카드와 동일한 배경색
   z-index: 2000;
   font-family: var(--lato, 'Lato', sans-serif);
-  transition: 0.3s ease;
+  transition: width 0.3s ease;
   overflow-x: hidden;
   scrollbar-width: none;
+  border-top-right-radius: 20px; // 오른쪽 상단만 둥글게
 
   &::-webkit-scrollbar {
     display: none;
   }
 
   &.hide {
-    width: 60px;
+    width: 120px;
   }
 }
 
 .brand {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
-  color: var(--blue, #3C91E6);
+  color: var(--blue);
   position: sticky;
   top: 0;
   left: 0;
-  background: var(--light, #F9F9F9);
+  background: var(--light);
   z-index: 500;
-  padding-bottom: 20px;
-  box-sizing: content-box;
+  padding: 0 16px;
+  text-decoration: none;
+  border-top-right-radius: 20px; // 브랜드 영역도 둥글게
 
   .bx {
-    min-width: 60px;
+    min-width: 40px;
     display: flex;
     justify-content: center;
+    font-size: 20px;
+    margin-right: 8px;
+  }
+  
+  .text {
+    white-space: nowrap;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
   }
 }
 
@@ -47,18 +58,18 @@
   width: 100%;
 
   &.top {
-    margin-top: 48px;
+    margin-top: 24px;
   }
 
   li {
-    height: 48px;
+    height: 44px;
     background: transparent;
     margin-left: 6px;
-    border-radius: 48px 0 0 48px;
+    border-radius: 44px 0 0 44px;
     padding: 4px;
 
     &.active {
-      background: var(--grey, #eee);
+      background: var(--grey);
       position: relative;
 
       &::before {
@@ -69,7 +80,7 @@
         border-radius: 50%;
         top: -40px;
         right: 0;
-        box-shadow: 20px 20px 0 var(--grey, #eee);
+        box-shadow: 20px 20px 0 var(--grey);
         z-index: -1;
       }
 
@@ -81,40 +92,41 @@
         border-radius: 50%;
         bottom: -40px;
         right: 0;
-        box-shadow: 20px -20px 0 var(--grey, #eee);
+        box-shadow: 20px -20px 0 var(--grey);
         z-index: -1;
       }
 
       a {
-        color: var(--blue, #3C91E6) !important;
+        color: var(--blue) !important;
       }
     }
 
     a {
       width: 100%;
       height: 100%;
-      background: var(--light, #F9F9F9);
+      background: var(--light);
       display: flex;
       align-items: center;
-      border-radius: 48px;
-      font-size: 16px;
-      color: var(--dark, #342E37);
+      border-radius: 44px;
+      font-size: 14px;
+      color: var(--dark);
       white-space: nowrap;
       overflow-x: hidden;
       text-decoration: none;
 
       &.logout {
-        color: var(--red, #DB504A);
+        color: var(--red);
       }
 
       &:hover {
-        color: var(--blue, #3C91E6);
+        color: var(--blue);
       }
 
       .bx {
-        min-width: calc(60px - ((4px + 6px) * 2));
+        min-width: calc(40px - ((4px + 6px) * 2));
         display: flex;
         justify-content: center;
+        font-size: 16px;
       }
     }
   }
@@ -135,10 +147,71 @@
 }
 
 .sidebar.hide .sideMenu li a {
-  width: calc(48px - (4px * 2));
+  width: calc(120px - (4px * 2));
   transition: width 0.3s ease;
+}
+
+.sidebar.hide .sideMenu .text {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar.hide .brand {
+  padding: 0 16px; // 패딩을 동일하게 유지하여 텍스트 위치 고정
+  
+  .bx {
+    min-width: 32px;
+    margin-right: 6px;
+  }
+  
+  .text {
+    opacity: 1 !important;
+    visibility: visible !important;
+    white-space: nowrap;
+    overflow: hidden;
+  }
 }
 
 .text {
   // This will be hidden when sidebar is collapsed
+}
+
+// Dark mode support
+[data-theme="dark"] {
+  .sidebar {
+    background: var(--dark-grey);
+    border-top-right-radius: 20px; // 오른쪽 상단만 둥글게
+  }
+  
+  .brand {
+    background: var(--dark-grey);
+    border-top-right-radius: 20px; // 브랜드 영역도 둥글게
+  }
+  
+  .sideMenu li {
+    &.active {
+      background: var(--dark);
+      
+      &::before {
+        box-shadow: 20px 20px 0 var(--dark);
+      }
+      
+      &::after {
+        box-shadow: 20px -20px 0 var(--dark);
+      }
+    }
+    
+    a {
+      background: var(--dark-grey);
+      color: var(--light);
+      
+      &:hover {
+        color: var(--blue);
+      }
+      
+      &.logout {
+        color: var(--red);
+      }
+    }
+  }
 } 

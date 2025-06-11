@@ -1,0 +1,47 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--light); // 상단 공백을 흰색으로 채움
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+  margin-left: 220px;
+  min-height: 100vh;
+  
+  &.sidebarHidden {
+    margin-left: 120px;
+  }
+}
+
+.main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: var(--grey);
+  border-radius: 20px; // 메인 콘텐츠 영역 모든 모서리를 둥글게
+  margin: 24px 24px 24px 0; // 왼쪽 마진 제거하여 사이드바와 붙임
+  margin-top: 0; // 헤더 바로 아래부터 시작
+}
+
+// Dark mode support
+[data-theme="dark"] {
+  .layout {
+    background: var(--dark-grey); // 다크모드에서 상단 공백을 어두운 색으로
+  }
+}
+
+// Responsive design
+@media screen and (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    
+    &.sidebarHidden {
+      margin-left: 0;
+    }
+  }
+} 
