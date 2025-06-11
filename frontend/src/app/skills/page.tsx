@@ -31,14 +31,14 @@ const SkillsPage: React.FC = () => {
   ];
 
   const tools = [
-    'Git & GitHub',
-    'VS Code',
+    'Prompt Engineering',
     'Docker',
+    'Kubernetes',
     'AWS',
-    'Figma',
-    'Postman',
-    'Webpack',
-    'Vite'
+    'Git',
+    'Notion',
+    'Jira',
+    'Slack'
   ];
 
   const SkillBar = ({ name, level }: { name: string; level: number }) => (
