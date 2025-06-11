@@ -1,10 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useMenuToggle } from '../../hooks/useMenuToggle';
+import { useChat } from '../../hooks/useChat';
 import Sidebar from '../Sidebar/Sidebar';
 import Header from '../Header/Header';
+import FloatingChatbot from '../FloatingChatbot/FloatingChatbot';
+import ChatWindow from '../ChatWindow/ChatWindow';
 import styles from './Layout.module.scss';
 
 interface LayoutProps {
@@ -19,6 +22,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     toggleNotification, 
     toggleProfile 
   } = useMenuToggle();
+  
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const { messages, isTyping, sendMessage } = useChat();
 
   return (
     <div className={styles.layout}>
@@ -42,6 +48,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       </section>
+      
+      {/* Floating Chatbot */}
+      <FloatingChatbot onClick={() => setIsChatOpen(true)} />
+      
+      {/* Chat Window */}
+      <ChatWindow
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        messages={messages}
+        onSendMessage={sendMessage}
+        isTyping={isTyping}
+      />
     </div>
   );
 };

@@ -1,0 +1,91 @@
+.floatingContainer {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+    
+    .tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-10px);
+    }
+  }
+  
+  &:active {
+    transform: scale(1.05);
+  }
+}
+
+.characterSvg {
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.me {
+  opacity: 1;
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .floatingContainer {
+    width: 100px;
+    height: 100px;
+    bottom: 25px;
+    right: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floatingContainer {
+    width: 85px;
+    height: 85px;
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .tooltip {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+} 

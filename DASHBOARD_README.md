@@ -1,4 +1,4 @@
-# AdminHub Dashboard - Next.js 15 변환 완료
+# Haneul Dashboard - Next.js 15 변환 완료
 
 ## 🎉 변환 완료된 내용
 

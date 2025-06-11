@@ -24,7 +24,7 @@ const bottomMenuItems = [
 const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { activeMenu, setActive } = useActiveMenu();
+  const { setActive } = useActiveMenu();
 
   const handleMenuClick = (menuId: string, href: string) => {
     if (href !== '#') {

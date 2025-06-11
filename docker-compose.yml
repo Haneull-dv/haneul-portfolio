@@ -1,0 +1,128 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: hc_user
+      POSTGRES_PASSWORD: hc_password
+      POSTGRES_DB: hc_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  gateway:
+    container_name: gateway
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./gateway/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  stocktrend:
+    container_name: stock
+    build:
+      context: ./stocktrend
+      dockerfile: Dockerfile
+    volumes:
+      - ./stocktrend:/app
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./stocktrend/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  irsummary:
+    container_name: summary
+    build:
+      context: ./irsummary
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    env_file:
+      - ./irsummary/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  chatbot:
+    container_name: chat
+    build:
+      context: ./chatbot
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./chatbot/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  esgdsd:
+    container_name: esg
+    build:
+      context: ./esgdsd
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./esgdsd:/app
+    env_file:
+      - ./esgdsd/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  dsdgen:
+    container_name: gen
+    build:
+      context: ./dsdgen
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    env_file:
+      - ./dsdgen/.env
+    depends_on:
+      - postgres
+    volumes:
+      - ./dart_documents:/app/app/dart_documents
+    networks:
+      - app-network
+
+  dsdcheck:
+    container_name: check
+    build:
+      context: ./dsdcheck
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./dsdcheck:/app
+    env_file:
+      - ./dsdcheck/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
+    driver: bridge

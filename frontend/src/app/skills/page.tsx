@@ -80,7 +80,7 @@ const SkillsPage: React.FC = () => {
 
       <CardContainer columns={2} gap="large">
         <Card 
-          title="Frontend Development" 
+          title="Language Proficiency" 
           headerActions={
             <>
               <i className='bx bx-code-alt'></i>
@@ -96,7 +96,7 @@ const SkillsPage: React.FC = () => {
         </Card>
 
         <Card 
-          title="Backend Development" 
+          title="Certifications" 
           headerActions={
             <>
               <i className='bx bx-server'></i>
@@ -115,7 +115,7 @@ const SkillsPage: React.FC = () => {
       <div style={{ marginTop: '32px' }}>
         <CardContainer columns={1}>
           <Card 
-            title="Tools & Technologies" 
+            title="Technical Skills" 
             headerActions={
               <>
                 <i className='bx bx-wrench'></i>

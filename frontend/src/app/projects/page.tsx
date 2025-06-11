@@ -14,8 +14,8 @@ const ProjectsPage: React.FC = () => {
 
   const projects = [
     {
-      title: 'E-Commerce Platform',
-      description: 'React와 Node.js를 사용한 풀스택 이커머스 플랫폼입니다. 사용자 인증, 결제 시스템, 관리자 대시보드 등의 기능을 포함합니다.',
+      title: 'Conan AI',
+      description: '재무팀 및 IR팀을 위한 업무 자동화 플랫폼입니다. 재무제표 검증, 재무 DSD, 업계주가, 증권 리포트 등의 기능을 포함합니다.',
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
       status: 'Completed',
       image: 'https://placehold.co/300x200/4285f4/ffffff?text=E-Commerce',
@@ -23,7 +23,7 @@ const ProjectsPage: React.FC = () => {
       demo: '#'
     },
     {
-      title: 'Task Management App',
+      title: '네오위즈 IR팀에서 한거',
       description: '팀 협업을 위한 태스크 관리 애플리케이션입니다. 실시간 업데이트, 파일 공유, 댓글 시스템 등을 제공합니다.',
       technologies: ['Next.js', 'TypeScript', 'PostgreSQL', 'Socket.io'],
       status: 'In Progress',
