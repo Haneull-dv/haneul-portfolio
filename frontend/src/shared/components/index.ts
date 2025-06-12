@@ -18,4 +18,4 @@ export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
 export { default as HoverButton } from './HoverButton/HoverButton';
 
 // 추후 Modal 컴포넌트 export 추가 예정
-export { default as Modal } from './Modal'; 
+// export { default as Modal } from './Modal'; 
