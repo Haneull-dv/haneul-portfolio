@@ -5,7 +5,7 @@ import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
-import { FaGithub, FaInstagram } from 'react-icons/fa6';
+import { FaGithub, FaInstagram } from 'react-icons/fa';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
