@@ -15,4 +15,7 @@ export { default as NotificationMenu } from './NotificationMenu/NotificationMenu
 export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
 
 // UI Components
-export { default as HoverButton } from './HoverButton/HoverButton'; 
+export { default as HoverButton } from './HoverButton/HoverButton';
+
+// 추후 Modal 컴포넌트 export 추가 예정
+export { default as Modal } from './Modal'; 

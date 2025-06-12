@@ -5,6 +5,7 @@ import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
+import { FaGithub, FaInstagram } from 'react-icons/fa6';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -39,34 +40,26 @@ const ContactPage: React.FC = () => {
     {
       icon: 'bx bx-envelope',
       label: 'Email',
-      value: 'haneul@example.com',
-      link: 'mailto:haneul@example.com'
+      value: 'haneull.dv@gmail.com',
+      link: 'haneull.dv@gmail.com'
     },
     {
       icon: 'bx bx-phone',
       label: 'Phone',
-      value: '+82 10-1234-5678',
-      link: 'tel:+821012345678'
+      value: '+82 10-9165-7262',
+      link: 'tel:+821091657262'
     },
     {
       icon: 'bx bx-map',
       label: 'Location',
-      value: 'Seoul, South Korea',
+      value: 'Gyeonggi-do, South Korea',
       link: '#'
-    },
-    {
-      icon: 'bxl-linkedin',
-      label: 'LinkedIn',
-      value: 'linkedin.com/in/haneulkim',
-      link: 'https://linkedin.com/in/haneulkim'
     }
   ];
 
   const socialLinks = [
-    { icon: 'bxl-github', name: 'GitHub', url: 'https://github.com/haneulkim' },
-    { icon: 'bxl-linkedin', name: 'LinkedIn', url: 'https://linkedin.com/in/haneulkim' },
-    { icon: 'bxl-twitter', name: 'Twitter', url: 'https://twitter.com/haneulkim' },
-    { icon: 'bxl-instagram', name: 'Instagram', url: 'https://instagram.com/haneulkim' }
+    { icon: <FaGithub size={28} />, name: 'GitHub', url: 'https://github.com/Haneull-dv' },
+    { icon: <FaInstagram size={28} />, name: 'Instagram', url: 'https://instagram.com/skyyy_neul' }
   ];
 
   return (
@@ -296,10 +289,10 @@ const ContactPage: React.FC = () => {
                 Follow Me
               </h4>
               <div style={{ display: 'flex', gap: '12px' }}>
-                {socialLinks.map((social, index) => (
+                {socialLinks.map((link, idx) => (
                   <a
-                    key={index}
-                    href={social.url}
+                    key={idx}
+                    href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -326,7 +319,7 @@ const ContactPage: React.FC = () => {
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    <i className={social.icon}></i>
+                    {link.icon}
                   </a>
                 ))}
               </div>

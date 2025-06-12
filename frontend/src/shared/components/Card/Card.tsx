@@ -6,16 +6,20 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   headerActions?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+  style?: React.CSSProperties;
 }
 
 const Card: React.FC<CardProps> = ({ 
   title, 
   children, 
   className = '', 
-  headerActions 
+  headerActions,
+  onClick,
+  style
 }) => {
   return (
-    <div className={`${styles.card} ${className}`}>
+    <div className={`${styles.card} ${className}`} onClick={onClick} style={style}>
       {title && (
         <div className={styles.cardHeader}>
           <h3 className={styles.cardTitle}>{title}</h3>

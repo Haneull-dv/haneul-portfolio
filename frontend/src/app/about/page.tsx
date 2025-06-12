@@ -83,20 +83,20 @@ const AboutPage: React.FC = () => {
                 <span>김하늘 (Haneul Kim)</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: '500' }}>직업:</span>
-                <span>Full Stack Developer</span>
+                <span style={{ fontWeight: '500' }}>학교:</span>
+                <span>명지대학교</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: '500' }}>경력:</span>
-                <span>3+ years</span>
+                <span>네오위즈 IR팀 인턴(2022.12 - 2023.06)</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: '500' }}>위치:</span>
-                <span>Seoul, Korea</span>
+                <span>대한민국, 경기도 용인시</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: '500' }}>이메일:</span>
-                <span>haneul@example.com</span>
+                <span>haneull.dv@gmail.com</span>
               </div>
             </div>
           </div>

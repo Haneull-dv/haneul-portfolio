@@ -18,6 +18,22 @@ ps:
 
 # 🚀 마이크로서비스별 명령어
 
+## frontend
+build-frontend:
+	docker-compose build frontend
+
+up-frontend:
+	docker-compose up -d frontend
+
+down-frontend:
+	docker-compose stop frontend
+
+logs-frontend:
+	docker-compose logs -f frontend
+
+restart-frontend:
+	docker-compose down frontend && docker-compose up -d --build frontend
+
 ## gateway
 build-gateway:
 	docker-compose build gateway
