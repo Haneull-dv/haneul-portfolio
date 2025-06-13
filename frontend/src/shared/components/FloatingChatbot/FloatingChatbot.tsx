@@ -5,11 +5,16 @@ import styles from './FloatingChatbot.module.scss';
 
 interface FloatingChatbotProps {
   onClick: () => void;
+  style?: React.CSSProperties;
 }
 
-const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick }) => {
+const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {} }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const characterRef = useRef<SVGSVGElement>(null);
+  const eyeLeftRef = useRef<SVGPathElement>(null);
+  const eyeRightRef = useRef<SVGPathElement>(null);
+  const eyebrowLeftRef = useRef<SVGPathElement>(null);
+  const eyebrowRightRef = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     let animationId: number;
@@ -38,14 +43,27 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick }) => {
       if (!xPosition) return;
       if (storedXPosition === xPosition && storedYPosition === yPosition) return;
 
+      // 기준점: 얼굴 중앙(약 105, 90) 기준, 눈동자/눈썹 최대 이동량(px)
+      const maxEyeMove = 3;
+      const maxBrowMove = 1.5;
       const x = percentage(xPosition, width) - 50;
       const y = percentage(yPosition, height) - 50;
+      const moveEyeX = Math.max(-maxEyeMove, Math.min(maxEyeMove, x / 20));
+      const moveEyeY = Math.max(-maxEyeMove, Math.min(maxEyeMove, y / 28));
+      const moveBrowX = moveEyeX * 0.5;
+      const moveBrowY = moveEyeY * 0.5;
 
-      if (characterRef.current) {
-        const moveX = Math.max(-8, Math.min(8, x / 6));
-        const moveY = Math.max(-5, Math.min(5, y / 8));
-        
-        characterRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      if (eyeLeftRef.current) {
+        eyeLeftRef.current.setAttribute('transform', `translate(${moveEyeX},${moveEyeY})`);
+      }
+      if (eyeRightRef.current) {
+        eyeRightRef.current.setAttribute('transform', `translate(${moveEyeX},${moveEyeY})`);
+      }
+      if (eyebrowLeftRef.current) {
+        eyebrowLeftRef.current.setAttribute('transform', `translate(${moveBrowX},${moveBrowY})`);
+      }
+      if (eyebrowRightRef.current) {
+        eyebrowRightRef.current.setAttribute('transform', `translate(${moveBrowX},${moveBrowY})`);
       }
 
       storedXPosition = xPosition;
@@ -80,6 +98,7 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick }) => {
     <div 
       ref={containerRef}
       className={styles.floatingContainer}
+      style={style}
       onClick={onClick}
     >
       <svg 
@@ -155,19 +174,21 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick }) => {
               <g className={styles.face}>
                 <rect x="73.99" y="48.26" width="61.54" height="80.49" rx="26.08" transform="rotate(180 104.76 88.5)" fill="#ede3d1" />
                 <g className={styles.innerFace}>
-                  <path className={styles.eyebrowRight} d="M120.73 79a9 9 0 00-4-1.22 9.8 9.8 0 00-4.19.87" fill="none" stroke="#b5aa9a" strokeWidth="1.04" />
-                  <path className={styles.eyebrowLeft} d="M97.12 79.41a9.53 9.53 0 00-4-1.11 10.58 10.58 0 00-4.2.76" fill="none" stroke="#b5aa9a" strokeWidth="1.04" />
+                  <path className={styles.eyebrowRight} d="M120.73 79a9 9 0 00-4-1.22 9.8 9.8 0 00-4.19.87" fill="none" stroke="#b5aa9a" strokeWidth="1.04" ref={eyebrowRightRef} />
+                  <path className={styles.eyebrowLeft} d="M97.12 79.41a9.53 9.53 0 00-4-1.11 10.58 10.58 0 00-4.2.76" fill="none" stroke="#b5aa9a" strokeWidth="1.04" ref={eyebrowLeftRef} />
                   <path className={styles.mouth} d="M97 107.52s7.06 4.62 14 1.59" fill="none" stroke="#b5aa9a" strokeWidth="1.04" />
                   <g className={styles.eyes}>
                     <path 
-                      className={`${styles.eyeLeft} ${styles.eye}`} 
-                      d="M89.48 87.37c-.07 2.08 1.25 3.8 2.94 3.85s3.1-1.59 3.16-3.67-1.25-3.8-2.94-3.85-3.1 1.59-3.16 3.67z" 
-                      fill="#2b343b" 
+                      className={`${styles.eyeLeft} ${styles.eye}`}
+                      d="M89.48 87.37c-.07 2.08 1.25 3.8 2.94 3.85s3.1-1.59 3.16-3.67-1.25-3.8-2.94-3.85-3.1 1.59-3.16 3.67z"
+                      fill="#2b343b"
+                      ref={eyeLeftRef}
                     />
                     <path 
-                      className={`${styles.eyeRight} ${styles.eye}`} 
-                      d="M113.67 87.37c-.07 2.08 1.25 3.8 2.94 3.85s3.1-1.59 3.16-3.67-1.25-3.8-2.94-3.85-3.1 1.59-3.16 3.67z" 
-                      fill="#2b343b" 
+                      className={`${styles.eyeRight} ${styles.eye}`}
+                      d="M113.67 87.37c-.07 2.08 1.25 3.8 2.94 3.85s3.1-1.59 3.16-3.67-1.25-3.8-2.94-3.85-3.1 1.59-3.16 3.67z"
+                      fill="#2b343b"
+                      ref={eyeRightRef}
                     />
                   </g>
                   <path className={styles.nose} d="M102.39 98.13s3.09 1.55 5.78 0" fill="none" stroke="#e0d5c1" />
