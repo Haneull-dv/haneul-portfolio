@@ -7,9 +7,10 @@ interface FloatingChatbotProps {
   onClick: () => void;
   style?: React.CSSProperties;
   hideBackground?: boolean;
+  hideTooltip?: boolean;
 }
 
-const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {}, hideBackground = false }) => {
+const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {}, hideBackground = false, hideTooltip = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const characterRef = useRef<SVGSVGElement>(null);
   const eyeLeftRef = useRef<SVGPathElement>(null);
@@ -209,9 +210,11 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {}, 
         </g>
       </svg>
       
-      <div className={styles.tooltip}>
-        <span>💬 채팅하기</span>
-      </div>
+      {!hideTooltip && (
+        <div className={styles.tooltip}>
+          <span>💬 채팅하기</span>
+        </div>
+      )}
     </div>
   );
 };

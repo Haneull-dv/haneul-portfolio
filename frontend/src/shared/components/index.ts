@@ -17,6 +17,7 @@ export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
 // UI Components
 export { default as HoverButton } from './HoverButton/HoverButton';
 export { default as BirthdayCake } from './BirthdayCake/BirthdayCake';
+export { default as SpeechBubbles } from './SpeechBubbles/SpeechBubbles';
 
 // Chat Components
 export { default as FloatingChatbot } from './FloatingChatbot/FloatingChatbot';

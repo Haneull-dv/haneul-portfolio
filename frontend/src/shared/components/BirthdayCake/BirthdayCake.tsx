@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import FloatingChatbot from '@/shared/components/FloatingChatbot';
-import SpeechBubbles from '@/speechbubbles';
+import SpeechBubbles from '@/shared/components/SpeechBubbles';
 import styles from './BirthdayCake.module.scss';
 
 const BirthdayCake: React.FC = () => {
@@ -13,7 +13,7 @@ const BirthdayCake: React.FC = () => {
   };
 
   const handleCharacterClick = () => {
-    // 캐릭터 클릭 시 아무 동작 안함 (케이크와 분리)
+    // 캐릭터 클릭 시 아무 동작 안함 (채팅 기능 비활성화)
   };
 
   return (
@@ -26,13 +26,15 @@ const BirthdayCake: React.FC = () => {
         <FloatingChatbot 
           onClick={handleCharacterClick}
           hideBackground={true}
+          hideTooltip={true}
           style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
             maxWidth: '400px',
             maxHeight: '400px',
-            zIndex: 1
+            zIndex: 1,
+            pointerEvents: 'none'
           }}
         />
       </div>
