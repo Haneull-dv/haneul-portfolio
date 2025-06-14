@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useSidebar = () => {
   const [isHidden, setIsHidden] = useState(false);
@@ -8,28 +8,6 @@ export const useSidebar = () => {
   const toggleSidebar = () => {
     setIsHidden(prev => !prev);
   };
-
-  const adjustSidebar = () => {
-    if (window.innerWidth <= 576) {
-      setIsHidden(true);
-    } else {
-      setIsHidden(false);
-    }
-  };
-
-  useEffect(() => {
-    adjustSidebar();
-    
-    const handleResize = () => {
-      adjustSidebar();
-    };
-
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   return {
     isHidden,

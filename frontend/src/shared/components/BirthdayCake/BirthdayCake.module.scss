@@ -24,12 +24,14 @@
   top: 50%;
   left: 52%;
   transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .cakeWrapper {
   position: relative;
   z-index: 2;
   transform: translateX(-5%);
+  pointer-events: none;
 }
 
 .cake {
@@ -91,6 +93,7 @@
   background-color: #fff;
   border-radius: 4px;
   z-index: 10;
+  pointer-events: auto;
 }
 
 .flame {
@@ -98,6 +101,7 @@
   z-index: 10;
   cursor: pointer;
   transition: all 0.3s ease;
+  pointer-events: auto;
 }
 
 .out {
@@ -168,6 +172,7 @@
     top: 50%;
     left: 52%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   }
 }
 
@@ -183,6 +188,7 @@
     top: 50%;
     left: 52%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   }
   
   .cake {
@@ -229,6 +235,7 @@
     width: 10px;
     top: -32px;
     margin-left: -5px;
+    pointer-events: auto;
   }
   
   .lit {
@@ -256,6 +263,7 @@
     top: 50%;
     left: 52%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   }
   
   .cake {
@@ -302,6 +310,7 @@
     width: 8px;
     top: -24px;
     margin-left: -4px;
+    pointer-events: auto;
   }
   
   .lit {

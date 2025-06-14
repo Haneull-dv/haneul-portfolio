@@ -8,6 +8,7 @@
   flex-wrap: wrap;
   align-content: space-around;
   pointer-events: auto;
+  z-index: 100;
   filter: 
     drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
@@ -19,7 +20,7 @@
   position: absolute;
   background: linear-gradient(25deg, #fbfdfa, #cbdce5);
   box-shadow: -0.25vmin 0.25vmin 0.25vmin 0.05vmin #fff inset;
-  z-index: 10;
+  z-index: 101;
   cursor: pointer;
   pointer-events: auto;
   transition: all 0.3s ease;
@@ -70,7 +71,7 @@
   top: 10%;
   left: 25%;
   background: linear-gradient(25deg, #f0e6ff, #d1b3ff);
-  z-index: 10;
+  z-index: 101;
 }
 
 .bubble.oval {
@@ -80,7 +81,7 @@
   top: 35%;
   left: 10%;
   background: linear-gradient(25deg, #fff8e6, #ffeb99);
-  z-index: 10;
+  z-index: 101;
 }
 
 // 오른쪽 말풍선들 (좌우반전)
@@ -92,7 +93,7 @@
   right: 25%;
   transform: scaleX(-1);
   background: linear-gradient(25deg, #ffe6f0, #ffb3d1);
-  z-index: 10;
+  z-index: 101;
   
   &:hover {
     transform: scaleX(-1) scale(1.05);
@@ -115,7 +116,7 @@
   right: 10%;
   transform: scaleX(-1);
   background: linear-gradient(25deg, #e6fff2, #b3e5d1);
-  z-index: 10;
+  z-index: 101;
   
   &:hover {
     transform: scaleX(-1) scale(1.05);
@@ -141,7 +142,7 @@
   background-repeat: no-repeat;
   background: linear-gradient(-135deg, #f2f7f6 0 1.7vmin, transparent 0 100%);
   pointer-events: none;
-  z-index: 5;
+  z-index: 100;
 }
 
 .bubble.circle:after {
@@ -151,7 +152,7 @@
   bottom: -1.7vmin;
   width: 2.8vmin;
   pointer-events: none;
-  z-index: 5;
+  z-index: 100;
 }
 
 .bubble.oval:after {
@@ -161,7 +162,7 @@
   right: 2.8vmin;
   width: 2.8vmin;
   pointer-events: none;
-  z-index: 5;
+  z-index: 100;
 }
 
 // 오른쪽 말풍선들의 꼬리
@@ -172,7 +173,7 @@
   bottom: -1.7vmin;
   width: 2.8vmin;
   pointer-events: none;
-  z-index: 5;
+  z-index: 100;
 }
 
 .bubble.ovalRight:after {
@@ -182,7 +183,7 @@
   right: 2.8vmin;
   width: 2.8vmin;
   pointer-events: none;
-  z-index: 5;
+  z-index: 100;
 }
 
 // 툴팁 스타일
@@ -688,5 +689,70 @@
   .tooltipDescription {
     font-size: 12px;
     line-height: 1.5;
+  }
+}
+
+// Add mobile responsive styles at the end
+@media (max-width: 768px) {
+  .wrapper {
+    transform: scale(0.8);
+    margin: 20px 0;
+  }
+  
+  .bubble {
+    font-size: 14px;
+    
+    &.circle, &.circleRight {
+      width: 80px;
+      height: 80px;
+    }
+    
+    &.oval, &.ovalRight {
+      width: 100px;
+      height: 60px;
+    }
+  }
+  
+  .tooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 400px;
+    z-index: 9999;
+    
+    .tooltipContent {
+      padding: 20px;
+      
+      .tooltipTitle {
+        font-size: 18px;
+      }
+      
+      .tooltipDescription {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    transform: scale(0.7);
+  }
+  
+  .bubble {
+    font-size: 12px;
+    
+    &.circle, &.circleRight {
+      width: 70px;
+      height: 70px;
+    }
+    
+    &.oval, &.ovalRight {
+      width: 90px;
+      height: 50px;
+    }
   }
 } 

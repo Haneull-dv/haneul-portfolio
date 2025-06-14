@@ -29,7 +29,7 @@
   min-height: 100vh;
   
   &.sidebarHidden {
-    margin-left: 120px;
+    margin-left: 0;
   }
 }
 
@@ -53,7 +53,7 @@
 // Responsive design
 @media screen and (max-width: 1024px) {
   .content {
-    margin-left: 120px;
+    margin-left: 220px;
     
     &.sidebarHidden {
       margin-left: 0;
@@ -68,7 +68,7 @@
 
 @media screen and (max-width: 768px) {
   .content {
-    margin-left: 0;
+    margin-left: 220px;
     
     &.sidebarHidden {
       margin-left: 0;

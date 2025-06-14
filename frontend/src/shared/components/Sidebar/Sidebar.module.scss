@@ -8,7 +8,7 @@
   background: var(--light); // 카드와 동일한 배경색
   z-index: 2000;
   font-family: var(--lato, 'Lato', sans-serif);
-  transition: width 0.3s ease;
+  transition: transform 0.3s ease;
   overflow-x: hidden;
   scrollbar-width: none;
   border-top-right-radius: 20px; // 오른쪽 상단만 둥글게
@@ -18,7 +18,7 @@
   }
 
   &.hide {
-    width: 120px;
+    transform: translateX(-100%);
   }
 }
 
@@ -62,42 +62,62 @@
   }
 
   li {
-    height: 44px;
     background: transparent;
     margin-left: 6px;
-    border-radius: 44px 0 0 44px;
+    margin-right: 6px;
+    border-radius: 12px;
     padding: 4px;
+    margin-bottom: 4px;
 
-    &.active {
-      background: var(--grey);
-      position: relative;
+    // Main menu item
+    > div {
+      height: 44px;
+      border-radius: 12px;
+      
+      &.active {
+        // 단순한 배경색만 적용, 복잡한 곡선 효과 제거
+        background: transparent;
 
-      &::before {
-        content: '';
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        top: -40px;
-        right: 0;
-        box-shadow: 20px 20px 0 var(--grey);
-        z-index: -1;
+        a {
+          color: var(--blue) !important;
+        }
       }
+    }
 
-      &::after {
-        content: '';
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        bottom: -40px;
-        right: 0;
-        box-shadow: 20px -20px 0 var(--grey);
-        z-index: -1;
-      }
-
-      a {
-        color: var(--blue) !important;
+    // Submenu items
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+        border-radius: 12px;
+        
+        &.active {
+          background: transparent;
+          
+          a {
+            color: var(--blue) !important;
+          }
+        }
+        
+        a {
+          color: var(--dark) !important; // About Me와 동일한 색상
+          font-size: 13px;
+          border-radius: 12px;
+          
+          &:hover {
+            color: var(--blue) !important;
+          }
+          
+          .bx {
+            min-width: 20px;
+            margin-right: 8px;
+          }
+        }
       }
     }
 
@@ -107,12 +127,13 @@
       background: var(--light);
       display: flex;
       align-items: center;
-      border-radius: 44px;
+      border-radius: 12px;
       font-size: 14px;
       color: var(--dark);
       white-space: nowrap;
       overflow-x: hidden;
       text-decoration: none;
+      transition: color 0.3s ease;
 
       &.logout {
         color: var(--red);
@@ -146,31 +167,8 @@
   }
 }
 
-.sidebar.hide .sideMenu li a {
-  width: calc(120px - (4px * 2));
-  transition: width 0.3s ease;
-}
-
-.sidebar.hide .sideMenu .text {
-  opacity: 1;
-  visibility: visible;
-}
-
-.sidebar.hide .brand {
-  padding: 0 16px; // 패딩을 동일하게 유지하여 텍스트 위치 고정
-  
-  .bx {
-    min-width: 32px;
-    margin-right: 6px;
-  }
-  
-  .text {
-    opacity: 1 !important;
-    visibility: visible !important;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-}
+// When sidebar is hidden, it's completely off-screen
+// No need for collapsed state styles
 
 .text {
   // This will be hidden when sidebar is collapsed
@@ -189,16 +187,8 @@
   }
   
   .sideMenu li {
-    &.active {
-      background: var(--dark);
-      
-      &::before {
-        box-shadow: 20px 20px 0 var(--dark);
-      }
-      
-      &::after {
-        box-shadow: 20px -20px 0 var(--dark);
-      }
+    > div.active {
+      background: transparent;
     }
     
     a {
@@ -208,9 +198,23 @@
       &:hover {
         color: var(--blue);
       }
+    }
+    
+    ul li {
+      &.active {
+        background: transparent;
+        
+        a {
+          color: var(--blue) !important;
+        }
+      }
       
-      &.logout {
-        color: var(--red);
+      a {
+        color: var(--light) !important;
+        
+        &:hover {
+          color: var(--blue) !important;
+        }
       }
     }
   }
@@ -250,23 +254,10 @@
 
 @media screen and (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    width: 220px;
     z-index: 3000;
     
-    &.show {
-      transform: translateX(0);
-    }
-    
-    &.hide {
-      width: 220px;
-      transform: translateX(-100%);
-      
-      &.show {
-        transform: translateX(0);
-      }
-    }
+    // On mobile, sidebar starts hidden by default
+    // but can be toggled with hamburger button
   }
   
   .brand {
