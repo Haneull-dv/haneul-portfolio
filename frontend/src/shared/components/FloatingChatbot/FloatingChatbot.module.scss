@@ -52,7 +52,7 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.8);
+    border-top-color: rgba(5, 5, 5, 0.8);
   }
   
   span {
@@ -67,12 +67,35 @@
 }
 
 // 반응형 디자인
+@media (max-width: 1024px) {
+  .floatingContainer {
+    width: 110px;
+    height: 110px;
+    bottom: 28px;
+    right: 28px;
+  }
+  
+  .tooltip {
+    font-size: 13px;
+    padding: 7px 11px;
+  }
+}
+
 @media (max-width: 768px) {
   .floatingContainer {
     width: 100px;
     height: 100px;
     bottom: 25px;
     right: 25px;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  .tooltip {
+    font-size: 12px;
+    padding: 6px 10px;
   }
 }
 
@@ -82,10 +105,37 @@
     height: 85px;
     bottom: 20px;
     right: 20px;
+    
+    &:hover {
+      transform: scale(1.02);
+    }
+    
+    &:active {
+      transform: scale(1.0);
+    }
   }
   
   .tooltip {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    
+    &::after {
+      border-width: 4px;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .floatingContainer {
+    width: 75px;
+    height: 75px;
+    bottom: 15px;
+    right: 15px;
+  }
+  
+  .tooltip {
+    font-size: 10px;
+    padding: 4px 6px;
   }
 } 

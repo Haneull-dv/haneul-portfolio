@@ -86,19 +86,91 @@
 }
 
 // Responsive design
+@media screen and (max-width: 1024px) {
+  .pageHeader {
+    margin-bottom: 28px;
+  }
+  
+  .title {
+    font-size: 32px;
+  }
+  
+  .breadcrumb li {
+    a, span {
+      font-size: 13px;
+    }
+    
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
 @media screen and (max-width: 768px) {
   .pageHeader {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
+    margin-bottom: 24px;
   }
   
   .title {
     font-size: 28px;
   }
   
+  .breadcrumb {
+    gap: 6px;
+    
+    li {
+      gap: 6px;
+      
+      a, span {
+        font-size: 12px;
+      }
+      
+      i {
+        font-size: 12px;
+      }
+    }
+  }
+  
   .actions {
     width: 100%;
     justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .pageHeader {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  
+  .breadcrumb {
+    gap: 4px;
+    flex-wrap: wrap;
+    
+    li {
+      gap: 4px;
+      
+      a, span {
+        font-size: 11px;
+      }
+      
+      i {
+        font-size: 10px;
+      }
+    }
+  }
+  
+  .actions {
+    gap: 6px;
+    flex-wrap: wrap;
   }
 } 

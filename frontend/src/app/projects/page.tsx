@@ -5,14 +5,15 @@ import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
+import PDFModal from '@/shared/components/PDFModal/PDFModal';
 
 const pdfMap: Record<string, string> = {
-  '미래정치연구소 연구보조원': '/pdfs/mirae_politics.pdf',
-  'Blog Platform': '/pdfs/blog_platform.pdf',
+  '파스타집 사업계획서': '/projects/pdfs/soar.pdf',
 };
 
 const ProjectsPage: React.FC = () => {
-  const [openedIdx, setOpenedIdx] = useState<null | number>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPDF, setSelectedPDF] = useState<{url: string, title: string} | null>(null);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -27,7 +28,8 @@ const ProjectsPage: React.FC = () => {
       status: 'In Progress',
       image: '/projects/conanai.png',
       github: '#',
-      demo: '#'
+      demo: '#',
+      hasModal: false,
     },
     {
       title: '네오위즈 IR팀 인턴',
@@ -36,7 +38,9 @@ const ProjectsPage: React.FC = () => {
       status: 'Completed',
       image: '/projects/네오위즈.png',
       github: '#',
-      demo: '#'
+      demo: '#',
+      hasModal: false,
+      isNeowizProject: true,
     },
     {
       title: '미래정치연구소 연구보조원',
@@ -45,16 +49,18 @@ const ProjectsPage: React.FC = () => {
       status: 'Completed',
       image: '/projects/미래정치연구소.png',
       github: '#',
-      demo: '#'
+      demo: '#',
+      hasModal: false,
     },
     {
       title: '파스타집 사업계획서',
       description: '아르바이트 하던 파스타집의 사업개선을 위해 사장님께 제안한 자료입니다. 마케팅, 사업개선 방안, 동종업계 비교 등의 내용을 담았습니다.',
-      technologies: ['Next.js', 'MDX', 'Prisma', 'NextAuth'],
-      status: 'Planning',
+      technologies: ['Business Plan', 'Marketing', 'Analysis'],
+      status: 'Completed',
       image: '/projects/쏘어_사업계획서.png',
       github: '#',
-      demo: '#'
+      demo: '#',
+      hasModal: true,
     }
   ];
 
@@ -65,6 +71,23 @@ const ProjectsPage: React.FC = () => {
       case 'Planning': return '#2196f3';
       default: return '#757575';
     }
+  };
+
+  const handleCardClick = (project: typeof projects[0]) => {
+    if (project.isNeowizProject) {
+      window.location.href = '/projects/neowiz';
+    } else if (project.hasModal && pdfMap[project.title]) {
+      setSelectedPDF({ url: pdfMap[project.title], title: project.title });
+      setModalOpen(true);
+    } else if (pdfMap[project.title]) {
+      setSelectedPDF({ url: pdfMap[project.title], title: project.title });
+      setModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedPDF(null);
   };
 
   return (
@@ -95,14 +118,8 @@ const ProjectsPage: React.FC = () => {
                   <i className='bx bx-dots-vertical-rounded'></i>
                 </>
               }
-              onClick={
-                project.title === '네오위즈 IR팀 인턴'
-                  ? () => window.location.href = '/projects/neowiz'
-                  : pdfMap[project.title]
-                    ? () => setOpenedIdx(openedIdx === index ? null : index)
-                    : undefined
-              }
-              style={{ minHeight: 420, display: 'flex', flexDirection: 'column', height: '100%', cursor: (project.title === '네오위즈 IR팀 인턴' || pdfMap[project.title]) ? 'pointer' : undefined }}
+              onClick={() => handleCardClick(project)}
+              style={{ minHeight: 420, display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
                 <img 
@@ -129,12 +146,27 @@ const ProjectsPage: React.FC = () => {
                   >
                     {project.status}
                   </span>
+                  {project.hasModal && (
+                    <span 
+                      style={{
+                        padding: '4px 12px',
+                        backgroundColor: '#4caf50',
+                        color: 'white',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      PDF 뷰어
+                    </span>
+                  )}
                 </div>
 
                 <p style={{ 
                   color: 'var(--dark-grey)', 
                   lineHeight: '1.6',
-                  margin: 0
+                  margin: 0,
+                  flex: 1
                 }}>
                   {project.description}
                 </p>
@@ -197,20 +229,19 @@ const ProjectsPage: React.FC = () => {
                 </div>
               </div>
             </Card>
-            {pdfMap[project.title] && openedIdx === index && (
-              <div style={{ marginTop: 16, width: '100%' }}>
-                <iframe
-                  src={pdfMap[project.title]}
-                  title={project.title + ' PDF'}
-                  width="100%"
-                  height="600px"
-                  style={{ border: '1px solid #ddd', borderRadius: 8, background: 'white' }}
-                />
-              </div>
-            )}
           </div>
         ))}
       </CardContainer>
+
+      {/* PDF 모달 */}
+      {modalOpen && selectedPDF && (
+        <PDFModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          pdfUrl={selectedPDF.url}
+          title={selectedPDF.title}
+        />
+      )}
     </Layout>
   );
 };

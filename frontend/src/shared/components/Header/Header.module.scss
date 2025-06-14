@@ -113,36 +113,191 @@
 }
 
 // Responsive styles
+@media screen and (max-width: 1024px) {
+  .nav {
+    padding: 0 16px;
+    gap: 16px;
+  }
+  
+  .form {
+    left: 200px;
+    right: 16px;
+    
+    .formInput input {
+      &:focus {
+        width: 280px;
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 768px) {
+  .nav {
+    padding: 0 12px;
+    gap: 12px;
+    height: 56px;
+  }
+  
   .navLink {
     display: none;
+  }
+  
+  .form {
+    left: 60px;
+    right: 12px;
+    
+    .formInput {
+      input {
+        height: 36px;
+        
+        &:focus {
+          width: 240px;
+        }
+      }
+      
+      button {
+        width: 36px;
+        height: 36px;
+      }
+    }
+  }
+  
+  .switchLm {
+    min-width: 45px;
+    height: 22px;
+    
+    .ball {
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  .checkbox:checked + .switchLm .ball {
+    transform: translateX(22px);
+  }
+  
+  .bxs-moon,
+  .bx-sun {
+    font-size: 1.2rem;
   }
 }
 
 @media screen and (max-width: 576px) {
+  .nav {
+    padding: 0 8px;
+    gap: 8px;
+    height: 52px;
+  }
+  
   .form {
-    &.formInput input {
-      border-radius: 0;
-      width: 100%;
+    left: 50px;
+    right: 8px;
+    
+    .formInput {
+      input {
+        height: 32px;
+        
+        &:focus {
+          width: 200px;
+        }
+      }
+      
+      button {
+        width: 32px;
+        height: 32px;
+      }
     }
-
-    &.formInput button {
-      width: 56px;
-      border-radius: 0 36px 36px 0;
-    }
-
+    
     &.show .formInput input {
-      width: calc(100% - 56px);
+      width: calc(100% - 32px);
     }
 
     &.show .formInput button {
-      width: 56px;
+      width: 32px;
     }
 
     &.show ~ .notification,
     &.show ~ .profile {
       display: none;
     }
+  }
+  
+  .switchLm {
+    min-width: 40px;
+    height: 20px;
+    
+    .ball {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  .checkbox:checked + .switchLm .ball {
+    transform: translateX(18px);
+  }
+  
+  .bxs-moon,
+  .bx-sun {
+    font-size: 1rem;
+    
+    &.bxs-moon {
+      left: 4px;
+    }
+    
+    &.bx-sun {
+      right: 4px;
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .nav {
+    padding: 0 6px;
+    gap: 6px;
+    height: 48px;
+  }
+  
+  .bx.bx-menu {
+    font-size: 1.2rem;
+  }
+  
+  .form {
+    left: 40px;
+    right: 6px;
+    
+    .formInput {
+      input {
+        height: 28px;
+        font-size: 14px;
+        
+        &:focus {
+          width: 160px;
+        }
+      }
+      
+      button {
+        width: 28px;
+        height: 28px;
+        
+        i {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  
+  .switchLm {
+    min-width: 36px;
+    height: 18px;
+    
+    .ball {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  
+  .checkbox:checked + .switchLm .ball {
+    transform: translateX(16px);
   }
 }
 

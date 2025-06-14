@@ -3,6 +3,7 @@
 import React from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
+import BirthdayCake from '@/shared/components/BirthdayCake/BirthdayCake';
 
 const DashboardPage: React.FC = () => {
   const breadcrumbs = [
@@ -28,10 +29,9 @@ const DashboardPage: React.FC = () => {
         alignItems: 'center', 
         justifyContent: 'center', 
         minHeight: '60vh',
-        fontSize: '18px',
-        color: '#6b7280'
+        padding: '20px'
       }}>
-        <p>우측 하단의 AI 어시스턴트와 대화해보세요! 💬</p>
+        <BirthdayCake />
       </div>
     </Layout>
   );

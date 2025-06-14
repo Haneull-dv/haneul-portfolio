@@ -6,6 +6,7 @@ import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
   isHidden: boolean;
+  className?: string;
 }
 
 const menuItems = [
@@ -21,7 +22,7 @@ const bottomMenuItems = [
   { id: 'logout', icon: 'bx-power-off', text: 'Logout', href: '#', extraClass: 'bx-burst-hover', isLogout: true },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isHidden, className = '' }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { setActive } = useActiveMenu();
@@ -40,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
   };
 
   return (
-    <section id="sidebar" className={`${styles.sidebar} ${isHidden ? styles.hide : ''}`}>
+    <section id="sidebar" className={`${styles.sidebar} ${isHidden ? styles.hide : ''} ${className}`}>
       <a href="#" className={styles.brand}>
         <span className={styles.text}>Haneul Kim</span>
       </a>

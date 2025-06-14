@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - app-network
 
@@ -53,36 +53,6 @@ services:
       - "8083:8083"
     env_file:
       - ./irsummary/.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
-  chatbot:
-    container_name: chat
-    build:
-      context: ./chatbot
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8082"
-    env_file:
-      - ./chatbot/.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
-  esgdsd:
-    container_name: esg
-    build:
-      context: ./esgdsd
-      dockerfile: Dockerfile
-    ports:
-      - "8084:8084"
-    volumes:
-      - ./esgdsd:/app
-    env_file:
-      - ./esgdsd/.env
     depends_on:
       - postgres
     networks:

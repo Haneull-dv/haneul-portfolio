@@ -1,0 +1,152 @@
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .cloudSvg {
+    width: 300px;
+    height: auto;
+    fill: #fff;
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+  
+  .cloudClickable,
+  .cloudClickable2 {
+    position: absolute;
+    width: 300px;
+    height: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  
+  .cloudClickable {
+    top: 80px;
+    left: 0;
+    animation: moveCloud1 20s linear infinite;
+    z-index: 1;
+  }
+  
+  .cloudClickable2 {
+    top: 240px;
+    left: 0;
+    animation: moveCloud2 35s linear infinite;
+    z-index: 1;
+  }
+  
+  .cloudText {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    pointer-events: none;
+  }
+  
+  @keyframes moveCloud1 {
+    from { transform: translateX(-100px); }
+    to { transform: translateX(100vw); }
+  }
+  
+  @keyframes moveCloud2 {
+    from { transform: translateX(-300px); }
+    to { transform: translateX(1350px); }
+  }
+
+  /* Responsive design */
+  @media screen and (max-width: 1024px) {
+    .cloudSvg {
+      width: 250px;
+    }
+    
+    .cloudClickable,
+    .cloudClickable2 {
+      width: 250px;
+      height: 150px;
+    }
+    
+    .cloudText {
+      font-size: 14px;
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .cloudSvg {
+      width: 200px;
+    }
+    
+    .cloudClickable,
+    .cloudClickable2 {
+      width: 200px;
+      height: 120px;
+    }
+    
+    .cloudClickable {
+      top: 60px;
+    }
+    
+    .cloudClickable2 {
+      top: 200px;
+    }
+    
+    .cloudText {
+      font-size: 12px;
+    }
+    
+    @keyframes moveCloud1 {
+      from { transform: translateX(-80px); }
+      to { transform: translateX(100vw); }
+    }
+    
+    @keyframes moveCloud2 {
+      from { transform: translateX(-200px); }
+      to { transform: translateX(100vw); }
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .cloudSvg {
+      width: 150px;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+    }
+    
+    .cloudClickable,
+    .cloudClickable2 {
+      width: 150px;
+      height: 90px;
+    }
+    
+    .cloudClickable {
+      top: 40px;
+      animation: moveCloud1 15s linear infinite;
+    }
+    
+    .cloudClickable2 {
+      top: 150px;
+      animation: moveCloud2 25s linear infinite;
+    }
+    
+    .cloudText {
+      font-size: 10px;
+      font-weight: 600;
+    }
+    
+    @keyframes moveCloud1 {
+      from { transform: translateX(-60px); }
+      to { transform: translateX(100vw); }
+    }
+    
+    @keyframes moveCloud2 {
+      from { transform: translateX(-150px); }
+      to { transform: translateX(100vw); }
+    }
+  }
+  

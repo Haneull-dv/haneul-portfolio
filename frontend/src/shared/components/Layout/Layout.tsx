@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSidebar } from '../../hooks/useSidebar';
 import { useMenuToggle } from '../../hooks/useMenuToggle';
 import { useChat } from '../../hooks/useChat';
@@ -24,12 +24,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   } = useMenuToggle();
   
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const { messages, isTyping, sendMessage } = useChat();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleMenuToggle = () => {
+    if (isMobile) {
+      setShowMobileSidebar(!showMobileSidebar);
+    } else {
+      toggleSidebar();
+    }
+  };
+
+  const handleOverlayClick = () => {
+    if (isMobile && showMobileSidebar) {
+      setShowMobileSidebar(false);
+    }
+  };
 
   return (
     <div className={styles.layout}>
+      {/* Mobile Overlay */}
+      {isMobile && showMobileSidebar && (
+        <div 
+          className={styles.overlay} 
+          onClick={handleOverlayClick}
+        />
+      )}
+      
       {/* Sidebar */}
-      <Sidebar isHidden={isHidden} />
+      <Sidebar 
+        isHidden={isHidden} 
+        className={isMobile && showMobileSidebar ? styles.showMobile : ''} 
+      />
       
       {/* Content */}
       <section 
@@ -37,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         className={`${styles.content} ${isHidden ? styles.sidebarHidden : ''}`}
       >
         <Header 
-          onMenuToggle={toggleSidebar}
+          onMenuToggle={handleMenuToggle}
           isNotificationOpen={isNotificationOpen}
           isProfileOpen={isProfileOpen}
           onNotificationToggle={toggleNotification}

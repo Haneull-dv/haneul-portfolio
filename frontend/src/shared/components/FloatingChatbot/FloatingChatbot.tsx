@@ -6,9 +6,10 @@ import styles from './FloatingChatbot.module.scss';
 interface FloatingChatbotProps {
   onClick: () => void;
   style?: React.CSSProperties;
+  hideBackground?: boolean;
 }
 
-const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {} }) => {
+const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {}, hideBackground = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const characterRef = useRef<SVGSVGElement>(null);
   const eyeLeftRef = useRef<SVGPathElement>(null);
@@ -50,8 +51,8 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {} }
       const y = percentage(yPosition, height) - 50;
       const moveEyeX = Math.max(-maxEyeMove, Math.min(maxEyeMove, x / 20));
       const moveEyeY = Math.max(-maxEyeMove, Math.min(maxEyeMove, y / 28));
-      const moveBrowX = moveEyeX * 0.5;
-      const moveBrowY = moveEyeY * 0.5;
+      const moveBrowX = Math.max(-maxBrowMove, Math.min(maxBrowMove, x / 40));
+      const moveBrowY = Math.max(-maxBrowMove, Math.min(maxBrowMove, y / 56));
 
       if (eyeLeftRef.current) {
         eyeLeftRef.current.setAttribute('transform', `translate(${moveEyeX},${moveEyeY})`);
@@ -126,11 +127,13 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {} }
         </defs>
         
         {/* 민트색 배경 */}
-        <path 
-          className={styles.bg} 
-          d="M39 153.73s31.57 19.71 77.26 15.21 90.18-37.23 90.36-72.33-10.51-57-35.28-63-50.22 17-76.31 20-60.12-15.88-78.32 2.51S-4.88 125.2 39 153.73z" 
-          fill="rgb(174, 206, 236)" 
-        />
+        {!hideBackground && (
+          <path 
+            className={styles.bg} 
+            d="M39 153.73s31.57 19.71 77.26 15.21 90.18-37.23 90.36-72.33-10.51-57-35.28-63-50.22 17-76.31 20-60.12-15.88-78.32 2.51S-4.88 125.2 39 153.73z" 
+            fill="rgb(174, 206, 236)" 
+          />
+        )}
         
         <g clipPath="url(#floating-background-clip)">
           <g className={styles.me}>
@@ -154,8 +157,8 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {} }
               />
               <path className={styles.neck} d="M114.26 143.16v-14a9.22 9.22 0 10-18.43 0v14c-15.27 2.84-24.74 15.08-24.74 27.33H139c0-12.24-9.5-24.49-24.74-27.33z" fill="#ede3d1" />
               <path className={styles.top} d="M105.61 167c-30.17 0-25.36-40-25.36 15.84h25.35l25-2.14c-.05-55.79 5.17-13.7-24.99-13.7z" fill="#fff" stroke="#404040" strokeWidth=".5" />
-              <path className={styles.shoulder} d="M95.82 142.87c-16 1.84-29.37 19.5-29.37 40h29.37z" fill="#404040" />
-              <path className={styles.shoulder} d="M114.23 142.67c15.76 1.85 29 19.6 29 40.2h-29z" fill="#404040" />
+              <path className={styles.shoulder} d="M95.82 142.87c-16 1.84-29.37 19.5-29.37 40h29.37z" fill="#f8f8f0" />
+              <path className={styles.shoulder} d="M114.23 142.67c15.76 1.85 29 19.6 29 40.2h-29z" fill="#f8f8f0" />
             </g>
             <path 
               className={styles.shadow} 

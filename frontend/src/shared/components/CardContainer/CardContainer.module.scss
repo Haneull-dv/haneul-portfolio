@@ -47,7 +47,7 @@
   }
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
   .columns2,
   .columns3,
   .columns4 {
@@ -60,5 +60,23 @@
   
   .gapLarge {
     gap: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .cardContainer {
+    padding: 0 8px;
+  }
+  
+  .gapSmall {
+    gap: 12px;
+  }
+  
+  .gapMedium {
+    gap: 12px;
+  }
+  
+  .gapLarge {
+    gap: 16px;
   }
 } 

@@ -83,4 +83,121 @@
       color: var(--blue);
     }
   }
+}
+
+// Responsive design
+@media screen and (max-width: 1024px) {
+  .card {
+    padding: 20px;
+    min-height: 360px;
+  }
+  
+  .cardTitle {
+    font-size: 18px;
+  }
+  
+  .cardActions i {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .card {
+    padding: 16px;
+    min-height: 300px;
+    border-radius: 16px;
+  }
+  
+  .cardHeader {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .cardTitle {
+    font-size: 16px;
+  }
+  
+  .cardActions {
+    gap: 8px;
+    
+    i {
+      font-size: 16px;
+    }
+  }
+  
+  .cardContent {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    padding: 16px;
+    min-height: 280px;
+    border-radius: 12px;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    }
+  }
+  
+  .cardHeader {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .cardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .cardActions {
+    gap: 6px;
+    
+    i {
+      font-size: 16px;
+    }
+  }
+  
+  .cardContent {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .card {
+    padding: 12px;
+    min-height: 260px;
+    border-radius: 10px;
+  }
+  
+  .cardHeader {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
+  
+  .cardTitle {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  
+  .cardActions {
+    gap: 4px;
+    
+    i {
+      font-size: 14px;
+    }
+  }
+  
+  .cardContent {
+    font-size: 12px;
+    line-height: 1.3;
+  }
 } 
