@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import styles from './ProfileMenu.module.scss';
 
 interface ProfileMenuProps {
@@ -31,7 +32,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
           onToggle();
         }}
       >
-        <img src={profileImage} alt={`${userName} Profile`} />
+        <Image src={profileImage} alt={`${userName} Profile`} width={40} height={40} />
       </a>
       
       <div className={`${styles.profileMenu} ${isOpen ? styles.show : ''}`}>

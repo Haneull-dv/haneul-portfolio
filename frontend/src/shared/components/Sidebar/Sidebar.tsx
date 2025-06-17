@@ -70,16 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
     );
   };
 
-  // Set active menu based on current pathname
-  const getActiveMenuFromPath = () => {
-    const pathSegments = pathname.split('/').filter(Boolean);
-    if (pathSegments.length === 0) return 'dashboard';
-    if (pathSegments.length === 1) return pathSegments[0];
-    if (pathSegments[0] === 'dashboard' && pathSegments.length > 1) {
-      return pathSegments[1]; // Return the sub-page (validation, dsd, etc.)
-    }
-    return pathSegments[0];
-  };
+
 
   const isSubItemActive = (subItem: SubMenuItem) => {
     return pathname === subItem.href;

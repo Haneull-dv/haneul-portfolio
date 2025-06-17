@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
@@ -100,9 +101,11 @@ const NeowizProjectsPage: React.FC = () => {
               style={{ cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <img 
+                <Image 
                   src={card.image}
                   alt={card.title}
+                  width={400}
+                  height={180}
                   style={{
                     width: '100%',
                     height: '180px',

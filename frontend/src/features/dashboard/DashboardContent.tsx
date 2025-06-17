@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import styles from './DashboardContent.module.scss';
 
 interface StatCardProps {
@@ -109,7 +110,7 @@ const DashboardContent: React.FC = () => {
               {orders.map((order) => (
                 <tr key={order.id}>
                   <td>
-                    <img src={order.user.image} alt={order.user.name} />
+                    <Image src={order.user.image} alt={order.user.name} width={32} height={32} />
                     <p>{order.user.name}</p>
                   </td>
                   <td>{order.date}</td>

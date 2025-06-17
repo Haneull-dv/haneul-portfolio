@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
@@ -98,12 +99,12 @@ const AboutPage: React.FC = () => {
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <img 
+              <Image 
                 src="https://placehold.co/120x120/4285f4/ffffff?text=HK" 
                 alt="Profile" 
+                width={120}
+                height={120}
                 style={{ 
-                  width: '120px', 
-                  height: '120px', 
                   borderRadius: '50%', 
                   objectFit: 'cover',
                   border: '4px solid var(--blue)'

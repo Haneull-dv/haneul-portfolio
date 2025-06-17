@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
@@ -122,9 +123,11 @@ const ProjectsPage: React.FC = () => {
               style={{ minHeight: 420, display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
-                <img 
+                <Image 
                   src={project.image} 
                   alt={project.title}
+                  width={400}
+                  height={200}
                   style={{
                     width: '100%',
                     height: '200px',
