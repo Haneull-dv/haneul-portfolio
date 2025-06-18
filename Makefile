@@ -50,6 +50,27 @@ logs-gateway:
 restart-gateway:
 	docker-compose down gateway && docker-compose up -d --build gateway
 
+## stockprice
+build-stockprice:
+	docker-compose build stockprice
+
+up-stockprice:
+	docker-compose up -d stockprice
+
+down-stockprice:
+	docker-compose stop stockprice
+
+logs-stockprice:
+	docker-compose logs -f stockprice
+
+restart-stockprice:
+	docker-compose down stockprice && docker-compose up -d --build stockprice
+
+# 개발 전용 (빌드 없이 재시작)
+dev-stockprice:
+	docker-compose stop stockprice
+	docker-compose up -d stockprice
+
 ## stocktrend
 build-stocktrend:
 	docker-compose build stocktrend
@@ -98,22 +119,6 @@ logs-dsdgen:
 restart-dsdgen:
 	docker-compose down dsdgen && docker-compose up -d --build dsdgen
 
-## esgdsd
-build-esgdsd:
-	docker-compose build esgdsd
-
-up-esgdsd:
-	docker-compose up -d esgdsd
-
-down-esgdsd:
-	docker-compose stop esgdsd
-
-logs-esgdsd:
-	docker-compose logs -f esgdsd
-
-restart-esgdsd:
-	docker-compose down esgdsd && docker-compose up -d --build esgdsd
-
 ## dsdcheck
 build-dsdcheck:
 	docker-compose build dsdcheck
@@ -130,19 +135,54 @@ logs-dsdcheck:
 restart-dsdcheck:
 	docker-compose down dsdcheck && docker-compose up -d --build dsdcheck
 
-## chatbot
-build-chatbot:
-	docker-compose build chatbot
+## n8n
+up-n8n:
+	docker-compose up -d n8n
 
-up-chatbot:
-	docker-compose up -d chatbot
+down-n8n:
+	docker-compose stop n8n
 
-down-chatbot:
-	docker-compose stop chatbot
+logs-n8n:
+	docker-compose logs -f n8n
 
-logs-chatbot:
-	docker-compose logs -f chatbot
+restart-n8n:
+	docker-compose down n8n && docker-compose up -d n8n
 
-restart-chatbot:
-	docker-compose down chatbot && docker-compose up -d --build chatbot
+# 🔗 워크플로우 자동화
+workflow-up:
+	docker-compose up -d n8n stockprice stocktrend
+
+workflow-down:
+	docker-compose stop n8n stockprice stocktrend
+
+# 📊 주가 관련 서비스들
+stock-services-up:
+	docker-compose up -d stockprice stocktrend
+
+stock-services-down:
+	docker-compose stop stockprice stocktrend
+
+stock-services-logs:
+	docker-compose logs -f stockprice stocktrend
+
+# 🧹 정리 명령어
+clean:
+	docker system prune -f
+
+clean-all:
+	docker system prune -a -f
+
+# 🧪 테스트 명령어
+test:
+	powershell -ExecutionPolicy Bypass -File test_services.ps1
+
+test-bash:
+	bash test_services.sh
+
+health-check:
+	docker-compose ps
+	@echo "🌐 서비스 접속 URLs:"
+	@echo "  📱 대시보드: http://localhost:3000/dashboard"
+	@echo "  🤖 N8N: http://localhost:5678 (admin/password)"
+	@echo "  📈 StockPrice: http://localhost:9006/docs"
 

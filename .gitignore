@@ -72,9 +72,54 @@ Thumbs.db
 dart_documents/
 dart_documents/extracted/
 
+# Frontend
 node_modules/
 .env
 dist/
 build/
 .DS_Store
+.next/
+out/
+
+# StockPrice Service
+stockprice/.env
+stockprice/**/*.pyc
+stockprice/logs/
+stockprice/temp/
+
+# N8N Data (selective ignore)
+n8n_data/database.sqlite
+n8n_data/crash.journal
+n8n_data/*.log
+n8n_data/logs/
+n8n_data/temp/
+# Keep config and workflows
+!n8n_data/config
+!n8n_data/workflows/
+!n8n_data/nodes/
+
+# ML Models and Data
+*.pkl
+*.h5
+*.model
+*.weights
+data/
+datasets/
+models/temp/
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Test files
+test_results/
+coverage/
+.coverage
+.pytest_cache/
+.tox/
+
+# Documentation builds
+docs/_build/
+site/
 

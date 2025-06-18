@@ -4,6 +4,42 @@
 
 기존 HTML/CSS/JavaScript 대시보드를 **Next.js 15, React 19, TypeScript**로 성공적으로 변환했습니다!
 
+## 🏗️ 마이크로서비스 아키텍처
+
+### 현재 운영 중인 서비스들
+
+| 서비스 | 포트 | 컨테이너명 | 설명 |
+|--------|------|------------|------|
+| **Frontend** | 3000 | frontend | Next.js 15 대시보드 |
+| **Gateway** | 8080 | gateway | API 게이트웨이 |
+| **StockPrice** | 9006 | stockprice | 주가 정보 조회 서비스 |
+| **StockTrend** | 8081 | stock | 주가 트렌드 분석 |
+| **IRSummary** | 8083 | summary | IR 보고서 요약 |
+| **DSDGen** | 8085 | gen | 재무제표 생성 |
+| **DSDCheck** | 8086 | check | 재무제표 검증 |
+| **N8N** | 5678 | n8n | 워크플로우 자동화 |
+| **PostgreSQL** | 5433 | db | 데이터베이스 |
+
+### 🔗 서비스 연동 구조
+```
+Frontend (Next.js) 
+    ↓
+Gateway (API 게이트웨이)
+    ↓
+┌─────────────────────────────────────┐
+│  비즈니스 서비스들                    │
+├─ StockPrice (주가 조회)              │
+├─ StockTrend (주가 트렌드)            │
+├─ IRSummary (IR 요약)               │
+├─ DSDGen (재무제표 생성)              │
+└─ DSDCheck (재무제표 검증)            │
+└─────────────────────────────────────┘
+    ↓
+PostgreSQL (데이터베이스)
+
+N8N (워크플로우 자동화) ← → 모든 서비스들
+```
+
 ## 📁 프로젝트 구조
 
 ```
@@ -11,6 +47,10 @@ frontend/src/
 ├── app/
 │   ├── dashboard/
 │   │   ├── page.tsx              # 메인 대시보드 페이지
+│   │   ├── digest/               # 다이제스트 페이지
+│   │   ├── dsd/                  # 재무제표 페이지
+│   │   ├── trends/               # 트렌드 분석 페이지
+│   │   ├── validation/           # 검증 페이지
 │   │   └── dashboard.module.scss # 대시보드 레이아웃 스타일
 │   └── layout.tsx                # 루트 레이아웃 (BoxIcons 포함)
 ├── features/
@@ -100,6 +140,22 @@ body.dark {
 
 ## 🔧 사용법
 
+### 🐳 Docker로 전체 시스템 실행
+```bash
+# 모든 서비스 시작
+make up
+
+# 특정 서비스만 시작
+make up-frontend
+make up-stockprice
+make up-n8n
+
+# 로그 확인
+make logs
+make logs-stockprice
+make logs-n8n
+```
+
 ### 개발 서버 실행
 ```bash
 cd frontend
@@ -111,8 +167,48 @@ npm run dev
 npm run build
 ```
 
-### 대시보드 접근
-- URL: `http://localhost:3000/dashboard`
+## 🌐 서비스 접근 URLs
+
+| 서비스 | URL | 설명 |
+|--------|-----|------|
+| **메인 대시보드** | http://localhost:3000/dashboard | Next.js 대시보드 |
+| **API 게이트웨이** | http://localhost:8080 | 통합 API 엔드포인트 |
+| **주가 서비스** | http://localhost:9006/api/v1/stockprice | 주가 정보 API |
+| **N8N 워크플로우** | http://localhost:5678 | 자동화 워크플로우 (admin/password) |
+| **PostgreSQL** | localhost:5433 | 데이터베이스 (hc_user/hc_password) |
+
+## 🔗 N8N 워크플로우 자동화
+
+### N8N 접속 정보
+- **URL**: http://localhost:5678
+- **Username**: admin  
+- **Password**: password
+
+### 추천 워크플로우 예시
+
+#### 1. 주가 데이터 자동 수집
+```
+Cron Node (매일 9시) 
+    → HTTP Request (StockPrice API 호출)
+    → Database Insert (PostgreSQL 저장)
+    → Slack/Discord 알림
+```
+
+#### 2. 재무제표 분석 자동화
+```
+File Trigger (엑셀 업로드)
+    → DSDCheck API (검증)
+    → DSDGen API (생성)
+    → 이메일 발송
+```
+
+#### 3. 시장 동향 모니터링
+```
+HTTP Request (StockTrend API)
+    → 조건부 필터링
+    → 알림 발송 (급등/급락 시)
+    → 대시보드 업데이트
+```
 
 ## 🎯 변환된 기능들
 
@@ -164,4 +260,7 @@ npm run build
 - 🪝 **커스텀 훅** 로직 분리
 - 🎨 **SCSS 모듈** 스타일 캡슐화
 - 📱 **완전한 반응형** 디자인
-- 🌙 **다크모드** 지원 
+- 🌙 **다크모드** 지원
+- 🐳 **Docker 컨테이너화** 
+- 🔗 **마이크로서비스** 아키텍처
+- 🤖 **N8N 워크플로우** 자동화 

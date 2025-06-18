@@ -1,14 +1,88 @@
-#railway DB접속
+# 🗄️ DB 접속 명령어들
+# Railway DB 접속
 $env:PGPASSWORD = "eOsxxfAyduDCmCLfzwhWioXppxufVcLY"
 psql -h crossover.proxy.rlwy.net -U postgres -p 47251 -d railway
 
-#postgre컨테이너 접속
-docker exec -it hc_postgres bash
+# PostgreSQL 컨테이너 접속
+docker exec -it db bash
 
-#db접속
+# DB 접속
 psql -U hc_user -d hc_db
 
-#컬럼확인
+# 컬럼 확인
 \d dsd_source
+
+# 🐳 새로 추가된 서비스들
+
+## StockPrice 서비스 (포트: 9006)
+# 빌드 및 실행
+docker-compose up -d --build stockprice
+
+# 🔥 개발 모드 (Live Reload) - 빌드 없이 코드 즉시 반영
+docker-compose stop stockprice
+docker-compose up -d stockprice
+# 또는 make dev-stockprice
+
+# 로그 확인
+docker-compose logs -f stockprice
+
+# 컨테이너 접속
+docker exec -it stockprice bash
+
+# API 테스트
+curl http://localhost:9006/api/v1/stockprice/?symbol=005930
+curl http://localhost:9006/api/v1/stockprice/trend?symbol=005930&period=1y
+curl http://localhost:9006/api/v1/stockprice/analysis?symbol=005930
+
+# 개발 중 유용한 명령어들
+# 실시간 로그 + API 테스트
+docker-compose logs -f stockprice &
+curl http://localhost:9006/docs
+
+## N8N 워크플로우 자동화 (포트: 5678)
+# 접속 정보
+# URL: http://localhost:5678
+# Username: admin
+# Password: password
+
+# N8N 컨테이너 접속
+docker exec -it n8n sh
+
+# N8N 로그 확인
+docker-compose logs -f n8n
+
+# N8N 데이터 백업
+docker cp n8n:/home/node/.n8n ./n8n_backup
+
+# 🔗 통합 서비스 명령어들
+
+# 모든 서비스 시작
+docker-compose up -d --build
+
+# 주가 관련 서비스만 시작
+docker-compose up -d stockprice stocktrend
+
+# 워크플로우 환경 시작 (N8N + 주가 서비스들)
+docker-compose up -d n8n stockprice stocktrend
+
+# 서비스 상태 확인
+docker-compose ps
+
+# 모든 로그 확인
+docker-compose logs -f
+
+# 특정 서비스 재시작
+docker-compose restart stockprice
+docker-compose restart n8n
+
+# 🧹 정리 명령어들
+# 사용하지 않는 이미지, 컨테이너 정리
+docker system prune -f
+
+# 모든 이미지, 볼륨까지 정리 (주의!)
+docker system prune -a -f
+
+# 볼륨 정리
+docker volume prune -f
 
 이히리오

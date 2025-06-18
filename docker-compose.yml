@@ -28,6 +28,29 @@ services:
     networks:
       - app-network
 
+  stockprice:
+    container_name: stockprice
+    build:
+      context: ./stockprice
+      dockerfile: Dockerfile
+    ports:
+      - "9006:9006"
+    volumes:
+      - ./stockprice:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      - DATABASE_URL=postgresql://hc_user:hc_password@db:5432/hc_db
+      - SERVICE_PORT=9006
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
   stocktrend:
     container_name: stock
     build:
@@ -87,6 +110,26 @@ services:
       - ./dsdcheck/.env
     depends_on:
       - postgres
+    networks:
+      - app-network
+
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=password
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Asia/Seoul
+    volumes:
+      - ./n8n_data:/home/node/.n8n
     networks:
       - app-network
 
