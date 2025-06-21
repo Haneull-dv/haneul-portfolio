@@ -130,6 +130,48 @@ services:
       - GENERIC_TIMEZONE=Asia/Seoul
     volumes:
       - ./n8n_data:/home/node/.n8n
+      - ./:/data-input
+    networks:
+      - app-network
+
+  newsclassifier:
+    container_name: newsclassifier
+    build:
+      context: ./slm-newsclassifier-inference
+      dockerfile: Dockerfile
+    ports:
+      - "8087:8087"
+    volumes:
+      - D:/portfolio-models/slm-newsclassifier-inference:/app
+      - /app/__pycache__
+      - newsclassifier-models:/app/models
+    environment:
+      - SERVICE_PORT=8087
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
+
+  summarizer:
+    container_name: summarizer
+    build:
+      context: ./slm-summarizer-inference
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    volumes:
+      - D:/portfolio-models/slm-summarizer-inference:/app
+      - /app/__pycache__
+      - D:/portfolio-models/slm-summarizer-inference/offload:/app/offload
+      - summarizer-models:/app/models
+    environment:
+      - SERVICE_PORT=8088
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
     networks:
       - app-network
 
@@ -150,6 +192,18 @@ services:
 
 volumes:
   pgdata:
+  newsclassifier-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: D:/portfolio-models/newsclassifier-models
+  summarizer-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: D:/portfolio-models/summarizer-models
 
 networks:
   app-network:

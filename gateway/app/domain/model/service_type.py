@@ -7,10 +7,14 @@ class ServiceType(str, Enum):
     DSDGEN = "dsdgen"
     STOCKPRICE = "stockprice"
     DSDCHECK = "dsdcheck"
+    NEWSCLASSIFIER = "newsclassifier"
+    SUMMARIZER = "summarizer"
 
 SERVICE_URLS = {
     ServiceType.STOCKTREND: os.getenv("STOCKTREND_SERVICE_URL"),
     ServiceType.DSDGEN: os.getenv("DSDGEN_SERVICE_URL"),
     ServiceType.STOCKPRICE: os.getenv("STOCKPRICE_SERVICE_URL"),
     ServiceType.DSDCHECK: os.getenv("DSDCHECK_SERVICE_URL"),
+    ServiceType.NEWSCLASSIFIER: os.getenv("NEWSCLASSIFIER_SERVICE_URL"),
+    ServiceType.SUMMARIZER: os.getenv("SUMMARIZER_SERVICE_URL"),
 }
