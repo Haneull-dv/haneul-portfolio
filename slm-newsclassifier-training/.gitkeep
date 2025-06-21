@@ -1,0 +1,3 @@
+# This file ensures the slm-newsclassifier-training directory is tracked by Git
+# The directory contains news classification model training code
+# All other files in this directory are ignored via .gitignore 
