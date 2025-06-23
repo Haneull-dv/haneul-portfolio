@@ -190,6 +190,25 @@ services:
     networks:
       - app-network
 
+  issue:
+    container_name: issue
+    build:
+      context: ./issue
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./issue:/app
+      - /app/__pycache__
+    env_file:
+      - ./issue/.env
+    depends_on:
+      - newsclassifier
+      - summarizer
+    networks:
+      app-network:
+        ipv4_address: 172.18.0.100
+
 volumes:
   pgdata:
   newsclassifier-models:
@@ -208,3 +227,6 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16

@@ -15,9 +15,9 @@
 - **포트**: `8088`
 - **기능**: 뉴스 텍스트 요약
 - **API 엔드포인트**:
-  - `POST /api/v1/summarize` - 단일 텍스트 요약
-  - `POST /api/v1/summarize/batch` - 배치 텍스트 요약
-  - `GET /api/v1/model/status` - 모델 상태 확인
+  - `POST /summarize` - 단일 텍스트 요약
+  - `POST /summarize/batch` - 배치 텍스트 요약
+  - `GET /model/status` - 모델 상태 확인
   - `GET /health` - 헬스체크
 
 ## 🔌 게이트웨이 통합
@@ -38,7 +38,7 @@ Content-Type: application/json
 ### 요약기 사용법
 ```bash
 # 게이트웨이를 통한 접근
-POST http://localhost:8080/api/summarizer/api/v1/summarize
+POST http://localhost:8080/api/summarizer/summarize
 Content-Type: application/json
 
 {
@@ -134,7 +134,7 @@ python main.py
 
 예시:
 - `/api/newsclassifier/predict` → `http://newsclassifier:8087/predict`
-- `/api/summarizer/api/v1/summarize` → `http://summarizer:8088/api/v1/summarize`
+- `/api/summarizer/summarize` → `http://summarizer:8088/summarize`
 
 ## 🛠️ 환경 변수
 

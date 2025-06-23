@@ -135,6 +135,27 @@ logs-dsdcheck:
 restart-dsdcheck:
 	docker-compose down dsdcheck && docker-compose up -d --build dsdcheck
 
+## issue
+build-issue:
+	docker-compose build issue
+
+up-issue:
+	docker-compose up -d issue
+
+down-issue:
+	docker-compose stop issue
+
+logs-issue:
+	docker-compose logs -f issue
+
+restart-issue:
+	docker-compose down issue && docker-compose up -d --build issue
+
+# 개발 전용 (빌드 없이 재시작)
+dev-issue:
+	docker-compose stop issue
+	docker-compose up -d issue
+
 ## n8n
 up-n8n:
 	docker-compose up -d n8n
@@ -165,6 +186,29 @@ stock-services-down:
 stock-services-logs:
 	docker-compose logs -f stockprice stocktrend
 
+# 🤖 AI 모델 서비스들
+ai-services-up:
+	docker-compose up -d newsclassifier summarizer
+
+ai-services-down:
+	docker-compose stop newsclassifier summarizer
+
+ai-services-logs:
+	docker-compose logs -f newsclassifier summarizer
+
+# 📰 뉴스 파이프라인 (Issue + AI 모델들)
+news-pipeline-up:
+	docker-compose up -d newsclassifier summarizer issue
+
+news-pipeline-down:
+	docker-compose stop newsclassifier summarizer issue
+
+news-pipeline-logs:
+	docker-compose logs -f newsclassifier summarizer issue
+
+news-pipeline-restart:
+	docker-compose restart newsclassifier summarizer issue
+
 # 🧹 정리 명령어
 clean:
 	docker system prune -f
@@ -183,6 +227,11 @@ health-check:
 	docker-compose ps
 	@echo "🌐 서비스 접속 URLs:"
 	@echo "  📱 대시보드: http://localhost:3000/dashboard"
+	@echo "  🌐 게이트웨이: http://localhost:8080"
 	@echo "  🤖 N8N: http://localhost:5678 (admin/password)"
 	@echo "  📈 StockPrice: http://localhost:9006/docs"
+	@echo "  📊 StockTrend: http://localhost:8081/docs"
+	@echo "  📰 Issue (뉴스 파이프라인): http://localhost:8089/docs"
+	@echo "  🔍 NewsClassifier: http://localhost:8087/docs"
+	@echo "  📝 Summarizer: http://localhost:8088/docs"
 
