@@ -50,109 +50,109 @@ logs-gateway:
 restart-gateway:
 	docker-compose down gateway && docker-compose up -d --build gateway
 
-## stockprice
-build-stockprice:
+## weekly_stockprice
+build-weekly-stockprice:
 	docker-compose build stockprice
 
-up-stockprice:
+up-weekly-stockprice:
 	docker-compose up -d stockprice
 
-down-stockprice:
+down-weekly-stockprice:
 	docker-compose stop stockprice
 
-logs-stockprice:
+logs-weekly-stockprice:
 	docker-compose logs -f stockprice
 
-restart-stockprice:
+restart-weekly-stockprice:
 	docker-compose down stockprice && docker-compose up -d --build stockprice
 
 # 개발 전용 (빌드 없이 재시작)
-dev-stockprice:
+dev-weekly-stockprice:
 	docker-compose stop stockprice
 	docker-compose up -d stockprice
 
-## stocktrend
-build-stocktrend:
+## conanai_stocktrend
+build-conanai-stocktrend:
 	docker-compose build stocktrend
 
-up-stocktrend:
+up-conanai-stocktrend:
 	docker-compose up -d stocktrend
 
-down-stocktrend:
+down-conanai-stocktrend:
 	docker-compose stop stocktrend
 
-logs-stocktrend:
+logs-conanai-stocktrend:
 	docker-compose logs -f stocktrend
 
-restart-stocktrend:
+restart-conanai-stocktrend:
 	docker-compose down stocktrend && docker-compose up -d --build stocktrend
 
-## irsummary
-build-irsummary:
+## conanai_irsummary
+build-conanai-irsummary:
 	docker-compose build irsummary
 
-up-irsummary:
+up-conanai-irsummary:
 	docker-compose up -d irsummary
 
-down-irsummary:
+down-conanai-irsummary:
 	docker-compose stop irsummary
 
-logs-irsummary:
+logs-conanai-irsummary:
 	docker-compose logs -f irsummary
 
-restart-irsummary:
+restart-conanai-irsummary:
 	docker-compose down irsummary && docker-compose up -d --build irsummary
 
-## dsdgen
-build-dsdgen:
+## conanai_dsdgen
+build-conanai-dsdgen:
 	docker-compose build dsdgen
 
-up-dsdgen:
+up-conanai-dsdgen:
 	docker-compose up -d dsdgen
 
-down-dsdgen:
+down-conanai-dsdgen:
 	docker-compose stop dsdgen
 
-logs-dsdgen:
+logs-conanai-dsdgen:
 	docker-compose logs -f dsdgen
 
-restart-dsdgen:
+restart-conanai-dsdgen:
 	docker-compose down dsdgen && docker-compose up -d --build dsdgen
 
-## dsdcheck
-build-dsdcheck:
+## conanai_dsdcheck
+build-conanai-dsdcheck:
 	docker-compose build dsdcheck
 
-up-dsdcheck:
+up-conanai-dsdcheck:
 	docker-compose up -d dsdcheck
 
-down-dsdcheck:
+down-conanai-dsdcheck:
 	docker-compose stop dsdcheck
 
-logs-dsdcheck:
+logs-conanai-dsdcheck:
 	docker-compose logs -f dsdcheck
 
-restart-dsdcheck:
+restart-conanai-dsdcheck:
 	docker-compose down dsdcheck && docker-compose up -d --build dsdcheck
 
-## issue
-build-issue:
+## weekly_issue
+build-weekly-issue:
 	docker-compose build issue
 
-up-issue:
+up-weekly-issue:
 	docker-compose up -d issue
 
-down-issue:
+down-weekly-issue:
 	docker-compose stop issue
 
-logs-issue:
+logs-weekly-issue:
 	docker-compose logs -f issue
 
-restart-issue:
+restart-weekly-issue:
 	docker-compose down issue && docker-compose up -d --build issue
 
 # 개발 전용 (빌드 없이 재시작)
-dev-issue:
+dev-weekly-issue:
 	docker-compose stop issue
 	docker-compose up -d issue
 
@@ -196,7 +196,7 @@ ai-services-down:
 ai-services-logs:
 	docker-compose logs -f newsclassifier summarizer
 
-# 📰 뉴스 파이프라인 (Issue + AI 모델들)
+# 📰 뉴스 파이프라인 (Weekly Issue + AI 모델들)
 news-pipeline-up:
 	docker-compose up -d newsclassifier summarizer issue
 
@@ -229,9 +229,9 @@ health-check:
 	@echo "  📱 대시보드: http://localhost:3000/dashboard"
 	@echo "  🌐 게이트웨이: http://localhost:8080"
 	@echo "  🤖 N8N: http://localhost:5678 (admin/password)"
-	@echo "  📈 StockPrice: http://localhost:9006/docs"
-	@echo "  📊 StockTrend: http://localhost:8081/docs"
-	@echo "  📰 Issue (뉴스 파이프라인): http://localhost:8089/docs"
+	@echo "  📈 Weekly StockPrice: http://localhost:9006/docs"
+	@echo "  📊 Conanai StockTrend: http://localhost:8081/docs"
+	@echo "  📰 Weekly Issue (뉴스 파이프라인): http://localhost:8089/docs"
 	@echo "  🔍 NewsClassifier: http://localhost:8087/docs"
 	@echo "  📝 Summarizer: http://localhost:8088/docs"
 

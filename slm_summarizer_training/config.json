@@ -1,0 +1,26 @@
+{
+    "service_name": "slm-summarizer-training",
+    "description": "뉴스 요약 모델 QLoRA 학습 서비스",
+    "version": "1.0.0",
+    "model": {
+        "name": "skt/kogpt2-base-v2",
+        "task": "news_summarization",
+        "input_format": "title + description",
+        "output_format": "summary"
+    },
+    "training": {
+        "method": "QLoRA",
+        "quantization": "4bit",
+        "epochs": 30,
+        "batch_size": 1,
+        "gradient_accumulation": 8,
+        "max_seq_length": 512,
+        "learning_rate": 5e-5,
+        "fp16": true,
+        "bf16": false
+    },
+    "hardware": {
+        "gpu": "RTX 2080",
+        "vram": "8GB"
+    }
+} 

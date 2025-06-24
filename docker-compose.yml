@@ -1,14 +1,13 @@
 services:
+
   postgres:
     image: postgres:15
     container_name: db
     restart: always
-    environment:
-      POSTGRES_USER: hc_user
-      POSTGRES_PASSWORD: hc_password
-      POSTGRES_DB: hc_db
+    env_file:
+      - ./postgres/.env
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5433:5432"
     networks:
@@ -21,6 +20,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    volumes:
+      - ./gateway:/app
     env_file:
       - ./gateway/.env
     depends_on:
@@ -31,21 +32,14 @@ services:
   stockprice:
     container_name: stockprice
     build:
-      context: ./stockprice
+      context: ./weekly_stockprice
       dockerfile: Dockerfile
     ports:
       - "9006:9006"
     volumes:
-      - ./stockprice:/app
-      - /app/__pycache__
-      - /app/.pytest_cache
-    environment:
-      - DATABASE_URL=postgresql://hc_user:hc_password@db:5432/hc_db
-      - SERVICE_PORT=9006
-      - LOG_LEVEL=INFO
-      - PYTHONPATH=/app
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+      - ./weekly_stockprice:/app
+    env_file:
+      - ./weekly_stockprice/.env
     depends_on:
       - postgres
     networks:
@@ -54,14 +48,14 @@ services:
   stocktrend:
     container_name: stock
     build:
-      context: ./stocktrend
+      context: ./conanai_stocktrend
       dockerfile: Dockerfile
-    volumes:
-      - ./stocktrend:/app
     ports:
       - "8081:8081"
+    volumes:
+      - ./conanai_stocktrend:/app
     env_file:
-      - ./stocktrend/.env
+      - ./conanai_stocktrend/.env
     depends_on:
       - postgres
     networks:
@@ -70,12 +64,14 @@ services:
   irsummary:
     container_name: summary
     build:
-      context: ./irsummary
+      context: ./conanai_irsummary
       dockerfile: Dockerfile
     ports:
       - "8083:8083"
+    volumes:
+      - ./conanai_irsummary:/app
     env_file:
-      - ./irsummary/.env
+      - ./conanai_irsummary/.env
     depends_on:
       - postgres
     networks:
@@ -84,30 +80,31 @@ services:
   dsdgen:
     container_name: gen
     build:
-      context: ./dsdgen
+      context: ./conanai_dsdgen
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
+    volumes:
+      - ./conanai_dsdgen:/app
+      - ./dart_documents:/app/app/dart_documents
     env_file:
-      - ./dsdgen/.env
+      - ./conanai_dsdgen/.env
     depends_on:
       - postgres
-    volumes:
-      - ./dart_documents:/app/app/dart_documents
     networks:
       - app-network
 
   dsdcheck:
     container_name: check
     build:
-      context: ./dsdcheck
+      context: ./conanai_dsdcheck
       dockerfile: Dockerfile
     ports:
       - "8086:8086"
     volumes:
-      - ./dsdcheck:/app
+      - ./conanai_dsdcheck:/app
     env_file:
-      - ./dsdcheck/.env
+      - ./conanai_dsdcheck/.env
     depends_on:
       - postgres
     networks:
@@ -119,59 +116,39 @@ services:
     restart: always
     ports:
       - "5678:5678"
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=password
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:5678/
-      - GENERIC_TIMEZONE=Asia/Seoul
     volumes:
       - ./n8n_data:/home/node/.n8n
-      - ./:/data-input
+      - ./n8n_data:/data-input
+    env_file:
+      - ./n8n_data/.env
     networks:
       - app-network
 
   newsclassifier:
     container_name: newsclassifier
     build:
-      context: ./slm-newsclassifier-inference
+      context: ./slm_newsclassifier_inference
       dockerfile: Dockerfile
     ports:
       - "8087:8087"
     volumes:
-      - D:/portfolio-models/slm-newsclassifier-inference:/app
-      - /app/__pycache__
-      - newsclassifier-models:/app/models
-    environment:
-      - SERVICE_PORT=8087
-      - LOG_LEVEL=INFO
-      - PYTHONPATH=/app
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+      - ./slm_newsclassifier_inference:/app
+    env_file:
+      - ./slm_newsclassifier_inference/.env
     networks:
       - app-network
 
   summarizer:
     container_name: summarizer
     build:
-      context: ./slm-summarizer-inference
+      context: ./slm_summarizer_inference
       dockerfile: Dockerfile
     ports:
       - "8088:8088"
     volumes:
-      - D:/portfolio-models/slm-summarizer-inference:/app
-      - /app/__pycache__
-      - D:/portfolio-models/slm-summarizer-inference/offload:/app/offload
-      - summarizer-models:/app/models
-    environment:
-      - SERVICE_PORT=8088
-      - LOG_LEVEL=INFO
-      - PYTHONPATH=/app
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+      - ./slm_summarizer_inference:/app
+    env_file:
+      - ./slm_summarizer_inference/.env
     networks:
       - app-network
 
@@ -184,24 +161,22 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
+    env_file:
+      - ./frontend/.env
     networks:
       - app-network
 
   issue:
     container_name: issue
     build:
-      context: ./issue
+      context: ./weekly_issue
       dockerfile: Dockerfile
     ports:
       - "8089:8089"
     volumes:
-      - ./issue:/app
-      - /app/__pycache__
+      - ./weekly_issue:/app
     env_file:
-      - ./issue/.env
+      - ./weekly_issue/.env
     depends_on:
       - newsclassifier
       - summarizer
@@ -211,18 +186,6 @@ services:
 
 volumes:
   pgdata:
-  newsclassifier-models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: D:/portfolio-models/newsclassifier-models
-  summarizer-models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: D:/portfolio-models/summarizer-models
 
 networks:
   app-network:
