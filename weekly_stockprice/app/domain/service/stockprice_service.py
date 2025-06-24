@@ -22,6 +22,37 @@ class StockPriceService:
             "181710": "NHN",
             "069080": "웹젠"
         }
+    
+    async def fetch_all_weekly_stock_data(self) -> List[WeeklyStockPriceResponse]:
+        """전체 게임기업 주간 주가 데이터 조회 (controller에서 이동한 로직)"""
+        print("🤍3. 전체 게임기업 주간 데이터 서비스 로직 진입")
+        
+        # 병렬로 모든 기업 데이터 수집
+        tasks = [
+            self.fetch_weekly_stock_data(code) 
+            for code in self.game_companies.keys()
+        ]
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # 결과 정리 (예외 처리된 결과 제외)
+        weekly_data = []
+        for result in results:
+            if isinstance(result, WeeklyStockPriceResponse):
+                weekly_data.append(result)
+            elif isinstance(result, Exception):
+                print(f"❌ 기업 데이터 수집 실패: {str(result)}")
+        
+        print(f"✅ 전체 게임기업 데이터 수집 완료: {len(weekly_data)}개")
+        return weekly_data
+    
+    def get_game_companies_info(self) -> Dict[str, Any]:
+        """게임기업 리스트 정보 반환 (controller에서 이동한 로직)"""
+        print("🤍3. 게임기업 리스트 서비스 로직 진입")
+        return {
+            "companies": self.game_companies,
+            "total_count": len(self.game_companies)
+        }
         
     def _get_friday_dates(self) -> tuple[str, str]:
         """실제 달력 기준으로 이번 주/전주 금요일 날짜 계산"""
@@ -210,7 +241,7 @@ class StockPriceService:
         """일별시세 데이터 수집"""
         url = f"https://finance.naver.com/item/sise_day.naver?code={stock_code}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        
+
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, headers=headers, timeout=10)

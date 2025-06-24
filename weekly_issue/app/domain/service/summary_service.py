@@ -1,6 +1,6 @@
 import requests
 from typing import List, Dict
-from ..model.issue_schema import SummarizeRequest, NewsInput
+from ..model.issue_model import SummarizeRequest, NewsInput
 
 class SummaryService:
     def __init__(self):

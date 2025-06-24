@@ -1,11 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.issue_router import router as issue_router
 from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="issue")
+# 공통 DB 모듈 import
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
+# 라우터 import
+from app.api.issue_router import router as issue_router
+
+app = FastAPI(title="Weekly Issue Analysis Service")
 
 # CORS 설정
 app.add_middleware(
@@ -19,4 +26,4 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(issue_router)
 
-print(f"🤍0 메인 진입")
+print(f"🤍0 메인 진입 - 이슈 분석 서비스 시작 (DI 기반)")
