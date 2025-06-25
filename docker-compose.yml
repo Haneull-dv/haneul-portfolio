@@ -32,12 +32,12 @@ services:
   stockprice:
     container_name: stockprice
     build:
-      context: ./weekly_stockprice
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./weekly_stockprice/Dockerfile
     ports:
       - "9006:9006"
     volumes:
-      - ./weekly_stockprice:/app
+      - .:/app
     env_file:
       - ./weekly_stockprice/.env
     depends_on:
@@ -180,23 +180,53 @@ services:
     networks:
       - app-network
 
+  weekly_data:
+    container_name: weekly_data
+    build:
+      context: .
+      dockerfile: ./weekly_db/Dockerfile
+    ports:
+      - "8091:8091"
+    volumes:
+      - .:/app
+    env_file:
+      - ./weekly_db/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  disclosure:
+    container_name: disclosure
+    build:
+      context: .
+      dockerfile: ./weekly_disclosure/Dockerfile
+    ports:
+      - "8090:8090"
+    volumes:
+      - .:/app
+    env_file:
+      - ./weekly_disclosure/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
   issue:
     container_name: issue
     build:
-      context: ./weekly_issue
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./weekly_issue/Dockerfile
     ports:
       - "8089:8089"
     volumes:
-      - ./weekly_issue:/app
+      - .:/app
     env_file:
       - ./weekly_issue/.env
     depends_on:
-      - newsclassifier
-      - summarizer
+      - postgres
     networks:
-      app-network:
-        ipv4_address: 172.18.0.100
+      - app-network
 
 volumes:
   postgres_data:

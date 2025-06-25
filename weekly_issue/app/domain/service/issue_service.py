@@ -1,6 +1,6 @@
 from typing import List, Dict
 from .news_pipeline_service import news_pipeline_service
-from weekly_issue.app.domain.model.issue_model import NewsPipelineResponse, SummarizedNews
+from app.domain.schema.issue_schema import IssueResponse
 
 class IssueService:
     def __init__(self):
@@ -28,31 +28,37 @@ class IssueService:
             }
         ]
     
-    async def process_news_pipeline_with_response(self, companies: List[str]) -> NewsPipelineResponse:
+    async def process_news_pipeline_with_response(self, companies: List[str]) -> IssueResponse:
         """뉴스 파이프라인 처리 및 응답 변환 (controller에서 이동한 로직)"""
         print(f"🤍3 뉴스 파이프라인 서비스 로직 진입")
         
         try:
             result = await self.news_pipeline_service.process_news_pipeline(companies)
             
-            # 결과를 NewsPipelineResponse 형태로 변환
-            summarized_news = []
-            for item in result.get("data", []):
-                summarized_news.append(SummarizedNews(**item))
+            # 결과를 IssueResponse 형태로 변환
+            results = result.get("data", [])
             
-            return NewsPipelineResponse(
-                success=result.get("success", True),
+            return IssueResponse(
+                status="success",
                 message=result.get("message", "뉴스 파이프라인 처리 완료"),
-                data=summarized_news,
-                stats=result.get("stats", {})
+                total_collected=result.get("stats", {}).get("total_collected", 0),
+                after_keyword_filter=result.get("stats", {}).get("after_keyword_filter", 0),
+                after_classification=result.get("stats", {}).get("after_classification", 0),
+                final_summaries=result.get("stats", {}).get("final_summaries", 0),
+                companies_processed=result.get("stats", {}).get("companies_processed", 0),
+                results=results
             )
         except Exception as e:
             print(f"❌ 뉴스 파이프라인 처리 중 오류: {str(e)}")
-            return NewsPipelineResponse(
-                success=False,
+            return IssueResponse(
+                status="error",
                 message=f"뉴스 파이프라인 처리 실패: {str(e)}",
-                data=[],
-                stats={"error": 1}
+                total_collected=0,
+                after_keyword_filter=0,
+                after_classification=0,
+                final_summaries=0,
+                companies_processed=0,
+                results=[]
             )
 
 # 싱글톤 인스턴스

@@ -3,8 +3,8 @@ from typing import List
 
 from app.domain.service.disclosure_service import DisclosureService
 from app.domain.service.disclosure_db_service import DisclosureDbService
-from weekly_disclosure.app.domain.model.disclosure_schema import DisclosureResponse
-from weekly_disclosure.app.domain.schema.disclosure_schema import (
+from app.domain.schema.disclosure_schema import DisclosureResponse
+from app.domain.schema.disclosure_schema import (
     DisclosureItemCreate, 
     DisclosureListResponse
 )

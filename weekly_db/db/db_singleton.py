@@ -84,3 +84,12 @@ class DatabaseSingleton:
 
 # 글로벌 싱글톤 인스턴스
 db_singleton = DatabaseSingleton()
+
+# FastAPI 의존성 주입용 함수
+async def get_weekly_session():
+    """FastAPI 의존성 주입을 위한 세션 생성 함수"""
+    session = await db_singleton.get_session()
+    try:
+        yield session
+    finally:
+        await session.close()

@@ -10,26 +10,63 @@ from weekly_db.db.db_builder import get_db_session
 
 # 서비스 모듈 import
 from app.domain.controller.issue_controller import IssueController
-from weekly_issue.app.domain.model.issue_model import NewsPipelineRequest, NewsPipelineResponse, ErrorResponse
-from weekly_issue.app.domain.schema.issue_schema import IssueListResponse
+from app.domain.schema.issue_schema import IssueAnalysisRequest, IssueResponse, ErrorResponse
+from app.domain.schema.issue_schema import IssueListResponse
+
+# Config import
+from app.config.companies import COMPANY_NAMES, TOTAL_COMPANIES
 
 router = APIRouter(prefix="/issue", tags=["issue"])
 
+# ========== 전체 기업 뉴스 파이프라인 엔드포인트 ==========
+
+@router.post("/news-all", response_model=IssueResponse)
+async def process_all_companies_news_pipeline(
+    db: AsyncSession = Depends(get_db_session)
+):
+    """🔍 전체 게임기업 뉴스 파이프라인 (자동 실행)
+    
+    **자동 처리**: config의 모든 {total_companies}개 게임기업 뉴스를 일괄 수집/분석
+    
+    **처리 과정**: 
+    1. 뉴스 수집 (각 기업당 100개씩, 총 {total_news}개 목표)
+    2. 키워드 필터링 
+    3. AI 분류 (중요도 판별)
+    4. 요약 생성 
+    5. DB 저장
+    """.format(total_companies=TOTAL_COMPANIES, total_news=TOTAL_COMPANIES * 100)
+    
+    print(f"🤍1 전체 기업 뉴스 파이프라인 라우터 진입 - {TOTAL_COMPANIES}개 기업")
+    
+    try:
+        controller = IssueController(db_session=db)
+        # 모든 기업명을 전달
+        result = await controller.process_news_pipeline(COMPANY_NAMES)
+        print("🤍2 전체 기업 뉴스 파이프라인 라우터 - 컨트롤러 호출 완료")
+        return result
+    except Exception as e:
+        print(f"❌ 전체 기업 뉴스 파이프라인 라우터 에러: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"전체 기업 뉴스 파이프라인 처리 중 오류 발생: {str(e)}")
+
 # ========== 뉴스 파이프라인 엔드포인트 ==========
 
-@router.post("/news", response_model=NewsPipelineResponse)
+@router.post("/news", response_model=IssueResponse)
 async def process_news_pipeline(
-    request: NewsPipelineRequest = Body(default_factory=NewsPipelineRequest),
+    request: IssueAnalysisRequest = Body(default_factory=IssueAnalysisRequest),
     db: AsyncSession = Depends(get_db_session)
 ):
     """🔍 뉴스 파이프라인 처리 및 DB 저장
     
-    기업명 리스트를 받아 뉴스 수집 → 필터링 → AI 분석 → 요약 과정을 거쳐 결과 반환
+    - **기본 동작**: config의 모든 11개 게임기업 뉴스를 자동 수집/분석
+    - **선택 동작**: companies 파라미터로 특정 기업만 지정 가능
+    
+    **처리 과정**: 뉴스 수집(각 기업당 100개) → 키워드 필터링 → AI 분류 → 요약 생성 → DB 저장
     """
     print(f"🤍1 뉴스 파이프라인 라우터 진입")
     
     try:
         controller = IssueController(db_session=db)
+        # companies가 None이거나 빈 리스트면 모든 기업 처리
         result = await controller.process_news_pipeline(request.companies)
         print("🤍2 뉴스 파이프라인 라우터 - 컨트롤러 호출 완료")
         return result
@@ -129,12 +166,22 @@ async def root():
         "service": "Weekly Issue Analysis Service",
         "version": "1.0.0",
         "description": "게임기업 뉴스 이슈 분석 및 AI 요약 서비스",
+        "total_companies": TOTAL_COMPANIES,
+        "target_companies": COMPANY_NAMES,
         "endpoints": {
-            "news_pipeline": "/issue/news",
+            "news_all": "/issue/news-all (전체 기업 자동 분석)",
+            "news_custom": "/issue/news (선택 기업 분석)",
             "important_news": "/issue/important-news",
             "recent": "/issue/recent",
             "search": "/issue/search",
             "high_confidence": "/issue/high-confidence",
             "health": "/issue/health"
-        }
+        },
+        "pipeline_process": [
+            "1. 뉴스 수집 (각 기업당 100개)",
+            "2. 키워드 필터링",
+            "3. AI 분류 (중요도 판별)",
+            "4. AI 요약 생성",
+            "5. DB 저장"
+        ]
     }
