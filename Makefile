@@ -135,6 +135,27 @@ logs-conanai-dsdcheck:
 restart-conanai-dsdcheck:
 	docker-compose down dsdcheck && docker-compose up -d --build dsdcheck
 
+## weekly_disclosure
+build-weekly-disclosure:
+	docker-compose build disclosure
+
+up-weekly-disclosure:
+	docker-compose up -d disclosure
+
+down-weekly-disclosure:
+	docker-compose stop disclosure
+
+logs-weekly-disclosure:
+	docker-compose logs -f disclosure
+
+restart-weekly-disclosure:
+	docker-compose down disclosure && docker-compose up -d --build disclosure
+
+# 개발 전용 (빌드 없이 재시작)
+dev-weekly-disclosure:
+	docker-compose stop disclosure
+	docker-compose up -d disclosure
+
 ## weekly_issue
 build-weekly-issue:
 	docker-compose build issue
@@ -209,8 +230,50 @@ news-pipeline-logs:
 news-pipeline-restart:
 	docker-compose restart newsclassifier summarizer issue
 
+# 📊 Weekly 서비스들 (disclosure, issue, stockprice)
+weekly-services-up:
+	docker-compose up -d disclosure issue stockprice
+
+weekly-services-down:
+	docker-compose stop disclosure issue stockprice
+
+weekly-services-logs:
+	docker-compose logs -f disclosure issue stockprice
+
+weekly-services-restart:
+	docker-compose restart disclosure issue stockprice
+
+weekly-services-build:
+	docker-compose build disclosure issue stockprice
+
+# 📊 Weekly 전체 시스템 (데이터 수집 + 조회)
+weekly-system-up:
+	docker-compose up -d weekly_data disclosure issue stockprice
+
+weekly-system-down:
+	docker-compose stop weekly_data disclosure issue stockprice
+
+weekly-system-logs:
+	docker-compose logs -f weekly_data disclosure issue stockprice
+
+weekly-system-restart:
+	docker-compose restart weekly_data disclosure issue stockprice
+
+# 🤖 n8n 자동화 테스트 명령어
+test-n8n-disclosure:
+	curl -X POST "http://localhost:8090/n8n/collect-disclosure" -H "Content-Type: application/json"
+
+test-n8n-issue:
+	curl -X POST "http://localhost:8089/n8n/collect-issues" -H "Content-Type: application/json"
+
+test-n8n-stockprice:
+	curl -X POST "http://localhost:9006/n8n/collect-stockprice" -H "Content-Type: application/json"
+
+test-weekly-table:
+	curl "http://localhost:8091/weekly/table-data"
+
 # 🗄️ 데이터베이스 관련 명령어
-## weekly_db 서비스
+## weekly_db 서비스 (DB 초기화용)
 build-weekly-db:
 	docker-compose build weekly_db
 
@@ -225,6 +288,22 @@ logs-weekly-db:
 
 restart-weekly-db:
 	docker-compose down weekly_db && docker-compose up -d --build weekly_db
+
+## weekly_data 서비스 (통합 API)
+build-weekly-data:
+	docker-compose build weekly_data
+
+up-weekly-data:
+	docker-compose up -d weekly_data
+
+down-weekly-data:
+	docker-compose stop weekly_data
+
+logs-weekly-data:
+	docker-compose logs -f weekly_data
+
+restart-weekly-data:
+	docker-compose down weekly_data && docker-compose up -d --build weekly_data
 
 # DB 초기화 (테이블 생성)
 init-db:
@@ -254,9 +333,10 @@ health-check:
 	@echo "  📱 대시보드: http://localhost:3000/dashboard"
 	@echo "  🌐 게이트웨이: http://localhost:8080"
 	@echo "  🤖 N8N: http://localhost:5678 (admin/password)"
+	@echo "  📄 Weekly Disclosure: http://localhost:8090/docs"
+	@echo "  📰 Weekly Issue (뉴스 파이프라인): http://localhost:8089/docs"
 	@echo "  📈 Weekly StockPrice: http://localhost:9006/docs"
 	@echo "  📊 Conanai StockTrend: http://localhost:8081/docs"
-	@echo "  📰 Weekly Issue (뉴스 파이프라인): http://localhost:8089/docs"
 	@echo "  🔍 NewsClassifier: http://localhost:8087/docs"
 	@echo "  📝 Summarizer: http://localhost:8088/docs"
 

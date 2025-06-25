@@ -33,6 +33,7 @@ try:
     from weekly_disclosure.app.domain.model.disclosure_model import Base as DisclosureBase, DisclosureModel
     from weekly_issue.app.domain.model.issue_model import Base as IssueBase, IssueModel
     from weekly_stockprice.app.domain.model.stockprice_model import Base as StockPriceBase, StockPriceModel, DailyStockDataModel
+    from weekly_db.db.weekly_unified_model import Base as WeeklyBase, WeeklyDataModel, WeeklyBatchJobModel
     print("✅ 모든 모델 클래스 import 완료")
     
     # 모델 정보 출력
@@ -40,6 +41,8 @@ try:
     print(f"   - IssueModel: {IssueModel.__tablename__}")
     print(f"   - StockPriceModel: {StockPriceModel.__tablename__}")
     print(f"   - DailyStockDataModel: {DailyStockDataModel.__tablename__}")
+    print(f"   - WeeklyDataModel: {WeeklyDataModel.__tablename__} ⭐ NEW")
+    print(f"   - WeeklyBatchJobModel: {WeeklyBatchJobModel.__tablename__} ⭐ NEW")
     
 except ImportError as e:
     print(f"❌ 모델 import 실패: {e}")
@@ -61,7 +64,10 @@ async def create_all_tables(dry_run=False):
             print("📋 weekly_stockprice 테이블 스키마 확인...")
             print(f"   테이블명: {StockPriceBase.metadata.tables.keys()}")
             
-            print("✅ 모든 테이블 스키마 검증 완료")
+            print("📋 weekly_unified 테이블 스키마 확인...")
+            print(f"   테이블명: {WeeklyBase.metadata.tables.keys()}")
+            
+            print("✅ 모든 테이블 스키마 검증 완료 (총 6개 테이블)")
             return
         
         # Docker 환경에서의 DB 연결
@@ -94,7 +100,13 @@ async def create_all_tables(dry_run=False):
         async with engine.begin() as conn:
             await conn.run_sync(StockPriceBase.metadata.create_all)
         
-        print("✅ 모든 테이블 생성 완료")
+        print("📋 weekly_unified 테이블 생성... ⭐ NEW")
+        async with engine.begin() as conn:
+            await conn.run_sync(WeeklyBase.metadata.create_all)
+        
+        print("✅ 모든 테이블 생성 완료 (총 6개)")
+        print("   - 기존: disclosures, issues, weekly_stock_prices, daily_stock_data")
+        print("   - 신규: weekly_data, weekly_batch_jobs")
         
         # DB 연결 정리
         await engine.dispose()

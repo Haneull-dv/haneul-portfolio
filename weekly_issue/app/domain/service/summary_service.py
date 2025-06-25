@@ -1,10 +1,11 @@
 import requests
 from typing import List, Dict
-from ..model.issue_model import SummarizeRequest, NewsInput
+from app.config.settings import SUMMARIZER_URL, REQUEST_TIMEOUT
 
 class SummaryService:
     def __init__(self):
-        self.summary_url = "http://summarizer:8088/summarize"
+        self.summary_url = SUMMARIZER_URL
+        self.timeout = REQUEST_TIMEOUT
     
     async def summarize_news(self, news_list: List[Dict]) -> List[Dict]:
         """
@@ -28,7 +29,7 @@ class SummaryService:
                     self.summary_url,
                     json=payload,
                     headers={"Content-Type": "application/json"},
-                    timeout=15
+                    timeout=self.timeout
                 )
                 
                 if response.status_code == 200:

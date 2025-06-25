@@ -10,8 +10,8 @@ from weekly_db.db.db_builder import get_db_session
 
 # 서비스 모듈 import
 from app.domain.controller.disclosure_controller import DisclosureController
-from weekly_disclosure.app.domain.model.disclosure_schema import DisclosureResponse
-from weekly_disclosure.app.domain.schema.disclosure_schema import DisclosureListResponse
+from app.domain.schema.disclosure_schema import DisclosureResponse
+from app.domain.schema.disclosure_schema import DisclosureListResponse
 
 router = APIRouter()
 

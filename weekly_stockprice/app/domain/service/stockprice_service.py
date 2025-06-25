@@ -7,21 +7,43 @@ from bs4 import BeautifulSoup
 import re
 from ..schema.stockprice_schema import WeeklyStockPriceResponse, StockDataPoint
 
+# Config 직접 정의 (import 이슈 회피)
+GAME_COMPANIES = {
+    "036570": "엔씨소프트",
+    "251270": "넷마블", 
+    "259960": "크래프톤",
+    "263750": "펄어비스",
+    "078340": "컴투스",
+    "112040": "위메이드",
+    "293490": "카카오게임즈",
+    "095660": "네오위즈",
+    "181710": "NHN",
+    "069080": "웹젠",
+    "225570": "넥슨게임즈"
+}
+TOTAL_COMPANIES = len(GAME_COMPANIES)
+
+# 기타 설정 상수들
+REQUEST_TIMEOUT = 10
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+DEFAULT_DAYS_BACK = 21
+MAIN_PAGE_URL_TEMPLATE = "https://finance.naver.com/item/main.naver?code={code}"
+MARKET_CAP_PATTERNS = [
+    "#_market_sum",
+    ".num",
+    ".blind"
+]
+
 class StockPriceService:
     def __init__(self):
-        # 게임기업 정보 (종목코드, 기업명)
-        self.game_companies = {
-            "036570": "엔씨소프트",
-            "251270": "넷마블",
-            "259960": "크래프톤", 
-            "263750": "펄어비스",
-            "078340": "컴투스",
-            "112040": "위메이드",
-            "293490": "카카오게임즈",
-            "095660": "네오위즈",
-            "181710": "NHN",
-            "069080": "웹젠"
-        }
+        # Config에서 설정 로드
+        self.game_companies = GAME_COMPANIES
+        self.timeout = REQUEST_TIMEOUT
+        self.user_agent = USER_AGENT
+        self.default_days = DEFAULT_DAYS_BACK
+        self.market_cap_patterns = MARKET_CAP_PATTERNS
+        
+        print(f"⚙️ StockPrice 서비스 초기화 - 게임기업 {TOTAL_COMPANIES}개 등록")
     
     async def fetch_all_weekly_stock_data(self) -> List[WeeklyStockPriceResponse]:
         """전체 게임기업 주간 주가 데이터 조회 (controller에서 이동한 로직)"""
@@ -178,22 +200,16 @@ class StockPriceService:
     
     async def _fetch_market_cap(self, stock_code: str) -> Optional[int]:
         """시가총액 수집"""
-        url = f"https://finance.naver.com/item/main.naver?code={stock_code}"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        url = MAIN_PAGE_URL_TEMPLATE.format(code=stock_code)
+        headers = {"User-Agent": self.user_agent}
         
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(url, headers=headers, timeout=10)
+                response = await client.get(url, headers=headers, timeout=self.timeout)
                 soup = BeautifulSoup(response.text, "html.parser")
                 
-                # 시가총액 찾기 - 여러 패턴 시도
-                market_cap_patterns = [
-                    "em#_market_sum",
-                    ".blind:contains('시가총액')",
-                    "td:contains('시가총액') + td"
-                ]
-                
-                for pattern in market_cap_patterns:
+                # 시가총액 찾기 - 여러 패턴 시도                
+                for pattern in self.market_cap_patterns:
                     try:
                         element = soup.select_one(pattern)
                         if element:
@@ -237,14 +253,17 @@ class StockPriceService:
             print(f"❌ 시가총액 수집 실패 {stock_code}: {str(e)}")
             return None
     
-    async def _fetch_daily_data(self, stock_code: str, days: int = 21) -> List[StockDataPoint]:
+    async def _fetch_daily_data(self, stock_code: str, days: int = None) -> List[StockDataPoint]:
         """일별시세 데이터 수집"""
-        url = f"https://finance.naver.com/item/sise_day.naver?code={stock_code}"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        if days is None:
+            days = self.default_days
+            
+        url = DAILY_CHART_URL_TEMPLATE.format(code=stock_code)
+        headers = {"User-Agent": self.user_agent}
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(url, headers=headers, timeout=10)
+                response = await client.get(url, headers=headers, timeout=self.timeout)
                 soup = BeautifulSoup(response.text, "html.parser")
                 
                 daily_data = []

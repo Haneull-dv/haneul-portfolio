@@ -2,28 +2,19 @@ import aiohttp
 import asyncio
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-from weekly_disclosure.app.domain.model.disclosure_schema import DisclosureResponse, DisclosureItem, DartApiResponse
+from app.domain.schema.disclosure_schema import DisclosureResponse, DisclosureItem
+from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
+from app.config.settings import DART_API_KEY, DART_BASE_URL, DEFAULT_DAYS_BACK
 
 class DisclosureService:
     def __init__(self):
-        self.api_key = "7c0bec1f1e1b81e5c11ed943e2be640cc0867823"
-        self.base_url = "https://opendart.fss.or.kr/api"
+        # Config에서 설정 로드
+        self.api_key = DART_API_KEY
+        self.base_url = DART_BASE_URL
+        self.game_companies = GAME_COMPANIES
+        self.default_days_back = DEFAULT_DAYS_BACK
         
-        # 게임기업 정보 (종목코드, 기업명) - 실제 corp_code는 별도로 조회 필요
-        self.game_companies = {
-            "036570": "엔씨소프트",
-            "251270": "넷마블",
-            "259960": "크래프톤", 
-            "263750": "펄어비스",
-            "078340": "컴투스",
-            "112040": "위메이드",
-            "293490": "카카오게임즈",
-            "095660": "네오위즈",
-            "181710": "NHN",
-            "069080": "웹젠"
-        }
-        
-        print("⚙️1 서비스 초기화 완료 - 게임기업 10개 등록")
+        print(f"⚙️1 서비스 초기화 완료 - 게임기업 {TOTAL_COMPANIES}개 등록")
 
     async def get_game_companies_disclosures(self) -> DisclosureResponse:
         """게임기업들의 최신 공시 정보를 조회"""

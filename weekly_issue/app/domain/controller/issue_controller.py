@@ -4,11 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.service.issue_service import issue_service
 from app.domain.service.news_pipeline_service import news_pipeline_service
 from app.domain.service.issue_db_service import IssueDbService
-from weekly_issue.app.domain.model.issue_model import NewsPipelineResponse, SummarizedNews
-from weekly_issue.app.domain.schema.issue_schema import (
+from app.domain.schema.issue_schema import IssueResponse
+from app.domain.schema.issue_schema import (
     IssueItemCreate,
     IssueListResponse
 )
+from app.config.companies import COMPANY_NAMES
 
 class IssueController:
     def __init__(self, db_session: AsyncSession = None):
@@ -24,11 +25,18 @@ class IssueController:
         print(f"🤍2 컨트롤러 진입")
         return self.issue_service.get_important_news()
     
-    async def process_news_pipeline(self, companies: List[str]) -> NewsPipelineResponse:
+    async def process_news_pipeline(self, companies: List[str]) -> IssueResponse:
         """
         뉴스 파이프라인 처리 및 DB 저장
         """
         print(f"🤍2 뉴스 파이프라인 컨트롤러 진입")
+        
+        # companies가 None이거나 빈 리스트면 모든 기업 처리
+        if not companies:
+            companies = COMPANY_NAMES
+            print(f"🤍2-1 모든 기업 자동 선택: {len(companies)}개 기업")
+        
+        print(f"🤍2-2 처리 대상 기업: {companies}")
         
         # 1. 기존 서비스로 뉴스 파이프라인 처리
         pipeline_response = await self.issue_service.process_news_pipeline_with_response(companies)
