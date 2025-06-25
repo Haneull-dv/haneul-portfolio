@@ -2,6 +2,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import declarative_base
 import os
 from typing import Optional
+from dotenv import load_dotenv
+from pathlib import Path
+
+# 환경변수 로드
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / "postgres/.env")
+print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
 
 # Base 클래스 생성
 Base = declarative_base()

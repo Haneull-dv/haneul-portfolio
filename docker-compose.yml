@@ -7,9 +7,9 @@ services:
     env_file:
       - ./postgres/.env
     volumes:
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
     networks:
       - app-network
 
@@ -166,6 +166,20 @@ services:
     networks:
       - app-network
 
+  weekly_db:
+    container_name: weekly_db
+    build:
+      context: ./weekly_db
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - ./weekly_db/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
   issue:
     container_name: issue
     build:
@@ -185,7 +199,7 @@ services:
         ipv4_address: 172.18.0.100
 
 volumes:
-  pgdata:
+  postgres_data:
 
 networks:
   app-network:

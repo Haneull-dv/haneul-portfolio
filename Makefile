@@ -209,6 +209,31 @@ news-pipeline-logs:
 news-pipeline-restart:
 	docker-compose restart newsclassifier summarizer issue
 
+# 🗄️ 데이터베이스 관련 명령어
+## weekly_db 서비스
+build-weekly-db:
+	docker-compose build weekly_db
+
+up-weekly-db:
+	docker-compose up -d weekly_db
+
+down-weekly-db:
+	docker-compose stop weekly_db
+
+logs-weekly-db:
+	docker-compose logs -f weekly_db
+
+restart-weekly-db:
+	docker-compose down weekly_db && docker-compose up -d --build weekly_db
+
+# DB 초기화 (테이블 생성)
+init-db:
+	docker-compose exec weekly_db python weekly_db/init_db.py
+
+# DB 초기화 (dry-run - 모델 검증만)
+init-db-dry:
+	docker-compose exec weekly_db python weekly_db/init_db.py --dry-run
+
 # 🧹 정리 명령어
 clean:
 	docker system prune -f
