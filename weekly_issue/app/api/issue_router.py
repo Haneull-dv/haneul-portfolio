@@ -16,7 +16,7 @@ from app.domain.schema.issue_schema import IssueListResponse
 # Config import
 from app.config.companies import COMPANY_NAMES, TOTAL_COMPANIES
 
-router = APIRouter(prefix="/issue", tags=["issue"])
+router = APIRouter(prefix="/issue")
 
 # ========== 전체 기업 뉴스 파이프라인 엔드포인트 ==========
 

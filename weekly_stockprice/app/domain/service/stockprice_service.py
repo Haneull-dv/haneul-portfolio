@@ -7,6 +7,16 @@ from bs4 import BeautifulSoup
 import re
 from ..schema.stockprice_schema import WeeklyStockPriceResponse, StockDataPoint
 
+# Settings import
+from app.config.settings import (
+    DAILY_CHART_URL_TEMPLATE,
+    MAIN_PAGE_URL_TEMPLATE,
+    REQUEST_TIMEOUT,
+    USER_AGENT,
+    DEFAULT_DAYS_BACK,
+    MARKET_CAP_PATTERNS
+)
+
 # Config 직접 정의 (import 이슈 회피)
 GAME_COMPANIES = {
     "036570": "엔씨소프트",
@@ -22,17 +32,6 @@ GAME_COMPANIES = {
     "225570": "넥슨게임즈"
 }
 TOTAL_COMPANIES = len(GAME_COMPANIES)
-
-# 기타 설정 상수들
-REQUEST_TIMEOUT = 10
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-DEFAULT_DAYS_BACK = 21
-MAIN_PAGE_URL_TEMPLATE = "https://finance.naver.com/item/main.naver?code={code}"
-MARKET_CAP_PATTERNS = [
-    "#_market_sum",
-    ".num",
-    ".blind"
-]
 
 class StockPriceService:
     def __init__(self):

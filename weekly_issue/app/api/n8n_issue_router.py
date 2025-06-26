@@ -17,7 +17,7 @@ from app.domain.controller.issue_controller import IssueController
 from app.config.companies import COMPANY_NAMES, GAME_COMPANIES
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/n8n", tags=["n8n-automation"])
+router = APIRouter(prefix="/n8n")
 
 @router.post("/collect-issues")
 async def collect_issues_for_n8n(

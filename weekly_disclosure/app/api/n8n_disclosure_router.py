@@ -17,7 +17,7 @@ from app.domain.controller.disclosure_controller import DisclosureController
 from app.config.companies import GAME_COMPANIES
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/n8n", tags=["n8n-automation"])
+router = APIRouter(prefix="/n8n")
 
 @router.post("/collect-disclosure")
 async def collect_disclosure_for_n8n(
