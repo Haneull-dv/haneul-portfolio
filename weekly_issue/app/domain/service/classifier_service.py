@@ -1,4 +1,4 @@
-import requests
+import httpx
 import asyncio
 from typing import List, Dict
 
@@ -21,38 +21,39 @@ class ClassifierService:
             # 배치로 분류 시도
             titles = [news["title"] for news in news_list]
             
-            response = requests.post(
-                self.classifier_url,
-                json={"text": titles},
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    self.classifier_url,
+                    json={"text": titles},
+                    headers={"Content-Type": "application/json"}
+                )
             
-            if response.status_code == 200:
-                result = response.json()
-                batch_results = result.get("result", [])
+                if response.status_code == 200:
+                    result = response.json()
+                    batch_results = result.get("result", [])
+                    
+                    # 결과와 원본 뉴스 매칭
+                    for i, news in enumerate(news_list):
+                        if i < len(batch_results):
+                            prediction = batch_results[i]
+                            news["classification"] = {
+                                "label": prediction.get("label"),
+                                "confidence": prediction.get("confidence")
+                            }
+                            
+                            # 신뢰도가 0.6 이상인 경우 통과 (임시 완화)
+                            confidence = prediction.get("confidence", 0)
+                            if confidence >= 0.6:
+                                classified_news.append(news)
+                    
+                    print(f"✅ 분류기 처리 완료: {len(classified_news)}개 뉴스가 중요도 기준 통과")
+                    return classified_news
                 
-                # 결과와 원본 뉴스 매칭
-                for i, news in enumerate(news_list):
-                    if i < len(batch_results):
-                        prediction = batch_results[i]
-                        news["classification"] = {
-                            "label": prediction.get("label"),
-                            "confidence": prediction.get("confidence")
-                        }
-                        
-                        # 라벨이 1인 경우만 통과
-                        if prediction.get("label") == 1:
-                            classified_news.append(news)
+                else:
+                    print(f"❌ 분류기 API 호출 실패: {response.status_code}")
+                    return []
                 
-                print(f"✅ 분류기 처리 완료: {len(classified_news)}개 뉴스가 중요도 기준 통과")
-                return classified_news
-            
-            else:
-                print(f"❌ 분류기 API 호출 실패: {response.status_code}")
-                return []
-                
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             print(f"❌ 분류기 호출 중 네트워크 오류: {str(e)}")
             return []
         except Exception as e:

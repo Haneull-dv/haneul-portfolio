@@ -36,16 +36,16 @@ class IssueService:
             result = await self.news_pipeline_service.process_news_pipeline(companies)
             
             # 결과를 IssueResponse 형태로 변환
-            results = result.get("data", [])
+            results = result.get("results", [])
             
             return IssueResponse(
                 status="success",
                 message=result.get("message", "뉴스 파이프라인 처리 완료"),
-                total_collected=result.get("stats", {}).get("total_collected", 0),
-                after_keyword_filter=result.get("stats", {}).get("after_keyword_filter", 0),
-                after_classification=result.get("stats", {}).get("after_classification", 0),
-                final_summaries=result.get("stats", {}).get("final_summaries", 0),
-                companies_processed=result.get("stats", {}).get("companies_processed", 0),
+                total_collected=result.get("total_collected", 0),
+                after_keyword_filter=result.get("after_keyword_filter", 0),
+                after_classification=result.get("after_classification", 0),
+                final_summaries=result.get("final_summaries", 0),
+                companies_processed=len(result.get("companies_processed", [])),
                 results=results
             )
         except Exception as e:

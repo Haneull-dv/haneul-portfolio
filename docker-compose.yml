@@ -121,6 +121,8 @@ services:
       - ./n8n_data:/data-input
     env_file:
       - ./n8n_data/.env
+    depends_on:
+      - gateway
     networks:
       - app-network
 
@@ -133,8 +135,20 @@ services:
       - "8087:8087"
     volumes:
       - ./slm_newsclassifier_inference:/app
+      - ./slm_newsclassifier_training:/app/slm_newsclassifier_training
     env_file:
       - ./slm_newsclassifier_inference/.env
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     networks:
       - app-network
 
@@ -147,8 +161,20 @@ services:
       - "8088:8088"
     volumes:
       - ./slm_summarizer_inference:/app
+      - ./slm_summarizer_training:/app/slm_summarizer_training
     env_file:
       - ./slm_summarizer_inference/.env
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     networks:
       - app-network
 

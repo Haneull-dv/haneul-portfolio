@@ -51,7 +51,7 @@ app.add_middleware(
 gateway_router = APIRouter(prefix="/api", tags=["gateway"])
 
 # ✅ 파일이 필요한 서비스 목록
-FILE_REQUIRED_SERVICES = {ServiceType.DSDGEN, ServiceType.XBRLGEN}
+FILE_REQUIRED_SERVICES = {ServiceType.DSDGEN}
 
 # ✅ 유틸리티 함수: 요청 처리 결과 반환
 def create_response(response):
@@ -127,7 +127,7 @@ async def proxy_post(
         
         # 파일이 필요한 서비스 처리
         if service in FILE_REQUIRED_SERVICES:
-            # dsdgen, xbrlgen과 같이 파일이 필요한 서비스인 경우
+            # dsdgen과 같이 파일이 필요한 서비스인 경우
             
             # 서비스 URI가 upload인 경우만 파일 체크
             if "upload" in path and not file:
@@ -145,14 +145,7 @@ async def proxy_post(
             if sheet_names:
                 params = {'sheet_name': sheet_names}
                 
-            # xbrlgen 다운로드의 경우 특별 처리
-            if service == ServiceType.XBRLGEN and "download" in path:
-                # 요청 본문에서 filename 추출
-                request_body = await request.json()
-                if "filename" in request_body:
-                    data = {'filename': request_body["filename"]}
-                else:
-                    raise HTTPException(status_code=400, detail="filename 파라미터가 필요합니다.")
+            # 특별 처리가 필요한 경우 여기에 추가
         else:
             # 일반 서비스 처리 (body JSON 전달)
             try:
