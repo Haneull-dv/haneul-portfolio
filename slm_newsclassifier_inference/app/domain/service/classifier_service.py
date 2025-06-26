@@ -39,6 +39,11 @@ class ClassifierService:
             # 텍스트 토크나이징
             inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
             
+            # GPU로 입력 이동 (디바이스 일관성 보장)
+            device = self.model_loader.get_device()
+            if device.startswith("cuda"):
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+            
             # 모델 추론
             with torch.no_grad():
                 outputs = self.model(**inputs)
@@ -47,12 +52,21 @@ class ClassifierService:
                 predicted = torch.argmax(probs, dim=1).item()
                 confidence = probs[0][predicted].item()
             
+            # GPU 메모리 정리
+            if device.startswith("cuda"):
+                del inputs, outputs, logits, probs
+                torch.cuda.empty_cache()
+            
             return {
                 "text": text,
                 "label": predicted,
                 "confidence": round(confidence, 4)
             }
         except Exception as e:
+            # GPU 메모리 정리 (에러 시에도)
+            device = self.model_loader.get_device()
+            if device.startswith("cuda"):
+                torch.cuda.empty_cache()
             raise Exception(f"예측 중 오류 발생: {str(e)}")
     
     def predict_single_text(self, text: str) -> dict:

@@ -85,4 +85,28 @@ docker system prune -a -f
 # 볼륨 정리
 docker volume prune -f
 
-이히리오
+#PostgreSQL 컨테이너 내부로 들어가기
+docker exec -it db bash
+
+#PostgreSQL 터미널(psql) 접속
+psql -U haneul -d weekly_db
+
+#테이블 목록 보기
+\dt
+
+#특정 테이블 데이터 보기
+SELECT * FROM daily_stock_data ORDER BY collected_at DESC LIMIT 10;
+SELECT * FROM disclosures ORDER BY collected_at DESC LIMIT 10;
+SELECT * FROM issues ORDER BY collected_at DESC LIMIT 10;
+SELECT * FROM weekly_batch_jobs ORDER BY created_at DESC LIMIT 10;
+SELECT * FROM weekly_data ORDER BY created_at DESC LIMIT 10;
+SELECT * FROM weekly_stock_prices ORDER BY collected_at DESC LIMIT 10;
+
+
+
+#나가기
+#PostgreSQL 빠져나오기
+\q
+#컨테이너 빠져나오기
+exit
+q

@@ -1,16 +1,26 @@
-torch>=2.0.0
-transformers>=4.40.0
+# RTX 2080 GPU 최적화 Summarizer Dependencies
+# PyTorch with CUDA 11.8 support
+torch>=2.0.0,<2.2.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+# Transformers with GPU optimization
+transformers>=4.40.0,<4.45.0
+# API Framework
 fastapi>=0.100.0
 uvicorn[standard]>=0.20.0
 pydantic>=2.0.0
-# 추론용 의존성
+# GPU 추론 최적화
 bitsandbytes>=0.42.0
 peft>=0.5.0
 accelerate>=0.21.0
+# Tokenization
 sentencepiece>=0.1.99
-protobuf>=3.20.0
-psutil>=5.9.0
-# KoGPT2 특별 의존성
 tokenizers>=0.15.0
-# 추가 안정성
-packaging>=21.0 
+protobuf>=3.20.0
+# System utilities
+psutil>=5.9.0
+packaging>=21.0
+# CUDA memory management
+nvidia-ml-py3>=7.352.0
+# HuggingFace Hub API
+huggingface-hub>=0.17.0 
