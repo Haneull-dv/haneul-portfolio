@@ -169,20 +169,6 @@ services:
   weekly_db:
     container_name: weekly_db
     build:
-      context: ./weekly_db
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-    env_file:
-      - ./weekly_db/.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
-  weekly_data:
-    container_name: weekly_data
-    build:
       context: .
       dockerfile: ./weekly_db/Dockerfile
     ports:

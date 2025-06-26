@@ -32,7 +32,7 @@ GAME_COMPANIES = {
 TOTAL_COMPANIES = len(GAME_COMPANIES)
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/n8n", tags=["n8n-automation"])
+router = APIRouter(prefix="/n8n")
 
 @router.post("/collect-stockprice")
 async def collect_stockprice_for_n8n(
@@ -151,7 +151,7 @@ async def collect_stockprice_for_n8n(
             "stockprice_stats": {
                 "successful_count": len(successful_stocks),
                 "error_count": len(error_stocks),
-                "avg_change_rate": round(sum(s.change_rate for s in successful_stocks) / len(successful_stocks), 2) if successful_stocks else 0
+                "avg_change_rate": round(sum(s.changeRate for s in successful_stocks) / len(successful_stocks), 2) if successful_stocks else 0
             },
             "job_id": job_id
         }

@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 # 도메인 서비스 import
 from app.domain.controller.disclosure_controller import DisclosureController
 from app.domain.service.disclosure_service import DisclosureService
-from app.foundation.db import get_db_session
+from weekly_db.db.db_builder import get_db_session
 
 # 설정 import
 from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
@@ -31,7 +31,7 @@ from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
 from weekly_db.db.weekly_unified_model import WeeklyDataModel
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/cqrs-disclosure", tags=["cqrs-disclosure"])
+router = APIRouter(prefix="/cqrs-disclosure")
 
 
 @router.post("/collect-and-project")

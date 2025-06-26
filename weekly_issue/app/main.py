@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(issue_router)
+app.include_router(issue_router, tags=["이슈 분석"])
 app.include_router(n8n_issue_router, tags=["n8n 자동화"])
 
 print(f"🤍0 메인 진입 - 이슈 분석 서비스 시작 (DI 기반)")
