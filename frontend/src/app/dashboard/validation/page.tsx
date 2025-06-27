@@ -33,14 +33,31 @@ interface ComparisonResult {
   difference: number;
 }
 
+interface FinancialRowData {
+  account_name: string;
+  path: string;
+  indent_level: number;
+  amounts: Record<string, number | null>;
+  validation_status: Record<string, boolean | null>;
+}
+
+interface FinancialStatementData {
+  sheet_name: string;
+  title: string;
+  years: string[];
+  rows: FinancialRowData[];
+  validation_summary: Record<string, { total: number; match: number; mismatch: number }>;
+}
+
 const ValidationPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [corpName, setCorpName] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'footing' | 'comparison' | null>(null);
+  const [activeTab, setActiveTab] = useState<'footing' | 'comparison' | 'financial' | null>(null);
   const [footingResults, setFootingResults] = useState<FootingResponse | null>(null);
   const [comparisonResults, setComparisonResults] = useState<ComparisonResult[] | null>(null);
+  const [financialData, setFinancialData] = useState<FinancialStatementData | null>(null);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -54,6 +71,7 @@ const ValidationPage: React.FC = () => {
       // Reset results when new file is uploaded
       setFootingResults(null);
       setComparisonResults(null);
+      setFinancialData(null);
       setActiveTab(null);
     }
   };
@@ -65,13 +83,14 @@ const ValidationPage: React.FC = () => {
     }
 
     setLoading(true);
-    setActiveTab('footing');
+    setActiveTab('financial');
     
     try {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/api/v1/dsdfooting/check-footing', {
+      // 재무상태표 원본 데이터 가져오기
+      const response = await fetch('http://localhost:8000/api/v1/dsdfooting/get-financial-data', {
         method: 'POST',
         body: formData,
       });
@@ -80,8 +99,8 @@ const ValidationPage: React.FC = () => {
         throw new Error('검증 요청이 실패했습니다.');
       }
 
-      const result: FootingResponse = await response.json();
-      setFootingResults(result);
+      const result: FinancialStatementData = await response.json();
+      setFinancialData(result);
     } catch (error) {
       console.error('Error:', error);
       alert('검증 중 오류가 발생했습니다.');
@@ -126,6 +145,16 @@ const ValidationPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getValidationStatusColor = (status: boolean | null) => {
+    if (status === null) return '';
+    return status ? styles.validMatch : styles.validMismatch;
+  };
+
+  const formatNumber = (value: number | null) => {
+    if (value === null || value === undefined) return '-';
+    return value.toLocaleString();
   };
 
   const renderValidationItem = (item: ValidationResult, level: number = 0) => {
@@ -198,13 +227,13 @@ const ValidationPage: React.FC = () => {
             <div className={styles.actionGrid}>
               <div className={styles.actionItem}>
                 <h4>합계검증</h4>
-                <p>자산·부채·자본 합계 일치 여부를 자동 검증합니다.</p>
+                <p>자산·부채·자본 합계 일치 여부를 자동 검증하고 재무상태표를 시각화합니다.</p>
                 <button 
                   onClick={handleFootingValidation}
                   disabled={loading}
                   className={`${styles.actionButton} ${styles.primary}`}
                 >
-                  {loading && activeTab === 'footing' ? (
+                  {loading && activeTab === 'financial' ? (
                     <>
                       <i className='bx bx-loader-alt bx-spin'></i>
                       검증 중...
@@ -262,8 +291,76 @@ const ValidationPage: React.FC = () => {
         </div>
 
         {/* Results Section */}
-        {(footingResults || comparisonResults) && (
+        {(footingResults || comparisonResults || financialData) && (
           <div className={styles.resultsSection}>
+            {financialData && activeTab === 'financial' && (
+              <div className={styles.card}>
+                <div className={styles.resultHeader}>
+                  <h3>재무상태표 및 합계검증 결과</h3>
+                  <div className={styles.summary}>
+                    <span className={styles.totalSheets}>시트: {financialData.title}</span>
+                    <div className={styles.validationSummary}>
+                      {Object.entries(financialData.validation_summary).map(([year, summary]) => (
+                        <span key={year} className={styles.yearSummary}>
+                          {year}: <span className={styles.success}>{summary.match}개 일치</span> / 
+                          <span className={styles.error}>{summary.mismatch}개 불일치</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.financialTableContainer}>
+                  <table className={styles.financialTable}>
+                    <thead>
+                      <tr>
+                        <th className={styles.accountColumn}>계정과목</th>
+                        {financialData.years.map(year => (
+                          <th key={year} className={styles.amountColumn}>{year}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {financialData.rows.map((row, index) => (
+                        <tr key={index} className={styles.financialRow}>
+                          <td 
+                            className={styles.accountCell}
+                            style={{ paddingLeft: `${row.indent_level * 20 + 10}px` }}
+                          >
+                            {row.indent_level > 0 && '└ '}
+                            {row.account_name}
+                          </td>
+                          {financialData.years.map(year => (
+                            <td 
+                              key={year}
+                              className={`${styles.amountCell} ${getValidationStatusColor(row.validation_status[year])}`}
+                            >
+                              {formatNumber(row.amounts[year])}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className={styles.legend}>
+                  <div className={styles.legendItem}>
+                    <div className={`${styles.legendColor} ${styles.validMatch}`}></div>
+                    <span>합계검증 일치</span>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={`${styles.legendColor} ${styles.validMismatch}`}></div>
+                    <span>합계검증 불일치</span>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={`${styles.legendColor} ${styles.noValidation}`}></div>
+                    <span>검증 대상 아님</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {footingResults && activeTab === 'footing' && (
               <div className={styles.card}>
                 <div className={styles.resultHeader}>

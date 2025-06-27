@@ -399,31 +399,247 @@
     @media (max-width: 768px) {
       font-size: 18px;
     }
-    
-    @media (max-width: 480px) {
-      font-size: 16px;
-    }
   }
 }
 
 .summary {
   display: flex;
-  gap: 16px;
   align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 
   @media (max-width: 768px) {
     gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    width: 100%;
   }
 }
 
-.totalSheets,
+.validationSummary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
+}
+
+.yearSummary {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark);
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+}
+
+.totalSheets {
+  background: var(--light-blue);
+  color: var(--blue);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+}
+
+.success {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.error {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+// 재무상태표 테이블 스타일
+.financialTableContainer {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--grey);
+  background: white;
+  margin-bottom: 20px;
+}
+
+.financialTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+
+  thead {
+    background: var(--light-blue);
+    
+    th {
+      padding: 16px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--blue);
+      border-bottom: 2px solid var(--blue);
+      white-space: nowrap;
+
+      @media (max-width: 768px) {
+        padding: 12px 10px;
+        font-size: 12px;
+      }
+
+      &.accountColumn {
+        min-width: 250px;
+        
+        @media (max-width: 768px) {
+          min-width: 200px;
+        }
+      }
+
+      &.amountColumn {
+        min-width: 120px;
+        text-align: right;
+        
+        @media (max-width: 768px) {
+          min-width: 100px;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr.financialRow {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #f8f9fa;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      td {
+        padding: 12px;
+        vertical-align: middle;
+
+        @media (max-width: 768px) {
+          padding: 10px 8px;
+        }
+
+        &.accountCell {
+          font-weight: 500;
+          color: var(--dark);
+        }
+
+        &.amountCell {
+          text-align: right;
+          font-family: 'Courier New', monospace;
+          font-weight: 500;
+          
+          // 검증 상태 색상
+          &.validMatch {
+            background-color: #fff3cd; // 연한 노란색
+            border-left: 4px solid #ffc107;
+          }
+
+          &.validMismatch {
+            background-color: #f8d7da; // 연한 빨간색
+            border-left: 4px solid #dc3545;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 범례 스타일
+.legend {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: var(--light);
+  border-radius: 8px;
+  border: 1px solid var(--grey);
+
+  @media (max-width: 768px) {
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 12px;
+  }
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--dark);
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    gap: 6px;
+  }
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+
+  @media (max-width: 768px) {
+    width: 16px;
+    height: 16px;
+  }
+
+  &.validMatch {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+  }
+
+  &.validMismatch {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+  }
+
+  &.noValidation {
+    background-color: white;
+    border-color: #ddd;
+  }
+}
+
+// 누락된 기존 스타일 클래스들
+.mismatchCount {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  &.success {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
 .totalItems {
   padding: 6px 12px;
   background: var(--light-blue);
@@ -435,38 +651,6 @@
   @media (max-width: 768px) {
     font-size: 13px;
     padding: 5px 10px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-}
-
-.mismatchCount {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-
-  @media (max-width: 768px) {
-    font-size: 13px;
-    padding: 5px 10px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-
-  &.success {
-    background: #d4edda;
-    color: #155724;
-  }
-
-  &.error {
-    background: #f8d7da;
-    color: #721c24;
   }
 }
 
@@ -487,10 +671,6 @@
       font-size: 16px;
       margin-bottom: 12px;
     }
-    
-    @media (max-width: 480px) {
-      font-size: 15px;
-    }
   }
 }
 
@@ -506,14 +686,6 @@
   overflow-x: auto;
   border-radius: 8px;
   border: 1px solid var(--grey);
-  
-  @media (max-width: 768px) {
-    border-radius: 6px;
-  }
-  
-  @media (max-width: 480px) {
-    border-radius: 4px;
-  }
 }
 
 .validationTable,
@@ -521,21 +693,16 @@
   width: 100%;
   border-collapse: collapse;
   background: white;
-  min-width: 600px; // Ensure table doesn't get too cramped on mobile
+  min-width: 600px;
 
   @media (max-width: 768px) {
     min-width: 500px;
     font-size: 13px;
   }
 
-  @media (max-width: 480px) {
-    min-width: 400px;
-    font-size: 12px;
-  }
-
   thead {
     background: var(--grey);
-
+    
     th {
       padding: 12px 16px;
       text-align: left;
@@ -544,15 +711,10 @@
       font-size: 14px;
       border-bottom: 1px solid var(--dark-grey);
       white-space: nowrap;
-      
+
       @media (max-width: 768px) {
         padding: 10px 12px;
         font-size: 13px;
-      }
-      
-      @media (max-width: 480px) {
-        padding: 8px 10px;
-        font-size: 12px;
       }
     }
   }
@@ -564,22 +726,17 @@
       &:hover {
         background: var(--light-blue);
       }
-    }
 
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--grey);
-      font-size: 14px;
-      color: var(--dark);
-      
-      @media (max-width: 768px) {
-        padding: 10px 12px;
-        font-size: 13px;
-      }
-      
-      @media (max-width: 480px) {
-        padding: 8px 10px;
-        font-size: 12px;
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--grey);
+        font-size: 14px;
+        color: var(--dark);
+
+        @media (max-width: 768px) {
+          padding: 10px 12px;
+          font-size: 13px;
+        }
       }
     }
   }
@@ -629,11 +786,6 @@
   @media (max-width: 768px) {
     padding: 3px 10px;
     font-size: 11px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 2px 8px;
-    font-size: 10px;
   }
 
   &.success {
@@ -734,4 +886,51 @@
   .sheetResult h4 {
     color: var(--light);
   }
-} 
+
+  .financialTable {
+    background: var(--dark-grey);
+
+    thead {
+      background: var(--dark);
+
+      th {
+        color: var(--light);
+        border-bottom-color: var(--blue);
+      }
+    }
+
+    tbody {
+      tr.financialRow {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+          color: var(--light);
+          border-bottom-color: var(--dark);
+
+          &.amountCell {
+            &.validMatch {
+              background-color: rgba(255, 193, 7, 0.2);
+              border-left-color: #ffc107;
+            }
+
+            &.validMismatch {
+              background-color: rgba(220, 53, 69, 0.2);
+              border-left-color: #dc3545;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .legend {
+    background: var(--dark-grey);
+    border-color: var(--dark);
+  }
+
+  .legendItem {
+    color: var(--light);
+  }
+}
