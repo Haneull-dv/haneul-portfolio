@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 # 라우터 import
 from app.api.issue_router import router as issue_router
 from app.api.n8n_issue_router import router as n8n_issue_router
+from app.api.cqrs_issue_router import router as cqrs_issue_router
 
 app = FastAPI(title="Weekly Issue Analysis Service")
 
@@ -27,5 +28,6 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(issue_router, tags=["이슈 분석"])
 app.include_router(n8n_issue_router, tags=["n8n 자동화"])
+app.include_router(cqrs_issue_router, tags=["CQRS 이슈"])
 
 print(f"🤍0 메인 진입 - 이슈 분석 서비스 시작 (DI 기반)")

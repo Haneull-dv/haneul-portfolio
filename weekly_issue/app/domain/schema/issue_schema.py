@@ -15,8 +15,8 @@ class IssueItemCreate(IssueItemBase):
     """이슈 아이템 생성 스키마"""
     news_url: Optional[str] = Field(None, description="원본 뉴스 URL")
     published_date: Optional[str] = Field(None, description="뉴스 발행일 (YYYYMMDD)")
-    category: Optional[str] = Field(None, description="뉴스 카테고리")
-    sentiment: Optional[str] = Field(None, description="감정 분석 결과")
+    category: Optional[str] = Field("일반", description="뉴스 카테고리")
+    sentiment: Optional[str] = Field("neutral", description="감정 분석 결과")
 
 class IssueItemUpdate(BaseModel):
     """이슈 아이템 수정 스키마"""
@@ -32,11 +32,11 @@ class IssueItemUpdate(BaseModel):
 
 class IssueItem(IssueItemBase):
     """이슈 아이템 응답 스키마"""
-    id: int = Field(..., description="이슈 ID")
+    id: str = Field(..., description="이슈 ID")
     news_url: Optional[str] = Field(None, description="원본 뉴스 URL")
     published_date: Optional[str] = Field(None, description="뉴스 발행일")
-    category: Optional[str] = Field(None, description="뉴스 카테고리")
-    sentiment: Optional[str] = Field(None, description="감정 분석 결과")
+    category: Optional[str] = Field("일반", description="뉴스 카테고리")
+    sentiment: Optional[str] = Field("neutral", description="감정 분석 결과")
     created_at: Optional[datetime] = Field(None, description="생성 시간")
     updated_at: Optional[datetime] = Field(None, description="수정 시간")
     
@@ -48,6 +48,7 @@ class PipelineStats(BaseModel):
     """AI 파이프라인 통계 스키마"""
     total_collected: int = Field(..., description="총 수집된 뉴스 수", example=150)
     after_keyword_filter: int = Field(..., description="키워드 필터링 후 뉴스 수", example=75)
+    after_deduplication: int = Field(..., description="중복 제거 후 뉴스 수", example=60)
     after_classification: int = Field(..., description="AI 분류 후 뉴스 수", example=45)
     final_summaries: int = Field(..., description="최종 요약 생성 수", example=30)
     companies_processed: int = Field(..., description="처리된 기업 수", example=10)
@@ -59,10 +60,11 @@ class IssueResponse(BaseModel):
     message: str = Field(..., description="응답 메시지", example="주간 이슈 분석 완료")
     total_collected: int = Field(..., description="총 수집된 뉴스 수")
     after_keyword_filter: int = Field(..., description="키워드 필터링 후 뉴스 수")
+    after_deduplication: int = Field(..., description="중복 제거 후 뉴스 수")
     after_classification: int = Field(..., description="AI 분류 후 뉴스 수")
     final_summaries: int = Field(..., description="최종 요약 생성 수")
     companies_processed: int = Field(..., description="처리된 기업 수")
-    results: List[IssueItem] = Field(..., description="분석 결과 목록")
+    results: List[Dict[str, Any]] = Field(..., description="분석 결과 목록")
 
 class IssueListResponse(BaseModel):
     """이슈 목록 조회 응답 스키마"""

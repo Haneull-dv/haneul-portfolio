@@ -166,7 +166,7 @@ services:
       - ./slm_summarizer_inference/.env
     environment:
       - CUDA_VISIBLE_DEVICES=0
-      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+      - HUGGINGFACE_HUB_TOKEN=${HUGGINGFACE_TOKEN}
     runtime: nvidia
     deploy:
       resources:

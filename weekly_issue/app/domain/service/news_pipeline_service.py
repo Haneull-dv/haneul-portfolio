@@ -1,5 +1,6 @@
 import asyncio
 from typing import List, Dict
+from fuzzywuzzy import fuzz
 from .naver_news_service import naver_news_service
 from .keyword_filter_service import keyword_filter_service
 from .classifier_service import classifier_service
@@ -11,6 +12,48 @@ class NewsPipelineService:
         self.keyword_filter = keyword_filter_service
         self.classifier = classifier_service
         self.summary = summary_service
+    
+    def remove_similar_titles(self, news_list: List[Dict]) -> List[Dict]:
+        """
+        유사한 제목을 가진 뉴스들을 제거하여 중복 기사를 줄입니다.
+        fuzzywuzzy token_set_ratio를 사용하여 한국어 어순/조사 변화에 강한 비교를 수행합니다.
+        
+        Args:
+            news_list: 뉴스 객체 리스트
+            
+        Returns:
+            유사한 제목을 제거한 뉴스 리스트
+        """
+        if not news_list:
+            return news_list
+        
+        original_count = len(news_list)
+        filtered_news = []
+        similarity_threshold = 85
+        
+        for current_news in news_list:
+            current_title = current_news.get("title", "").strip()
+            if not current_title:
+                continue
+            
+            # 이미 추가된 뉴스들과 유사도 비교
+            is_similar = False
+            for existing_news in filtered_news:
+                existing_title = existing_news.get("title", "").strip()
+                
+                # fuzzywuzzy token_set_ratio를 사용한 유사도 계산
+                similarity_score = fuzz.token_set_ratio(current_title, existing_title)
+                
+                if similarity_score >= similarity_threshold:
+                    is_similar = True
+                    break
+            
+            # 유사하지 않으면 추가
+            if not is_similar:
+                filtered_news.append(current_news)
+        
+        print(f"🧹 유사 제목 제거 결과: {len(filtered_news)}/{original_count}개")
+        return filtered_news
     
     async def process_news_pipeline(self, companies: List[str]) -> Dict:
         """
@@ -60,6 +103,23 @@ class NewsPipelineService:
                     "message": "키워드 필터링을 통과한 뉴스가 없습니다.",
                     "total_collected": len(all_news),
                     "after_keyword_filter": 0,
+                    "after_deduplication": 0,
+                    "after_classification": 0,
+                    "final_summaries": 0,
+                    "results": []
+                }
+            
+            # 2.5단계: 유사한 제목 제거
+            print("🧹 2.5단계: 유사 제목 제거 시작")
+            deduped_news = self.remove_similar_titles(keyword_filtered_news)
+            
+            if not deduped_news:
+                return {
+                    "status": "success",
+                    "message": "유사 제목 제거 후 남은 뉴스가 없습니다.",
+                    "total_collected": len(all_news),
+                    "after_keyword_filter": len(keyword_filtered_news),
+                    "after_deduplication": 0,
                     "after_classification": 0,
                     "final_summaries": 0,
                     "results": []
@@ -67,7 +127,7 @@ class NewsPipelineService:
             
             # 3단계: AI 모델 2차 분류
             print("🤖 3단계: AI 분류 시작")
-            classified_news = await self.classifier.classify_news(keyword_filtered_news)
+            classified_news = await self.classifier.classify_news(deduped_news)
             
             if not classified_news:
                 return {
@@ -75,6 +135,7 @@ class NewsPipelineService:
                     "message": "AI 분류를 통과한 뉴스가 없습니다.",
                     "total_collected": len(all_news),
                     "after_keyword_filter": len(keyword_filtered_news),
+                    "after_deduplication": len(deduped_news),
                     "after_classification": 0,
                     "final_summaries": 0,
                     "results": []
@@ -90,6 +151,7 @@ class NewsPipelineService:
                 "message": "뉴스 파이프라인 처리 완료",
                 "total_collected": len(all_news),
                 "after_keyword_filter": len(keyword_filtered_news),
+                "after_deduplication": len(deduped_news),
                 "after_classification": len(classified_news),
                 "final_summaries": len(final_results),
                 "companies_processed": companies,
@@ -106,6 +168,7 @@ class NewsPipelineService:
                 "message": f"파이프라인 처리 중 오류 발생: {str(e)}",
                 "total_collected": 0,
                 "after_keyword_filter": 0,
+                "after_deduplication": 0,
                 "after_classification": 0,
                 "final_summaries": 0,
                 "results": []

@@ -48,15 +48,18 @@ class IssueController:
                 # 이슈 데이터를 DB 저장용 스키마로 변환
                 issue_creates = []
                 for result in pipeline_response.results:
-                    if hasattr(result, 'summary') and result.summary:  # 요약이 있는 것만 저장
+                    # Dict 타입으로 변경되었으므로 dict 접근 방식 사용
+                    if isinstance(result, dict) and result.get('summary'):  # 요약이 있는 것만 저장
                         issue_create = IssueItemCreate(
-                            corp=result.corp,
-                            summary=result.summary,
-                            original_title=result.original_title,
-                            confidence=result.confidence,
-                            matched_keywords=result.matched_keywords,
-                            sentiment="neutral",  # 기본값, 필요시 sentiment 분석 추가
-                            analyzed_at=None  # DB에서 자동 설정
+                            corp=result.get('corp', ''),
+                            summary=result.get('summary', ''),
+                            original_title=result.get('original_title', ''),
+                            confidence=result.get('confidence', 0.0),
+                            matched_keywords=result.get('matched_keywords', []),
+                            news_url=result.get('news_url', ''),  # 뉴스 URL 추가
+                            published_date=result.get('published_date', ''),  # 발행일 추가
+                            category=result.get('category', '일반'),  # 카테고리 추가
+                            sentiment=result.get('sentiment', 'neutral')  # 감정 분석 추가
                         )
                         issue_creates.append(issue_create)
                 

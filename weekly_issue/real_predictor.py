@@ -65,12 +65,15 @@ class SummarizerPredictor:
                 llm_int8_has_fp16_weight=False
             )
             
-            # KoGPT2 토크나이저 로딩 (단순화된 방식)
+            # KoGPT2 토크나이저 로딩 (오프라인 우선)
             logger.info("📖 KoGPT2 토크나이저 로딩...")
             try:
                 self.tokenizer = AutoTokenizer.from_pretrained(
                     self.base_model_name,
-                    token=os.getenv("HUGGINGFACE_HUB_TOKEN")
+                    trust_remote_code=True,
+                    use_fast=False,
+                    local_files_only=False,  # HuggingFace Hub 허용
+                    token=os.getenv("HUGGINGFACE_HUB_TOKEN")  # API 제한 우회
                 )
                 
                 # KoGPT2 필수 설정
@@ -87,15 +90,19 @@ class SummarizerPredictor:
                 logger.error(f"❌ 토크나이저 로딩 실패: {e}")
                 raise
             
-            # RTX 2080 최적화 베이스 모델 로딩 (단순화된 방식)
+            # RTX 2080 최적화 베이스 모델 로딩 
             logger.info("🤖 KoGPT2 베이스 모델 로딩 (GPU + 4bit)...")
             try:
                 base_model = AutoModelForCausalLM.from_pretrained(
                     self.base_model_name,
                     quantization_config=bnb_config,
                     device_map="auto",  # RTX 2080에 자동 배치
+                    trust_remote_code=True,
                     torch_dtype=torch.float16,
                     low_cpu_mem_usage=True,
+                    max_memory={0: "7GB"},  # RTX 2080 8GB 중 7GB 사용
+                    use_cache=True,
+                    attn_implementation="eager",  # RTX 2080 호환
                     token=os.getenv("HUGGINGFACE_HUB_TOKEN")
                 )
                 
@@ -103,12 +110,13 @@ class SummarizerPredictor:
                 
             except Exception as e:
                 logger.error(f"❌ 베이스 모델 로딩 실패: {e}")
-                # 폴백: 4bit 없이 GPU만 사용
-                logger.info("🔄 4bit 없이 GPU 모드로 재시도...")
+                # 폴백: 더 보수적인 설정
+                logger.info("🔄 보수적 설정으로 재시도...")
                 base_model = AutoModelForCausalLM.from_pretrained(
                     self.base_model_name,
+                    quantization_config=bnb_config,
+                    device_map={"": 0},  # 강제로 GPU 0에 배치
                     torch_dtype=torch.float16,
-                    device_map="auto",
                     low_cpu_mem_usage=True,
                     token=os.getenv("HUGGINGFACE_HUB_TOKEN")
                 )
@@ -160,16 +168,13 @@ class SummarizerPredictor:
                 truncation=True,
                 max_length=400,  # 입력 길이 제한 (RTX 2080 최적화)
                 padding=True
-            )
-            # 입력 텐서를 모델과 같은 디바이스로 이동 (4bit 모델 호환)
-            device = next(self.model.parameters()).device
-            inputs = {k: v.to(device) for k, v in inputs.items()}
+            ).to(self.device)
             
             # GPU 추론
             with torch.no_grad():
                 outputs = self.model.generate(
-                    input_ids=inputs["input_ids"],
-                    attention_mask=inputs["attention_mask"],
+                    input_ids=inputs.input_ids,
+                    attention_mask=inputs.attention_mask,
                     max_new_tokens=max_new_tokens,
                     temperature=temperature,
                     top_p=top_p,
@@ -184,7 +189,7 @@ class SummarizerPredictor:
             
             # 결과 디코딩
             generated_text = self.tokenizer.decode(
-                outputs[0][inputs["input_ids"].shape[1]:], 
+                outputs[0][inputs.input_ids.shape[1]:], 
                 skip_special_tokens=True
             ).strip()
             
