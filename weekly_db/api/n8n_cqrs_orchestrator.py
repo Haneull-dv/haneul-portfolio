@@ -41,20 +41,22 @@ router = APIRouter(prefix="/n8n-cqrs", tags=["n8n-cqrs-orchestrator"])
 
 @router.post("/orchestrate-weekly-collection")
 async def orchestrate_weekly_collection(
-    week: Optional[str] = Query(None, description="대상 주차 (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_weekly_session)
 ) -> Dict[str, Any]:
     """
     [n8n CQRS Orchestrator] 주간 데이터 수집 전체 프로세스 오케스트레이션
+    
+    현재 주차(이번 주 월요일 기준)의 데이터를 자동으로 수집합니다.
+    n8n에서 빈 POST 요청으로 호출하면 자동으로 현재 주차를 계산합니다.
     """
     
-    if not week:
-        week = WeeklyDataModel.get_current_week()
+    # 현재 주차를 자동으로 계산
+    week = WeeklyDataModel.get_current_week()
     
     orchestration_id = f"orchestration_{week}_{int(datetime.now().timestamp())}"
     
     try:
-        logger.info(f"🎭 [n8n CQRS Orchestrator] 주간 수집 오케스트레이션 시작")
+        logger.info(f"🎭 [n8n CQRS Orchestrator] 주간 수집 오케스트레이션 시작 - Week: {week}")
         
         # 모든 도메인 서비스에 CQRS 작업 요청
         domain_services = [

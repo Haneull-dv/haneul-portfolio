@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 # 라우터 import
 from app.api.stockprice_router import router as stockprice_router
 from app.api.n8n_stockprice_router import router as n8n_stockprice_router
+from app.api.cqrs_stockprice_router import router as cqrs_stockprice_router
 
 app = FastAPI(title="Weekly Stock Price Service")
 
@@ -24,6 +25,7 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(stockprice_router, prefix="/stockprice", tags=["주가 정보"])
 app.include_router(n8n_stockprice_router, tags=["n8n 자동화"])
+app.include_router(cqrs_stockprice_router, tags=["CQRS 주가"])
 
 print(f"🤍0. 메인 진입 - 주가 서비스 시작 (DI 기반)")
 

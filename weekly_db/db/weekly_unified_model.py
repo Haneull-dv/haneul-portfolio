@@ -73,6 +73,15 @@ class WeeklyDataModel(Base):
         return monday.strftime('%Y-%m-%d')
     
     @staticmethod
+    def get_current_week() -> str:
+        """현재 주의 월요일 날짜를 YYYY-MM-DD 형태로 반환"""
+        today = datetime.now().date()
+        # 월요일(0)을 기준으로 주의 시작일 계산
+        days_since_monday = today.weekday()
+        monday = today - timedelta(days=days_since_monday)
+        return monday.strftime('%Y-%m-%d')
+    
+    @staticmethod
     def get_week_info(date_str: str = None) -> tuple:
         """날짜 문자열에서 연도와 ISO 주차 번호 추출"""
         if date_str:
