@@ -132,7 +132,7 @@ const FloatingChatbot: React.FC<FloatingChatbotProps> = ({ onClick, style = {}, 
           <path 
             className={styles.bg} 
             d="M39 153.73s31.57 19.71 77.26 15.21 90.18-37.23 90.36-72.33-10.51-57-35.28-63-50.22 17-76.31 20-60.12-15.88-78.32 2.51S-4.88 125.2 39 153.73z" 
-            fill="rgb(174, 206, 236)" 
+            fill="#C6EBF7" 
           />
         )}
         

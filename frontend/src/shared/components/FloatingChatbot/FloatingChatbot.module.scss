@@ -6,10 +6,19 @@
   height: 120px;
   cursor: pointer;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.1));
   
   &:hover {
-    transform: scale(1.1);
+    transform: scale(1.08) translateY(-2px) rotate(1deg);
+    filter: drop-shadow(0 8px 40px rgba(174, 206, 236, 0.6)) 
+            drop-shadow(0 0 30px rgba(174, 206, 236, 0.4));
+    
+    .characterSvg {
+      .bg {
+        filter: brightness(1.1) saturate(1.2);
+      }
+    }
     
     .tooltip {
       opacity: 1;
@@ -19,7 +28,8 @@
   }
   
   &:active {
-    transform: scale(1.05);
+    transform: scale(1.02) translateY(-1px) rotate(0.5deg);
+    transition: all 0.1s ease;
   }
 }
 
@@ -27,6 +37,10 @@
   width: 100%;
   height: 100%;
   transition: all 0.3s ease;
+  
+  .bg {
+    transition: filter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 .tooltip {
@@ -89,7 +103,9 @@
     right: 25px;
     
     &:hover {
-      transform: scale(1.05);
+      transform: scale(1.05) translateY(-1px) rotate(0.5deg);
+      filter: drop-shadow(0 6px 30px rgba(174, 206, 236, 0.5)) 
+              drop-shadow(0 0 20px rgba(174, 206, 236, 0.3));
     }
   }
   
@@ -107,7 +123,9 @@
     right: 20px;
     
     &:hover {
-      transform: scale(1.02);
+      transform: scale(1.03) translateY(-0.5px);
+      filter: drop-shadow(0 4px 20px rgba(174, 206, 236, 0.4)) 
+              drop-shadow(0 0 15px rgba(174, 206, 236, 0.2));
     }
     
     &:active {

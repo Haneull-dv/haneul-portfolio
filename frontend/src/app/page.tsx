@@ -47,7 +47,8 @@ export default function IntroPage() {
             position: "static", 
             width: "100%", 
             height: "100%" 
-          }} 
+          }}
+          hideTooltip={true}
         />
       </div>
       
