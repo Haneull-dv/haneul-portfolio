@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
 from ..repository.stockprice_repository import StockPriceRepository
 from ..model.stockprice_model import StockPriceModel
 from ..schema.stockprice_schema import (
@@ -13,22 +13,6 @@ from ..schema.stockprice_schema import (
     GameCompany
 )
 
-
-# Config 직접 정의 (import 이슈 회피)
-GAME_COMPANIES = {
-    "036570": "엔씨소프트",
-    "251270": "넷마블", 
-    "259960": "크래프톤",
-    "263750": "펄어비스",
-    "078340": "컴투스",
-    "112040": "위메이드",
-    "293490": "카카오게임즈",
-    "095660": "네오위즈",
-    "181710": "NHN",
-    "069080": "웹젠",
-    "225570": "넥슨게임즈"
-}
-TOTAL_COMPANIES = len(GAME_COMPANIES)
 
 class StockPriceDbService:
     """주간 주가 정보 DB 접근 전용 서비스"""
@@ -232,13 +216,16 @@ class StockPriceDbService:
         """게임 기업 목록 조회"""
         print("🗄️ [DB] 게임 기업 목록 조회")
         
+        from app.config.companies import COMPANY_INFO
         companies = []
         for symbol, name in self.game_companies.items():
+            country = COMPANY_INFO[symbol]["country"] if symbol in COMPANY_INFO else "Unknown"
             companies.append(GameCompany(
                 symbol=symbol,
                 name=name,
                 market="KOSPI" if symbol in ["036570", "259960"] else "KOSDAQ",
-                sector="게임"
+                sector="게임",
+                country=country
             ))
         
         return GameCompaniesResponse(
@@ -281,9 +268,11 @@ class StockPriceDbService:
         try:
             stocks = await self.repository.bulk_create(stockprices_data)
             
+            from app.config.companies import COMPANY_INFO
             results = [
                 WeeklyStockPriceResponse(
                     symbol=stock.symbol,
+                    companyName=COMPANY_INFO.get(stock.symbol, {}).get('name', stock.symbol),
                     marketCap=stock.market_cap,
                     today=stock.today,
                     lastWeek=stock.last_week,
@@ -308,6 +297,8 @@ class StockPriceDbService:
             )
             
         except Exception as e:
+            import traceback
+            traceback.print_exc()  # 에러의 전체 traceback을 출력
             processing_time = __import__('time').time() - start_time
             
             return StockPriceBatchResponse(
