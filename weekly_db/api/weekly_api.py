@@ -9,6 +9,12 @@ from weekly_db.db.db_builder import get_db_session
 from weekly_db.db.weekly_service import WeeklyDataService, WeeklyBatchService
 from weekly_db.db.weekly_unified_model import WeeklyDataModel
 
+# --- 기업 정보 config import ---
+try:
+    from app.config.companies import COMPANY_INFO
+except ImportError:
+    from weekly_stockprice.app.config.companies import COMPANY_INFO
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/weekly", tags=["weekly-frontend"])
 
@@ -227,4 +233,22 @@ async def get_current_week_info() -> Dict[str, Any]:
         raise HTTPException(
             status_code=500,
             detail=f"현재 주차 정보 조회 중 오류 발생: {str(e)}"
-        ) 
+        )
+
+
+@router.get("/companies")
+async def get_all_companies() -> Dict[str, Any]:
+    """
+    🌏 글로벌 게임기업 전체 목록 (symbol, name, country)
+    """
+    companies = []
+    for symbol, info in COMPANY_INFO.items():
+        companies.append({
+            "symbol": symbol,
+            "name": info["name"],
+            "country": info["country"]
+        })
+    return {
+        "companies": companies,
+        "total_count": len(companies)
+    } 

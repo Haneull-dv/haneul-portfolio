@@ -54,29 +54,36 @@ class StockPriceRepository:
         result = await self.db.execute(query)
         return result.scalars().all()
     
-    async def get_by_symbol(self, symbol: str) -> Optional[StockPriceModel]:
-        """종목 심볼로 최신 주가 정보 조회"""
-        query = (
-            select(StockPriceModel)
-            .where(StockPriceModel.symbol == symbol)
-            .order_by(desc(StockPriceModel.created_at))
-            .limit(1)
-        )
+    async def get_by_symbol(self, symbol: str, date: Optional[str] = None) -> Optional[StockPriceModel]:
+        """
+        종목 심볼로 주가 정보 조회. 특정 날짜가 주어지면 해당 날짜 또는 그 이전의 가장 최신 데이터를 조회.
+        """
+        query = select(StockPriceModel).where(StockPriceModel.symbol == symbol)
+        
+        if date:
+            # SQLAlchemy는 datetime 객체를 직접 비교하는 것을 권장합니다.
+            # 이 예제에서는 created_at이 이미 datetime 객체라고 가정합니다.
+            # 실제로는 date 문자열을 datetime 객체로 변환해야 할 수 있습니다.
+            # 예: from datetime import datetime; date_obj = datetime.strptime(date, '%Y-%m-%d')
+            query = query.where(StockPriceModel.created_at <= date)
+        
+        query = query.order_by(desc(StockPriceModel.created_at)).limit(1)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
-    
-    async def get_all_latest_prices(self) -> List[StockPriceModel]:
-        """모든 종목의 최신 주가 정보 조회"""
-        from sqlalchemy import distinct
+
+    async def get_all_latest_prices(self, date: Optional[str] = None) -> List[StockPriceModel]:
+        """
+        모든 종목의 최신 주가 정보 조회. 특정 날짜가 주어지면 해당 날짜 기준 최신 데이터를 조회.
+        """
+        # 각 심볼별로 특정 날짜 또는 그 이전의 최신 데이터만 조회
+        subquery = select(
+            StockPriceModel.symbol,
+            func.max(StockPriceModel.created_at).label('max_created_at')
+        )
+        if date:
+            subquery = subquery.where(StockPriceModel.created_at <= date)
         
-        # 각 심볼별로 최신 데이터만 조회
-        subquery = (
-            select(
-                StockPriceModel.symbol,
-                func.max(StockPriceModel.created_at).label('max_created_at')
-            )
-            .group_by(StockPriceModel.symbol)
-        ).subquery()
+        subquery = subquery.group_by(StockPriceModel.symbol).subquery()
         
         query = (
             select(StockPriceModel)
@@ -93,17 +100,20 @@ class StockPriceRepository:
         result = await self.db.execute(query)
         return result.scalars().all()
     
-    async def get_by_symbols(self, symbols: List[str]) -> List[StockPriceModel]:
-        """여러 종목 심볼로 최신 주가 정보 조회"""
-        # 각 심볼별로 최신 데이터만 조회
+    async def get_by_symbols(self, symbols: List[str], date: Optional[str] = None) -> List[StockPriceModel]:
+        """여러 종목 심볼로 특정 날짜 기준 최신 주가 정보 조회"""
+        
         subquery = (
             select(
                 StockPriceModel.symbol,
                 func.max(StockPriceModel.created_at).label('max_created_at')
             )
             .where(StockPriceModel.symbol.in_(symbols))
-            .group_by(StockPriceModel.symbol)
-        ).subquery()
+        )
+        if date:
+            subquery = subquery.where(StockPriceModel.created_at <= date)
+            
+        subquery = subquery.group_by(StockPriceModel.symbol).subquery()
         
         query = (
             select(StockPriceModel)
@@ -213,54 +223,21 @@ class StockPriceRepository:
         stockprice_id: int, 
         stockprice_data: WeeklyStockPriceUpdate
     ) -> Optional[StockPriceModel]:
-        """주가 정보 수정"""
+        """주가 정보 수정 (기존 로직 유지)"""
         stockprice = await self.get_by_id(stockprice_id)
-        if not stockprice:
-            return None
-        
-        update_data = stockprice_data.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(stockprice, field, value)
-        
-        await self.db.commit()
-        await self.db.refresh(stockprice)
+        if stockprice:
+            update_data = stockprice_data.model_dump(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(stockprice, key, value)
+            
+            stockprice.updated_at = func.now()
+            
+            await self.db.commit()
+            await self.db.refresh(stockprice)
         return stockprice
     
-    async def upsert_by_symbol(
-        self, 
-        stockprice_data: WeeklyStockPriceCreate
-    ) -> StockPriceModel:
-        """종목 심볼 기준으로 업서트 (있으면 업데이트, 없으면 생성)"""
-        existing = await self.get_by_symbol(stockprice_data.symbol)
-        
-        if existing:
-            # 기존 데이터 업데이트
-            update_data = WeeklyStockPriceUpdate(
-                market_cap=stockprice_data.market_cap,
-                today=stockprice_data.today,
-                last_week=stockprice_data.last_week,
-                change_rate=stockprice_data.change_rate,
-                week_high=stockprice_data.week_high,
-                week_low=stockprice_data.week_low,
-                error=stockprice_data.error
-            )
-            return await self.update(existing.id, update_data)
-        else:
-            # 새 데이터 생성
-            return await self.create(stockprice_data)
-    
-    async def delete(self, stockprice_id: int) -> bool:
-        """주가 정보 삭제"""
-        stockprice = await self.get_by_id(stockprice_id)
-        if not stockprice:
-            return False
-        
-        await self.db.delete(stockprice)
-        await self.db.commit()
-        return True
-    
     async def bulk_create(self, stockprices_data: List[WeeklyStockPriceCreate]) -> List[StockPriceModel]:
-        """주가 정보 대량 생성"""
+        """주가 정보 대량 생성 (항상 새로 추가)"""
         stockprices = []
         for data in stockprices_data:
             stockprice = StockPriceModel(
@@ -286,3 +263,12 @@ class StockPriceRepository:
             await self.db.refresh(stockprice)
         
         return stockprices
+    
+    async def delete(self, stockprice_id: int) -> bool:
+        """주가 정보 삭제"""
+        stockprice = await self.get_by_id(stockprice_id)
+        if stockprice:
+            await self.db.delete(stockprice)
+            await self.db.commit()
+            return True
+        return False

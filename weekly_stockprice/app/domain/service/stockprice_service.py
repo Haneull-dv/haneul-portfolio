@@ -5,6 +5,7 @@ import random
 import httpx
 from bs4 import BeautifulSoup
 import re
+from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES, COMPANY_INFO
 from ..schema.stockprice_schema import WeeklyStockPriceResponse, StockDataPoint
 
 # Settings import
@@ -18,20 +19,7 @@ from app.config.settings import (
 )
 
 # Config 직접 정의 (import 이슈 회피)
-GAME_COMPANIES = {
-    "036570": "엔씨소프트",
-    "251270": "넷마블", 
-    "259960": "크래프톤",
-    "263750": "펄어비스",
-    "078340": "컴투스",
-    "112040": "위메이드",
-    "293490": "카카오게임즈",
-    "095660": "네오위즈",
-    "181710": "NHN",
-    "069080": "웹젠",
-    "225570": "넥슨게임즈"
-}
-TOTAL_COMPANIES = len(GAME_COMPANIES)
+
 
 class StockPriceService:
     def __init__(self):
@@ -68,11 +56,18 @@ class StockPriceService:
         return weekly_data
     
     def get_game_companies_info(self) -> Dict[str, Any]:
-        """게임기업 리스트 정보 반환 (controller에서 이동한 로직)"""
+        """게임기업 리스트 정보 반환 (국가 정보 포함)"""
         print("🤍3. 게임기업 리스트 서비스 로직 진입")
+        companies = []
+        for symbol, info in COMPANY_INFO.items():
+            companies.append({
+                "symbol": symbol,
+                "name": info["name"],
+                "country": info["country"]
+            })
         return {
-            "companies": self.game_companies,
-            "total_count": len(self.game_companies)
+            "companies": companies,
+            "total_count": len(companies)
         }
         
     def _get_friday_dates(self) -> tuple[str, str]:
@@ -139,12 +134,13 @@ class StockPriceService:
         
     async def fetch_weekly_stock_data(self, symbol: str) -> WeeklyStockPriceResponse:
         """주간 주가 데이터 수집 메인 메서드 (실제 달력 기준)"""
-        print(f"🤍[주간 데이터 수집 시작] 심볼: {symbol}")
+        stock_code = self._get_stock_code(symbol)
+        company_name = COMPANY_INFO.get(stock_code, {}).get('name', symbol)
+        
+        print(f"🤍[주간 데이터 수집 시작] {company_name}({stock_code})")
         
         try:
             # 기업명 확인 (symbol이 기업명인 경우 코드로 변환)
-            stock_code = self._get_stock_code(symbol)
-            company_name = self.game_companies.get(stock_code, symbol)
             
             print(f"📊 처리 중: {company_name} ({stock_code})")
             
@@ -159,7 +155,8 @@ class StockPriceService:
             
             if not daily_data:
                 return WeeklyStockPriceResponse(
-                    symbol=company_name,
+                    symbol=stock_code,
+                    companyName=company_name,
                     error="일별시세 데이터를 가져올 수 없습니다"
                 )
             
@@ -167,19 +164,23 @@ class StockPriceService:
             weekly_stats = self._calculate_weekly_stats_by_date(daily_data, this_friday, last_friday)
             
             return WeeklyStockPriceResponse(
-                symbol=company_name,
+                symbol=stock_code,
+                companyName=company_name,
                 marketCap=market_cap,
                 today=weekly_stats.get("today"),
                 lastWeek=weekly_stats.get("lastWeek"),
                 changeRate=weekly_stats.get("changeRate"),
                 weekHigh=weekly_stats.get("weekHigh"),
-                weekLow=weekly_stats.get("weekLow")
+                weekLow=weekly_stats.get("weekLow"),
+                thisFridayDate=this_friday,
+                lastFridayDate=last_friday
             )
             
         except Exception as e:
-            print(f"❌ [주간 데이터 수집 실패] {symbol}: {str(e)}")
+            print(f"❌ [주간 데이터 수집 실패] {company_name}({stock_code}): {str(e)}")
             return WeeklyStockPriceResponse(
-                symbol=symbol,
+                symbol=stock_code,
+                companyName=company_name,
                 error=f"데이터 수집 실패: {str(e)}"
             )
     

@@ -64,6 +64,7 @@ async def get_all_weekly_stock_data(db: AsyncSession = Depends(get_db_session)):
         result = await controller.get_all_weekly_stock_data()
         print("🤍2. 전체 주간 데이터 라우터 - 컨트롤러 호출 완료")
         return result
+        
     except Exception as e:
         print(f"❌ 전체 주간 데이터 라우터 에러: {str(e)}")
         raise HTTPException(status_code=500, detail=f"전체 주간 주가 조회 중 오류 발생: {str(e)}")
@@ -101,23 +102,6 @@ async def get_all_stocks_from_db(
     except Exception as e:
         print(f"❌ DB 주가 조회 라우터 에러: {str(e)}")
         raise HTTPException(status_code=500, detail=f"DB 주가 조회 중 오류 발생: {str(e)}")
-
-@router.get("/db/{symbol}", response_model=WeeklyStockPriceResponse)
-async def get_stock_by_symbol_from_db(
-    symbol: str,
-    db: AsyncSession = Depends(get_db_session)
-):
-    """🔍 DB에서 특정 종목 주가 조회"""
-    print(f"🤍1. DB 특정 종목 조회 라우터 진입: {symbol}")
-    
-    try:
-        controller = StockPriceController(db_session=db)
-        result = await controller.get_stock_by_symbol_from_db(symbol)
-        print("🤍2. DB 특정 종목 조회 라우터 - 컨트롤러 호출 완료")
-        return result
-    except Exception as e:
-        print(f"❌ DB 특정 종목 조회 라우터 에러: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"DB 특정 종목 조회 중 오류 발생: {str(e)}")
 
 @router.get("/db/top-gainers", response_model=List[WeeklyStockPriceResponse])
 async def get_top_gainers_from_db(
@@ -166,6 +150,23 @@ async def get_game_companies_from_db(db: AsyncSession = Depends(get_db_session))
     except Exception as e:
         print(f"❌ DB 게임기업 정보 조회 라우터 에러: {str(e)}")
         raise HTTPException(status_code=500, detail=f"DB 게임기업 정보 조회 중 오류 발생: {str(e)}")
+
+@router.get("/db/{symbol}", response_model=WeeklyStockPriceResponse)
+async def get_stock_by_symbol_from_db(
+    symbol: str,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """🔍 DB에서 특정 종목 주가 조회"""
+    print(f"🤍1. DB 특정 종목 조회 라우터 진입: {symbol}")
+    
+    try:
+        controller = StockPriceController(db_session=db)
+        result = await controller.get_stock_by_symbol_from_db(symbol)
+        print("🤍2. DB 특정 종목 조회 라우터 - 컨트롤러 호출 완료")
+        return result
+    except Exception as e:
+        print(f"❌ DB 특정 종목 조회 라우터 에러: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"DB 특정 종목 조회 중 오류 발생: {str(e)}")
 
 # ========== 헬스체크 엔드포인트 ==========
 

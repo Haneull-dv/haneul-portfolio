@@ -4,7 +4,8 @@ from datetime import datetime
 
 class WeeklyStockPriceResponse(BaseModel):
     """주간 주가 데이터 응답 모델"""
-    symbol: str = Field(..., description="종목 심볼/코드", example="035720")
+    symbol: str = Field(..., description="종목 코드", example="036570")
+    companyName: str = Field(..., description="기업명", example="엔씨소프트")
     marketCap: Optional[int] = Field(None, description="시가총액 (억원 단위)", example=89500)
     today: Optional[int] = Field(None, description="이번 주 금요일 종가", example=361500)
     lastWeek: Optional[int] = Field(None, description="전주 금요일 종가", example=367500)
@@ -12,6 +13,8 @@ class WeeklyStockPriceResponse(BaseModel):
     weekHigh: Optional[int] = Field(None, description="금주 고점", example=375000)
     weekLow: Optional[int] = Field(None, description="금주 저점", example=359000)
     error: Optional[str] = Field(None, description="오류 메시지")
+    thisFridayDate: Optional[str] = Field(None, description="이번 주 금요일 날짜 (YYYY.MM.DD)", example="2024.12.27")
+    lastFridayDate: Optional[str] = Field(None, description="전주 금요일 날짜 (YYYY.MM.DD)", example="2024.12.20")
 
 class StockDataPoint(BaseModel):
     """일별 주가 데이터 포인트"""
@@ -124,6 +127,7 @@ class GameCompany(BaseModel):
     name: str = Field(..., description="기업명", example="크래프톤")
     market: str = Field(..., description="상장 시장", example="KOSPI")
     sector: str = Field("게임", description="섹터")
+    country: str = Field(..., description="국가 코드 (KR, CN, JP, US, EU 등)", example="KR")
 
 class GameCompaniesResponse(BaseModel):
     """게임 기업 목록 응답 스키마"""
