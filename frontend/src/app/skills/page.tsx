@@ -42,8 +42,8 @@ const SkillsPage: React.FC = () => {
 
   const techSkills = {
     Frontend: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Zustand'],
-    Backend: ['FastAPI', 'Python', 'PostgreSQL', 'Redis', 'Docker', 'MSA Architecture'],
-    Tools: ['AWS', 'Kubernetes', 'Docker','Git', 'JIRA', 'Slack', 'Notion', 'Cursor AI']
+    Backend: ['FastAPI', 'Python', 'PostgreSQL', 'MSA Architecture'],
+    Tools: ['Cursor AI', 'AWS', 'Kubernetes', 'Docker','Git', 'JIRA', 'Slack', 'Notion']
   };
 
 
