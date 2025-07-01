@@ -41,13 +41,16 @@ class StockPriceDbService:
         for stock in stock_prices:
             stock_data.append(WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             ))
         
         return StockPriceListResponse(
@@ -69,13 +72,16 @@ class StockPriceDbService:
         
         return WeeklyStockPriceResponse(
             symbol=stock.symbol,
+            companyName=stock.symbol,
             marketCap=stock.market_cap,
             today=stock.today,
             lastWeek=stock.last_week,
             changeRate=stock.change_rate,
             weekHigh=stock.week_high,
             weekLow=stock.week_low,
-            error=stock.error
+            error=stock.error,
+            thisFridayDate=stock.this_friday_date,
+            lastFridayDate=stock.last_friday_date
         )
     
     async def get_by_symbol(self, symbol: str) -> Optional[WeeklyStockPriceResponse]:
@@ -88,13 +94,16 @@ class StockPriceDbService:
         
         return WeeklyStockPriceResponse(
             symbol=stock.symbol,
+            companyName=stock.symbol,
             marketCap=stock.market_cap,
             today=stock.today,
             lastWeek=stock.last_week,
             changeRate=stock.change_rate,
             weekHigh=stock.week_high,
             weekLow=stock.week_low,
-            error=stock.error
+            error=stock.error,
+            thisFridayDate=stock.this_friday_date,
+            lastFridayDate=stock.last_friday_date
         )
     
     async def get_all_latest_prices(self) -> List[WeeklyStockPriceResponse]:
@@ -105,13 +114,16 @@ class StockPriceDbService:
         return [
             WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             )
             for stock in stocks
         ]
@@ -124,13 +136,16 @@ class StockPriceDbService:
         return [
             WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             )
             for stock in stocks
         ]
@@ -143,13 +158,16 @@ class StockPriceDbService:
         return [
             WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             )
             for stock in stocks
         ]
@@ -162,13 +180,16 @@ class StockPriceDbService:
         return [
             WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             )
             for stock in stocks
         ]
@@ -185,13 +206,16 @@ class StockPriceDbService:
         return [
             WeeklyStockPriceResponse(
                 symbol=stock.symbol,
+                companyName=stock.symbol,
                 marketCap=stock.market_cap,
                 today=stock.today,
                 lastWeek=stock.last_week,
                 changeRate=stock.change_rate,
                 weekHigh=stock.week_high,
                 weekLow=stock.week_low,
-                error=stock.error
+                error=stock.error,
+                thisFridayDate=stock.this_friday_date,
+                lastFridayDate=stock.last_friday_date
             )
             for stock in stocks
         ]
@@ -247,13 +271,16 @@ class StockPriceDbService:
         stock = await self.repository.create(stockprice_data)
         return WeeklyStockPriceResponse(
             symbol=stock.symbol,
+            companyName=stock.symbol,
             marketCap=stock.market_cap,
             today=stock.today,
             lastWeek=stock.last_week,
             changeRate=stock.change_rate,
             weekHigh=stock.week_high,
             weekLow=stock.week_low,
-            error=stock.error
+            error=stock.error,
+            thisFridayDate=stock.this_friday_date,
+            lastFridayDate=stock.last_friday_date
         )
     
     async def bulk_create(
@@ -272,14 +299,16 @@ class StockPriceDbService:
             results = [
                 WeeklyStockPriceResponse(
                     symbol=stock.symbol,
-                    companyName=COMPANY_INFO.get(stock.symbol, {}).get('name', stock.symbol),
+                    companyName=stock.symbol,
                     marketCap=stock.market_cap,
                     today=stock.today,
                     lastWeek=stock.last_week,
                     changeRate=stock.change_rate,
                     weekHigh=stock.week_high,
                     weekLow=stock.week_low,
-                    error=stock.error
+                    error=stock.error,
+                    thisFridayDate=stock.this_friday_date,
+                    lastFridayDate=stock.last_friday_date
                 )
                 for stock in stocks
             ]
@@ -321,13 +350,16 @@ class StockPriceDbService:
         stock = await self.repository.upsert_by_symbol(stockprice_data)
         return WeeklyStockPriceResponse(
             symbol=stock.symbol,
+            companyName=stock.symbol,
             marketCap=stock.market_cap,
             today=stock.today,
             lastWeek=stock.last_week,
             changeRate=stock.change_rate,
             weekHigh=stock.week_high,
             weekLow=stock.week_low,
-            error=stock.error
+            error=stock.error,
+            thisFridayDate=stock.this_friday_date,
+            lastFridayDate=stock.last_friday_date
         )
     
     async def update(
@@ -347,13 +379,16 @@ class StockPriceDbService:
         
         return WeeklyStockPriceResponse(
             symbol=stock.symbol,
+            companyName=stock.symbol,
             marketCap=stock.market_cap,
             today=stock.today,
             lastWeek=stock.last_week,
             changeRate=stock.change_rate,
             weekHigh=stock.week_high,
             weekLow=stock.week_low,
-            error=stock.error
+            error=stock.error,
+            thisFridayDate=stock.this_friday_date,
+            lastFridayDate=stock.last_friday_date
         )
     
     async def delete(self, stockprice_id: int) -> bool:

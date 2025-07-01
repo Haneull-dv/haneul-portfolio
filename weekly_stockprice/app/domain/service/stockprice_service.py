@@ -157,7 +157,9 @@ class StockPriceService:
                 return WeeklyStockPriceResponse(
                     symbol=stock_code,
                     companyName=company_name,
-                    error="일별시세 데이터를 가져올 수 없습니다"
+                    error="일별시세 데이터를 가져올 수 없습니다",
+                    thisFridayDate=this_friday,
+                    lastFridayDate=last_friday
                 )
             
             # 3. 실제 금요일 날짜로 주간 데이터 계산
@@ -178,10 +180,14 @@ class StockPriceService:
             
         except Exception as e:
             print(f"❌ [주간 데이터 수집 실패] {company_name}({stock_code}): {str(e)}")
+            # 실패 시에도 날짜 필드를 None으로 포함하여 반환
+            this_friday, last_friday = self._get_friday_dates()
             return WeeklyStockPriceResponse(
                 symbol=stock_code,
                 companyName=company_name,
-                error=f"데이터 수집 실패: {str(e)}"
+                error=f"데이터 수집 실패: {str(e)}",
+                thisFridayDate=this_friday,
+                lastFridayDate=last_friday
             )
     
     def _get_stock_code(self, symbol: str) -> str:
