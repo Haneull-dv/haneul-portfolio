@@ -43,8 +43,18 @@ class DisclosureController:
         if not service.db_service:
             raise ValueError("DB 서비스가 초기화되지 않았습니다")
         
-        # 이 부분도 서비스로 로직 이동이 가능하지만, 현재는 유지
-        return await service.db_service.get_all(days=days)
+        # 서비스의 get_recent_disclosures를 호출하여 최근 공시 목록을 가져옵니다.
+        disclosures = await service.db_service.get_recent_disclosures(days=days)
+        
+        # DisclosureListResponse 형식에 맞게 결과를 구성합니다.
+        return DisclosureListResponse(
+            status="success",
+            message=f"최근 {days}일간의 공시 목록 조회 완료",
+            data=disclosures,
+            total_count=len(disclosures),
+            page=1,  # 페이징이 없으므로 기본값 설정
+            page_size=len(disclosures) if disclosures else 20
+        )
     
     async def search_disclosures(
         self,
