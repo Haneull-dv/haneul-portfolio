@@ -78,7 +78,8 @@ class StockPriceController:
                 # 성공한 주가 데이터만 DB 저장용으로 변환
                 stock_creates = []
                 for stock_data in all_stock_data:
-                    if not stock_data.error:  # 에러가 없는 것만 저장
+                    # 에러가 없고, 날짜 속성이 있는 데이터만 저장
+                    if not stock_data.error and hasattr(stock_data, 'thisFridayDate'):
                         # 기업코드를 기업명으로 변환
                         company_name = COMPANY_INFO.get(stock_data.symbol, {}).get('name', stock_data.symbol)
                         

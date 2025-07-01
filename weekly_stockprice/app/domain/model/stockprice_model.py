@@ -22,10 +22,10 @@ class StockPriceModel(Base):
     week_low = Column(Integer, nullable=True, comment="금주 최저가")
     
     # 메타데이터
-    error = Column(Text, nullable=True, comment="오류 메시지")
-    this_friday_date = Column(String(10), nullable=True, comment="이번 주 금요일 날짜 (YYYY-MM-DD)")
-    last_friday_date = Column(String(10), nullable=True, comment="전주 금요일 날짜 (YYYY-MM-DD)")
-    data_source = Column(String(50), nullable=True, comment="데이터 소스")
+    error = Column(String, nullable=True, comment="오류 메시지")
+    this_friday_date = Column(String, nullable=True, comment="이번 주 금요일 날짜")
+    last_friday_date = Column(String, nullable=True, comment="지난 주 금요일 날짜")
+    data_source = Column(String, nullable=True, comment="데이터 출처 (예: naver_finance)")
     
     # 시스템 메타데이터
     created_at = Column(DateTime(timezone=True), server_default=func.now(), comment="생성 시간")
