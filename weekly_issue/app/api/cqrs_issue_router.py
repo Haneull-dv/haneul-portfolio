@@ -205,29 +205,11 @@ async def collect_issue_with_cqrs(
     except Exception as e:
         error_message = f"Issue CQRS 처리 실패: {str(e)}"
         logger.error(f"❌ [CQRS Command] {error_message}")
-        
-        # 배치 작업 실패 로그
-        if job_id:
-            try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    await client.post(
-                        "http://weekly_data:8091/weekly-cqrs/domain-command/issue",
-                        params={
-                            "week": week,
-                            "action": "fail_job"
-                        },
-                        json={
-                            "job_id": job_id,
-                            "error": error_message
-                        }
-                    )
-            except:
-                pass
-        
-        raise HTTPException(
-            status_code=500,
-            detail=error_message
-        )
+        return {
+            "status": "error",
+            "message": "Issue CQRS 처리 중 오류가 발생했습니다.",
+            "error": error_message
+        }
 
 
 @router.get("/cqrs-status")

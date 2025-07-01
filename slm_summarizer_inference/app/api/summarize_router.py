@@ -52,5 +52,5 @@ async def reload_model():
 
 @router.get("/health")
 async def health_check():
-    """헬스 체크"""
-    return await summarizer_controller.health_check() 
+    """헬스 체크 - 서비스의 기본적인 생존 여부만 빠르게 응답"""
+    return {"status": "ok"} 

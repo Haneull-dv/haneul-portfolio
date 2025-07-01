@@ -10,6 +10,7 @@ DDD + CQRS + EDA 구조:
 from typing import Dict, Any, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func, desc
+from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime, timezone
 import logging
 
@@ -205,7 +206,7 @@ class WeeklyProjectionService:
         domain_data: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
-        도메인 데이터를 weekly_data 테이블에 projection
+        도메인 데이터를 weekly_data 테이블에 projection (UPSERT 패턴)
         
         Args:
             category: 데이터 카테고리 (disclosure/issue/stockprice)
@@ -223,28 +224,11 @@ class WeeklyProjectionService:
         
         for item in domain_data:
             try:
-                # 기존 데이터 확인 (중복 방지)
-                existing_query = select(WeeklyDataModel).where(
-                    and_(
-                        WeeklyDataModel.company_name == item["company_name"],
-                        WeeklyDataModel.category == category,
-                        WeeklyDataModel.week == week
-                    )
-                )
-                
-                existing_result = await self.db.execute(existing_query)
-                existing_data = existing_result.scalar_one_or_none()
-                
-                if existing_data:
-                    logger.debug(f"⏭️ 기존 데이터 존재, 스킵: {item['company_name']} - {category}")
-                    skipped_count += 1
-                    continue
-                
                 # 주차 정보 계산
                 week_year, week_number = WeeklyDataModel.get_week_info(week)
                 
-                # 새 projection 데이터 생성
-                weekly_data = WeeklyDataModel(
+                # UPSERT 구문 준비 (PostgreSQL ON CONFLICT 사용)
+                stmt = insert(WeeklyDataModel).values(
                     company_name=item["company_name"],
                     content=item["content"],
                     category=category,
@@ -256,10 +240,25 @@ class WeeklyProjectionService:
                     collected_at=datetime.now(timezone.utc)
                 )
                 
-                self.db.add(weekly_data)
+                # ON CONFLICT DO UPDATE: 중복 시 기존 데이터 업데이트
+                stmt = stmt.on_conflict_do_update(
+                    constraint='uq_weekly_data_unique',
+                    set_=dict(
+                        content=stmt.excluded.content,
+                        stock_code=stmt.excluded.stock_code,
+                        extra_data=stmt.excluded.extra_data,
+                        collected_at=stmt.excluded.collected_at,
+                        updated_at=func.now()
+                    )
+                )
+                
+                # UPSERT 실행
+                result = await self.db.execute(stmt)
+                
+                # 새로 삽입되었는지 업데이트되었는지 확인하기 어려우므로 일단 updated로 처리
                 updated_count += 1
                 
-                logger.debug(f"✅ Projection 생성: {item['company_name']} - {category}")
+                logger.debug(f"✅ Projection UPSERT: {item['company_name']} - {category}")
                 
             except Exception as e:
                 logger.error(f"❌ Projection 실패: {item.get('company_name', 'Unknown')} - {str(e)}")

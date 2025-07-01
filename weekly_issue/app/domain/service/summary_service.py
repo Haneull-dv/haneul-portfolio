@@ -18,19 +18,6 @@ class SummaryService:
         
         summarized_results = []
         
-        # AI 서비스 사용 가능 여부 확인
-        ai_service_available = await self._check_ai_service_availability()
-        print(f"🔍 AI 서비스 사용 가능: {ai_service_available}")
-        
-        if not ai_service_available:
-            print("⚠️ AI 요약 서비스가 사용할 수 없음. Fallback 요약으로 처리합니다.")
-            # AI 서비스 불가 시 모든 뉴스에 대해 fallback 요약 생성
-            for news in news_list:
-                result = self._create_fallback_result(news)
-                result["summary_type"] = "fallback_service_unavailable"  # 디버깅용
-                summarized_results.append(result)
-            return summarized_results
-        
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             for i, news in enumerate(news_list):
                 try:
@@ -115,70 +102,6 @@ class SummaryService:
         print(f"📊 요약 유형별 통계: {summary_stats}")
         
         return summarized_results
-    
-    async def _check_ai_service_availability(self) -> bool:
-        """
-        AI 요약 서비스 사용 가능 여부 확인
-        """
-        try:
-            print(f"🔍 AI 서비스 가용성 확인 중...")
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                # 여러 방법으로 헬스체크 시도
-                health_urls = []
-                
-                # URL 파싱을 안전하게 처리
-                base_url = self.summary_url.replace('/summarize', '')
-                health_urls = [
-                    f"{base_url}/health",
-                    f"{base_url}/",
-                    f"{base_url}/docs", 
-                    self.summary_url  # 실제 엔드포인트로 가벼운 요청
-                ]
-                
-                for health_url in health_urls:
-                    try:
-                        print(f"🔍 헬스체크 시도: {health_url}")
-                        
-                        if health_url == self.summary_url:
-                            # 실제 API 엔드포인트 테스트 (간단한 요청)
-                            test_payload = {
-                                "news": {
-                                    "title": "테스트",
-                                    "description": "테스트 내용"
-                                }
-                            }
-                            response = await client.post(
-                                health_url, 
-                                json=test_payload,
-                                headers={"Content-Type": "application/json"}
-                            )
-                        else:
-                            # 헬스체크 엔드포인트 테스트
-                            response = await client.get(health_url)
-                        
-                        print(f"🔍 헬스체크 응답: {response.status_code}")
-                        
-                        # 200 OK 또는 422 (요청 형식 오류, 하지만 서비스는 살아있음)
-                        if response.status_code in [200, 404, 422]:  
-                            print(f"✅ AI 서비스 가용함 (URL: {health_url}, Status: {response.status_code})")
-                            return True
-                            
-                    except httpx.ConnectError as e:
-                        print(f"❌ 연결 실패 ({health_url}): {str(e)}")
-                        continue
-                    except httpx.TimeoutException as e:
-                        print(f"❌ 타임아웃 ({health_url}): {str(e)}")
-                        continue
-                    except Exception as e:
-                        print(f"❌ 헬스체크 실패 ({health_url}): {str(e)}")
-                        continue
-                
-                print("❌ 모든 헬스체크 실패")
-                return False
-                
-        except Exception as e:
-            print(f"❌ 헬스체크 중 오류: {str(e)}")
-            return False
     
     def _create_fallback_result(self, news: Dict) -> Dict:
         """

@@ -48,8 +48,16 @@ class IssueController:
                 # 이슈 데이터를 DB 저장용 스키마로 변환
                 issue_creates = []
                 for result in pipeline_response.results:
-                    # Dict 타입으로 변경되었으므로 dict 접근 방식 사용
+                    # dict 타입이 아니면 dict로 변환
+                    if not isinstance(result, dict):
+                        if hasattr(result, 'model_dump'):
+                            result = result.model_dump()
+                        elif hasattr(result, '__dict__'):
+                            result = dict(result.__dict__)
                     if isinstance(result, dict) and result.get('summary'):  # 요약이 있는 것만 저장
+                        # id가 int면 str로 변환
+                        if 'id' in result and isinstance(result['id'], int):
+                            result['id'] = str(result['id'])
                         issue_create = IssueItemCreate(
                             corp=result.get('corp', ''),
                             summary=result.get('summary', ''),
