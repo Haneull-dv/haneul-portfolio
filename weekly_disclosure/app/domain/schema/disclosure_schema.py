@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 
 # === 기본 공시 아이템 ===
@@ -39,6 +39,7 @@ class DisclosureResponse(BaseModel):
     message: str = Field(..., description="응답 메시지", example="최근 7일간 게임기업 공시 조회 완료")
     disclosures: List[DisclosureItem] = Field(..., description="공시 목록")
     total_count: int = Field(..., description="총 공시 개수", example=15)
+    count_by_company: Dict[str, int] = Field({}, description="기업별 공시 개수", example={"크래프톤": 5, "엔씨소프트": 2})
 
 class DisclosureListResponse(BaseModel):
     """공시 목록 조회 응답 스키마"""
