@@ -59,7 +59,11 @@ async def get_weekly_table_data(
         
     except Exception as e:
         logger.error(f"❌ [CQRS Query] Weekly table data 조회 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"데이터 조회 중 오류가 발생했습니다: {str(e)}")
+        return {
+            "status": "error",
+            "message": "데이터 조회 중 오류가 발생했습니다.",
+            "error": str(e)
+        }
 
 
 @router.get("/available-weeks")
@@ -84,7 +88,11 @@ async def get_available_weeks(
         
     except Exception as e:
         logger.error(f"❌ [CQRS Query] Available weeks 조회 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"주차 목록 조회 중 오류가 발생했습니다: {str(e)}")
+        return {
+            "status": "error",
+            "message": "주차 목록 조회 중 오류가 발생했습니다.",
+            "error": str(e)
+        }
 
 
 @router.get("/summary/{week}")
@@ -109,7 +117,11 @@ async def get_week_summary(
         
     except Exception as e:
         logger.error(f"❌ [CQRS Query] Week summary 조회 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"주차 요약 조회 중 오류가 발생했습니다: {str(e)}")
+        return {
+            "status": "error",
+            "message": "주차 요약 조회 중 오류가 발생했습니다.",
+            "error": str(e)
+        }
 
 
 # ============================================
@@ -156,7 +168,11 @@ async def aggregate_weekly_projections(
         
     except Exception as e:
         logger.error(f"❌ [CQRS Projection] Weekly aggregation 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"데이터 aggregation 중 오류가 발생했습니다: {str(e)}")
+        return {
+            "status": "error",
+            "message": "데이터 aggregation 중 오류가 발생했습니다.",
+            "error": str(e)
+        }
 
 
 @router.post("/project-domain-data")
@@ -191,7 +207,11 @@ async def project_domain_data(
         
     except Exception as e:
         logger.error(f"❌ [CQRS Projection] Domain projection 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Domain projection 중 오류가 발생했습니다: {str(e)}")
+        return {
+            "status": "error",
+            "message": "Domain projection 중 오류가 발생했습니다.",
+            "error": str(e)
+        }
 
 
 # ============================================

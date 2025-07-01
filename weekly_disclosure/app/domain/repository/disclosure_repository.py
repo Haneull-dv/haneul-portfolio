@@ -137,23 +137,29 @@ class DisclosureRepository:
         return True
     
     async def bulk_create(self, disclosures_data: List[DisclosureItemCreate]) -> List[DisclosureModel]:
-        """공시 정보 대량 생성"""
-        disclosures = []
-        for data in disclosures_data:
-            disclosure = DisclosureModel(
-                company_name=data.company_name,
-                stock_code=data.stock_code,
-                disclosure_title=data.disclosure_title,
-                disclosure_date=data.disclosure_date,
-                report_name=data.report_name
-            )
-            disclosures.append(disclosure)
-        
-        self.db.add_all(disclosures)
-        await self.db.commit()
-        
-        # 새로 생성된 ID로 다시 조회
-        for disclosure in disclosures:
-            await self.db.refresh(disclosure)
-        
-        return disclosures
+        """공시 정보 대량 생성 (재시도 로직 포함)"""
+        import asyncio
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                disclosures = []
+                for data in disclosures_data:
+                    disclosure = DisclosureModel(
+                        company_name=data.company_name,
+                        stock_code=data.stock_code,
+                        disclosure_title=data.disclosure_title,
+                        disclosure_date=data.disclosure_date,
+                        report_name=data.report_name
+                    )
+                    disclosures.append(disclosure)
+                self.db.add_all(disclosures)
+                await self.db.commit()
+                for disclosure in disclosures:
+                    await self.db.refresh(disclosure)
+                return disclosures
+            except Exception as e:
+                print(f"❌ [DB] bulk_create 실패 (시도 {attempt}/{max_retries}): {e}")
+                await self.db.rollback()
+                if attempt == max_retries:
+                    raise
+                await asyncio.sleep(1)  # 짧은 대기 후 재시도

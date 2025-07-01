@@ -75,10 +75,10 @@ async def collect_disclosure_with_cqrs(
         # ==========================================
         
         # Disclosure Controller로 데이터 수집
-        controller = DisclosureController(db)
+        controller = DisclosureController()
         logger.info(f"🔍 [CQRS Command] 공시 데이터 수집 - {TOTAL_COMPANIES}개 기업")
         
-        disclosure_results = await controller.fetch_game_companies_disclosures()
+        disclosure_results = await controller.fetch_game_companies_disclosures(db_session=db)
         logger.info(f"📋 [CQRS Command] 공시 수집 완료 - {len(disclosure_results.disclosures)}건")
         
         # 로컬 테이블 저장 통계
@@ -92,10 +92,10 @@ async def collect_disclosure_with_cqrs(
         
         for disclosure in disclosure_results.disclosures:
             try:
-                # 종목코드로 기업명 찾기
+                # 종목코드로 기업명 찾기 - DisclosureItem 객체의 속성에 직접 접근
                 company_name = GAME_COMPANIES.get(
-                    disclosure.get("stock_code"), 
-                    disclosure.get("company_name", "Unknown")
+                    disclosure.stock_code, 
+                    disclosure.company_name
                 )
                 
                 # 로컬 테이블 저장은 기존 DisclosureService에서 이미 처리됨
@@ -105,13 +105,13 @@ async def collect_disclosure_with_cqrs(
                 # Projection용 데이터 준비 (weekly_data 테이블로 전송할 형태)
                 projection_item = {
                     "company_name": company_name,
-                    "content": f"[{disclosure.get('disclosure_date')}] {disclosure.get('disclosure_title')} - {disclosure.get('report_name')}",
-                    "stock_code": disclosure.get("stock_code"),
+                    "content": f"[{disclosure.disclosure_date}] {disclosure.disclosure_title} - {disclosure.report_name}",
+                    "stock_code": disclosure.stock_code,
                     "metadata": {
-                        "disclosure_title": disclosure.get("disclosure_title"),
-                        "disclosure_date": disclosure.get("disclosure_date"),
-                        "report_name": disclosure.get("report_name"),
-                        "stock_code": disclosure.get("stock_code"),
+                        "disclosure_title": disclosure.disclosure_title,
+                        "disclosure_date": disclosure.disclosure_date,
+                        "report_name": disclosure.report_name,
+                        "stock_code": disclosure.stock_code,
                         "source": "dart_api",
                         "cqrs_pattern": "command_to_projection"
                     }
@@ -198,30 +198,11 @@ async def collect_disclosure_with_cqrs(
     except Exception as e:
         error_message = f"Disclosure CQRS 처리 실패: {str(e)}"
         logger.error(f"❌ [CQRS Command] {error_message}")
-        
-        # 배치 작업 실패 로그
-        if job_id:
-            try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    await client.post(
-                        "http://weekly_data:8091/weekly-cqrs/domain-command/disclosure",
-                        params={
-                            "week": week,
-                            "action": "finish_job"
-                        },
-                        json={
-                            "job_id": job_id,
-                            "result": {"updated": 0, "skipped": 0, "errors": 1},
-                            "error_message": error_message
-                        }
-                    )
-            except Exception as log_error:
-                logger.error(f"❌ [CQRS] 실패 로그 기록 실패: {str(log_error)}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail=f"CQRS Disclosure 처리 중 오류가 발생했습니다: {str(e)}"
-        )
+        return {
+            "status": "error",
+            "message": "Disclosure CQRS 처리 중 오류가 발생했습니다.",
+            "error": error_message
+        }
 
 
 @router.get("/cqrs-status")
