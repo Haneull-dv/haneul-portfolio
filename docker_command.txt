@@ -149,13 +149,19 @@ ORDER BY created_at DESC
 LIMIT 10;
 
 -- 오늘 저장된 최신 데이터만
-SELECT * FROM weekly_stock_prices 
+SELECT * FROM disclosures 
 WHERE DATE(created_at) = CURRENT_DATE
 ORDER BY created_at DESC 
 LIMIT 10;
 
 -- 한국시간 기준으로 오늘 데이터
-SELECT * FROM weekly_stock_prices 
-WHERE DATE(created_at AT TIME ZONE 'Asia/Seoul') = '2025-06-30'
-ORDER BY created_at DESC 
+SELECT
+    stock_code,
+    company_name,
+    created_at,
+    created_at AT TIME ZONE 'Asia/Seoul' AS created_at_kst
+FROM
+    disclosures
+ORDER BY
+    created_at DESC
 LIMIT 10;

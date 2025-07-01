@@ -23,8 +23,8 @@ async def fetch_disclosures(db: AsyncSession = Depends(get_db_session)):
     print("🚀1 라우터 진입 - 공시 조회 요청")
     
     try:
-        controller = DisclosureController(db_session=db)
-        result = await controller.fetch_game_companies_disclosures()
+        controller = DisclosureController()
+        result = await controller.fetch_game_companies_disclosures(db_session=db)
         print("🚀2 라우터 - 컨트롤러 호출 완료")
         return result
     except Exception as e:
@@ -42,8 +42,8 @@ async def get_recent_disclosures(
     print(f"🚀1 DB 조회 라우터 진입 - 최근 {days}일")
     
     try:
-        controller = DisclosureController(db_session=db)
-        result = await controller.get_recent_disclosures_from_db(days=days)
+        controller = DisclosureController()
+        result = await controller.get_recent_disclosures_from_db(days=days, db_session=db)
         print("🚀2 DB 조회 라우터 - 컨트롤러 호출 완료")
         return result
     except Exception as e:
@@ -62,12 +62,13 @@ async def search_disclosures(
     print(f"🚀1 검색 라우터 진입 - 회사: {company_name}, 코드: {stock_code}")
     
     try:
-        controller = DisclosureController(db_session=db)
+        controller = DisclosureController()
         result = await controller.search_disclosures(
             company_name=company_name,
             stock_code=stock_code,
             page=page,
-            page_size=page_size
+            page_size=page_size,
+            db_session=db
         )
         print("🚀2 검색 라우터 - 컨트롤러 호출 완료")
         return result
