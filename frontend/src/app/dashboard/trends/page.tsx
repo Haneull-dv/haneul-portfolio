@@ -6,6 +6,9 @@ import PageHeader from '@/shared/components/PageHeader/PageHeader';
 
 // API 베이스 URL
 const STOCKPRICE_API_BASE = 'http://localhost:9006/stockprice';
+const DISCLOSURE_API_BASE = 'http://localhost:8090/disclosure';
+const ISSUE_API_BASE = 'http://localhost:8089/issue';
+const WEEKLY_DB_API_BASE = 'http://localhost:8091/weekly';
 
 // 한국 게임기업 종목코드-시장 매핑표
 const STOCK_MARKET_MAPPING: Record<string, string> = {
@@ -34,11 +37,34 @@ interface WeeklyStockPrice {
   error: string | null;
 }
 
+interface WeeklyDisclosure {
+  symbol: string;
+  companyName: string;
+  title: string;
+  date: string;
+  url?: string;
+  category: string;
+  summary?: string;
+}
+
+interface WeeklyIssue {
+  symbol: string;
+  companyName: string;
+  title: string;
+  date: string;
+  category: string;
+  source: string;
+  url?: string;
+  summary?: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+}
+
 interface GameCompany {
   symbol: string;
   name: string;
   market: string;
   sector: string;
+  country: string;
 }
 
 interface StockPriceListResponse {
@@ -58,7 +84,7 @@ interface GameCompaniesResponse {
 }
 
 // API 호출 함수들
-const stockPriceApi = {
+const apiClient = {
   // 모든 주가 정보 조회
   getAllStocks: async (): Promise<StockPriceListResponse> => {
     const response = await fetch(`${STOCKPRICE_API_BASE}/db/all`);
@@ -95,6 +121,28 @@ const stockPriceApi = {
     return response.json();
   },
 
+  getDbCompanies: async (): Promise<{ companies: { symbol: string; name: string; country: string }[] }> => {
+    const response = await fetch(`${WEEKLY_DB_API_BASE}/companies`);
+    if (!response.ok) {
+      throw new Error('DB 기업 정보 조회에 실패했습니다.');
+    }
+    return response.json();
+  },
+
+  // Disclosure API
+  getWeeklyDisclosures: async () => {
+    const response = await fetch(`${DISCLOSURE_API_BASE}/db/weekly`);
+    if (!response.ok) throw new Error('공시 데이터 로딩 실패');
+    return await response.json();
+  },
+
+  // Issue API
+  getWeeklyIssues: async () => {
+    const response = await fetch(`${ISSUE_API_BASE}/db/weekly`);
+    if (!response.ok) throw new Error('이슈 데이터 로딩 실패');
+    return await response.json();
+  },
+
   // 헬스체크
   healthCheck: async (): Promise<{ status: string; service: string }> => {
     const response = await fetch(`${STOCKPRICE_API_BASE}/health`);
@@ -109,8 +157,23 @@ const stockPriceApi = {
 interface EnrichedStockData extends WeeklyStockPrice {
   companyName: string;
   market: string;
+  country: string;
   marketCapRank?: number;
+  disclosures: WeeklyDisclosure[];
+  issues: WeeklyIssue[];
 }
+
+const getCountryStyle = (country: string) => {
+    const styles: Record<string, { background: string; color: string }> = {
+      KR: { background: '#3498db', color: 'white' },
+      JP: { background: '#e74c3c', color: 'white' },
+      CN: { background: '#f1c40f', color: '#2c3e50' },
+      US: { background: '#2c3e50', color: 'white' },
+      EU: { background: '#9b59b6', color: 'white' },
+      default: { background: '#bdc3c7', color: '#2c3e50' },
+    };
+    return styles[country] || styles.default;
+};
 
 // 트렌디한 랭킹 카드 컴포넌트
 interface RankingCardProps {
@@ -341,6 +404,13 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showPopup, setShowPopup] = useState<{ stock: EnrichedStockData; position: { x: number; y: number } } | null>(null);
   const [quickFilter, setQuickFilter] = useState<'all' | 'top5_change' | 'top5_marketcap'>('all');
+  const [filterCountry, setFilterCountry] = useState('all');
+
+  const countryOptions = useMemo(() => {
+    if (!data) return ['all'];
+    const countries = new Set(data.map(item => item.country).filter(c => c !== 'Unknown'));
+    return ['all', ...Array.from(countries).sort()];
+  }, [data]);
 
   // 필터링 및 정렬된 데이터
   const filteredAndSortedData = useMemo(() => {
@@ -352,7 +422,9 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
                            (filterPositive === 'positive' && item.changeRate && item.changeRate > 0) ||
                            (filterPositive === 'negative' && item.changeRate && item.changeRate < 0);
       
-      return matchesSearch && matchesFilter;
+      const matchesCountry = filterCountry === 'all' || item.country === filterCountry;
+      
+      return matchesSearch && matchesFilter && matchesCountry;
     });
 
     // 빠른 필터 적용
@@ -388,7 +460,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
     });
 
     return filtered;
-  }, [data, searchTerm, sortField, sortDirection, filterPositive, quickFilter]);
+  }, [data, searchTerm, sortField, sortDirection, filterPositive, quickFilter, filterCountry]);
 
   // 선택 관련 함수
   const handleSelectAll = () => {
@@ -495,6 +567,25 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
               <option value="all">전체</option>
               <option value="positive">상승</option>
               <option value="negative">하락</option>
+            </select>
+
+            {/* 국가 필터 */}
+            <select
+              value={filterCountry}
+              onChange={(e) => setFilterCountry(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px',
+                background: 'white'
+              }}
+            >
+              {countryOptions.map(country => (
+                <option key={country} value={country}>
+                  {country === 'all' ? '전체 국가' : country}
+                </option>
+              ))}
             </select>
 
             {/* 빠른 필터 버튼 */}
@@ -613,13 +704,16 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
                 { key: 'marketCapRank', label: '순위' },
                 { key: 'companyName', label: '기업명' },
                 { key: 'symbol', label: '종목코드' },
+                { key: 'country', label: '국가' },
                 { key: 'market', label: '시장' },
                 { key: 'today', label: '현재가' },
                 { key: 'changeRate', label: '등락률(%)' },
                 { key: 'marketCap', label: '시가총액(억원)' },
                 { key: 'weekHigh', label: '주간고가' },
                 { key: 'weekLow', label: '주간저가' },
-                { key: 'lastWeek', label: '전주종가' }
+                { key: 'lastWeek', label: '전주종가' },
+                { key: 'disclosures', label: '금주 공시' },
+                { key: 'issues', label: '금주 이슈' }
               ].map(column => (
                 <th
                   key={column.key}
@@ -698,17 +792,31 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
                 >
                   {stock.companyName}
                 </td>
-                <td 
-                  style={{ 
-                    padding: '12px 8px', 
-                    color: '#2c3e50',
-                    fontWeight: '600',
-                    borderRight: '1px solid #e9ecef',
-                    cursor: 'pointer'
-                  }}
+                <td style={{ 
+                  padding: '12px 8px', 
+                  color: '#2c3e50',
+                  fontWeight: '600',
+                  borderRight: '1px solid #e9ecef',
+                  cursor: 'pointer'
+                }}
                   onClick={(e) => handleCellClick(stock, e)}
                 >
                   {stock.symbol}
+                </td>
+                <td style={{ 
+                  padding: '12px 8px', 
+                  textAlign: 'center',
+                  borderRight: '1px solid #e9ecef'
+                }}>
+                  <span style={{
+                    ...getCountryStyle(stock.country),
+                    padding: '4px 10px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }}>
+                    {stock.country}
+                  </span>
                 </td>
                 <td style={{ 
                   padding: '12px 8px', 
@@ -788,6 +896,79 @@ const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF 
                 }}>
                   {formatNumber(stock.lastWeek)}원
                 </td>
+                <td style={{ padding: '12px 8px', borderRight: '1px solid #e9ecef' }}>
+                  {stock.disclosures.length > 0 ? (
+                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
+                      {stock.disclosures.slice(0, 2).map((disclosure, idx) => (
+                        <div key={idx} style={{ 
+                          marginBottom: '6px',
+                          padding: '6px 10px',
+                          background: '#f8f9fa',
+                          borderRadius: '6px',
+                          fontSize: '12px'
+                        }}>
+                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
+                            {disclosure.title.length > 25 ? 
+                              `${disclosure.title.substring(0, 25)}...` : 
+                              disclosure.title}
+                          </div>
+                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
+                            {disclosure.date} · {disclosure.category}
+                          </div>
+                        </div>
+                      ))}
+                      {stock.disclosures.length > 2 && (
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#7f8c8d', 
+                          textAlign: 'center',
+                          marginTop: '4px'
+                        }}>
+                          +{stock.disclosures.length - 2}개 더
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>공시 없음</span>
+                  )}
+                </td>
+                <td style={{ padding: '12px 8px' }}>
+                  {stock.issues.length > 0 ? (
+                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
+                      {stock.issues.slice(0, 2).map((issue, idx) => (
+                        <div key={idx} style={{ 
+                          marginBottom: '6px',
+                          padding: '6px 10px',
+                          background: issue.sentiment === 'positive' ? '#e8f5e8' :
+                                     issue.sentiment === 'negative' ? '#ffeaea' : '#f8f9fa',
+                          borderRadius: '6px',
+                          fontSize: '12px'
+                        }}>
+                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
+                            {issue.title.length > 25 ? 
+                              `${issue.title.substring(0, 25)}...` : 
+                              issue.title}
+                          </div>
+                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
+                            {issue.date} · {issue.source}
+                          </div>
+                        </div>
+                      ))}
+                      {stock.issues.length > 2 && (
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#7f8c8d', 
+                          textAlign: 'center',
+                          marginTop: '4px'
+                        }}>
+                          +{stock.issues.length - 2}개 더
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>이슈 없음</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -821,7 +1002,13 @@ const TrendsPage: React.FC = () => {
   ];
 
   // 데이터 통합 함수 (중복 제거 포함)
-  const enrichStockData = (stockData: WeeklyStockPrice[], companies: GameCompany[]): EnrichedStockData[] => {
+  const enrichStockData = (
+    stockData: WeeklyStockPrice[], 
+    companies: GameCompany[],
+    disclosures: WeeklyDisclosure[],
+    issues: WeeklyIssue[],
+    dbCompanies: { symbol: string; name: string; country: string }[]
+  ): EnrichedStockData[] => {
     // 안전성 검사
     if (!Array.isArray(stockData) || stockData.length === 0) {
       return [];
@@ -838,10 +1025,16 @@ const TrendsPage: React.FC = () => {
 
     return uniqueStocks.map(stock => {
       const company = companies.find(c => c && c.symbol === stock.symbol);
+      const dbCompany = dbCompanies.find(c => c && c.symbol === stock.symbol);
+      const companyDisclosures = disclosures.filter(d => d.symbol === stock.symbol);
+      const companyIssues = issues.filter(i => i.symbol === stock.symbol);
       return {
         ...stock,
         companyName: company?.name || stock.symbol || 'Unknown',
-        market: STOCK_MARKET_MAPPING[stock.symbol] || company?.market || 'Unknown'
+        market: STOCK_MARKET_MAPPING[stock.symbol] || company?.market || 'Unknown',
+        country: dbCompany?.country || 'Unknown',
+        disclosures: companyDisclosures,
+        issues: companyIssues
       };
     }).sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
       .map((stock, index) => ({
@@ -853,11 +1046,22 @@ const TrendsPage: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [gainersData, losersData, companiesData, allStocksResponse] = await Promise.all([
-        stockPriceApi.getTopGainers(3),
-        stockPriceApi.getTopLosers(3),
-        stockPriceApi.getGameCompanies(),
-        stockPriceApi.getAllStocks()
+      const [
+        gainersData, 
+        losersData, 
+        companiesData, 
+        allStocksResponse,
+        disclosuresResponse,
+        issuesResponse,
+        dbCompaniesResponse
+      ] = await Promise.all([
+        apiClient.getTopGainers(3),
+        apiClient.getTopLosers(3),
+        apiClient.getGameCompanies(),
+        apiClient.getAllStocks(),
+        apiClient.getWeeklyDisclosures().catch(() => ({ data: [] })),
+        apiClient.getWeeklyIssues().catch(() => ({ data: [] })),
+        apiClient.getDbCompanies().catch(() => ({ companies: [] }))
       ]);
 
       // 데이터 유효성 검사
@@ -865,13 +1069,16 @@ const TrendsPage: React.FC = () => {
       const validLosers = Array.isArray(losersData) ? losersData : [];
       const validCompanies = Array.isArray(companiesData?.companies) ? companiesData.companies : [];
       const validAllStocks = Array.isArray(allStocksResponse?.data) ? allStocksResponse.data : [];
+      const validDisclosures = Array.isArray(disclosuresResponse.data) ? disclosuresResponse.data : [];
+      const validIssues = Array.isArray(issuesResponse.data) ? issuesResponse.data : [];
+      const validDbCompanies = Array.isArray(dbCompaniesResponse.companies) ? dbCompaniesResponse.companies : [];
 
       setCompanies(validCompanies);
       
       // 데이터 통합 (빈 배열도 안전하게 처리)
-      const enrichedGainers = enrichStockData(validGainers, validCompanies);
-      const enrichedLosers = enrichStockData(validLosers, validCompanies);
-      const enrichedAllStocks = enrichStockData(validAllStocks, validCompanies);
+      const enrichedGainers = enrichStockData(validGainers, validCompanies, validDisclosures, validIssues, validDbCompanies);
+      const enrichedLosers = enrichStockData(validLosers, validCompanies, validDisclosures, validIssues, validDbCompanies);
+      const enrichedAllStocks = enrichStockData(validAllStocks, validCompanies, validDisclosures, validIssues, validDbCompanies);
 
       setTopGainers(enrichedGainers);
       setTopLosers(enrichedLosers);

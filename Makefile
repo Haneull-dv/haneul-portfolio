@@ -177,6 +177,27 @@ dev-weekly-issue:
 	docker-compose stop issue
 	docker-compose up -d issue
 
+## kpi_compare
+build-kpi-compare:
+	docker-compose build kpi_compare
+
+up-kpi-compare:
+	docker-compose up -d kpi_compare
+
+down-kpi-compare:
+	docker-compose stop kpi_compare
+
+logs-kpi-compare:
+	docker-compose logs -f kpi_compare
+
+restart-kpi-compare:
+	docker-compose down kpi_compare && docker-compose up -d --build kpi_compare
+
+# 개발 전용 (빌드 없이 재시작)
+dev-kpi-compare:
+	docker-compose stop kpi_compare
+	docker-compose up -d kpi_compare
+
 ## n8n
 up-n8n:
 	docker-compose up -d n8n
@@ -232,32 +253,32 @@ news-pipeline-restart:
 
 # 📊 Weekly 서비스들 (disclosure, issue, stockprice)
 weekly-services-up:
-	docker-compose up -d disclosure issue stockprice
+	docker-compose up -d disclosure issue stockprice kpi_compare
 
 weekly-services-down:
-	docker-compose stop disclosure issue stockprice
+	docker-compose stop disclosure issue stockprice kpi_compare
 
 weekly-services-logs:
-	docker-compose logs -f disclosure issue stockprice
+	docker-compose logs -f disclosure issue stockprice kpi_compare
 
 weekly-services-restart:
-	docker-compose restart disclosure issue stockprice
+	docker-compose restart disclosure issue stockprice kpi_compare
 
 weekly-services-build:
-	docker-compose build disclosure issue stockprice
+	docker-compose build disclosure issue stockprice kpi_compare
 
 # 📊 Weekly 전체 시스템 (데이터 수집 + 조회)
 weekly-system-up:
-	docker-compose up -d weekly_data disclosure issue stockprice
+	docker-compose up -d weekly_data disclosure issue stockprice kpi_compare
 
 weekly-system-down:
-	docker-compose stop weekly_data disclosure issue stockprice
+	docker-compose stop weekly_data disclosure issue stockprice kpi_compare
 
 weekly-system-logs:
-	docker-compose logs -f weekly_data disclosure issue stockprice
+	docker-compose logs -f weekly_data disclosure issue stockprice kpi_compare
 
 weekly-system-restart:
-	docker-compose restart weekly_data disclosure issue stockprice
+	docker-compose restart weekly_data disclosure issue stockprice kpi_compare
 
 # 🤖 n8n 자동화 테스트 명령어
 test-n8n-disclosure:
@@ -336,6 +357,7 @@ health-check:
 	@echo "  📄 Weekly Disclosure: http://localhost:8090/docs"
 	@echo "  📰 Weekly Issue (뉴스 파이프라인): http://localhost:8089/docs"
 	@echo "  📈 Weekly StockPrice: http://localhost:9006/docs"
+	@echo "  📊 KPI Compare: http://localhost:9007/docs"
 	@echo "  📊 Conanai StockTrend: http://localhost:8081/docs"
 	@echo "  🔍 NewsClassifier: http://localhost:8087/docs"
 	@echo "  📝 Summarizer: http://localhost:8088/docs"
