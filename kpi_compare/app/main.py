@@ -32,5 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(kpi_compare_router, prefix="/kpi", tags=["KPI 비교"])
+app.include_router(kpi_compare_router)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
