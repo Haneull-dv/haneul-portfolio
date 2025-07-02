@@ -74,6 +74,8 @@ interface IntegratedCompanyData {
   changeRate: number | null;
   weekHigh: number | null;
   weekLow: number | null;
+  lastWeek: number | null;
+  market: string;
   disclosures: WeeklyDisclosure[];
   issues: WeeklyIssue[];
   marketCapRank?: number;
@@ -130,6 +132,87 @@ const getCountryStyle = (country: string) => {
       default: { background: '#bdc3c7', color: '#2c3e50' },
     };
     return styles[country] || styles.default;
+};
+
+// 미니 정보 팝업 컴포넌트
+interface MiniPopupProps {
+  stock: IntegratedCompanyData;
+  onClose: () => void;
+  position: { x: number; y: number };
+}
+
+const MiniPopup: React.FC<MiniPopupProps> = ({ stock, onClose, position }) => {
+  const formatNumber = (num: number | null) => {
+    if (num === null) return 'N/A';
+    return num.toLocaleString();
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: position.y + 10,
+      left: position.x + 10,
+      background: 'white',
+      border: '2px solid #e9ecef',
+      borderRadius: '12px',
+      padding: '20px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+      zIndex: 1000,
+      minWidth: '300px',
+      maxWidth: '400px'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+        <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '18px' }}>{stock.companyName}</h4>
+        <button onClick={onClose} style={{
+          background: 'none',
+          border: 'none',
+          fontSize: '20px',
+          cursor: 'pointer',
+          color: '#7f8c8d'
+        }}>×</button>
+      </div>
+      
+      <div style={{ marginBottom: '15px' }}>
+        <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '5px' }}>
+          {stock.symbol} · {stock.country} · 순위 {stock.marketCapRank || 'N/A'}
+        </div>
+        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
+          {formatNumber(stock.currentPrice)}원
+        </div>
+        <div style={{ 
+          fontSize: '16px', 
+          fontWeight: 'bold',
+          color: stock.changeRate === null ? '#7f8c8d' : 
+                 stock.changeRate > 0 ? '#e74c3c' : 
+                 stock.changeRate < 0 ? '#3498db' : '#7f8c8d'
+        }}>
+          {stock.changeRate !== null ? 
+            `${stock.changeRate > 0 ? '+' : ''}${stock.changeRate.toFixed(2)}%` : 'N/A'}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
+        <div>
+          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>시가총액</div>
+          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+            {stock.marketCap ? `${formatNumber(stock.marketCap)}억원` : 'N/A'}
+          </div>
+        </div>
+        <div>
+          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 고가</div>
+          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+            {formatNumber(stock.weekHigh)}원
+          </div>
+        </div>
+        <div>
+          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 저가</div>
+          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+            {formatNumber(stock.weekLow)}원
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // KPI 카드 컴포넌트
@@ -230,8 +313,8 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, color, 
 // 메인 통합 테이블 컴포넌트
 interface IntegratedTableProps {
   data: IntegratedCompanyData[];
-  onExportExcel: () => void;
-  onExportPDF: () => void;
+  onExportExcel: (selectedData?: IntegratedCompanyData[]) => void;
+  onExportPDF: (selectedData?: IntegratedCompanyData[]) => void;
   onCompanyClick: (symbol: string) => void;
 }
 
@@ -245,6 +328,8 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
   const [sortField, setSortField] = useState<keyof IntegratedCompanyData>('marketCapRank');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterCountry, setFilterCountry] = useState('all');
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [showPopup, setShowPopup] = useState<{ stock: IntegratedCompanyData; position: { x: number; y: number } } | null>(null);
 
   const countryOptions = useMemo(() => {
     if (!data) return ['all'];
@@ -285,6 +370,38 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
 
     return filtered;
   }, [data, searchTerm, sortField, sortDirection, filterCountry]);
+
+  // 선택 관련 함수
+  const handleSelectAll = () => {
+    if (selectedItems.size === filteredAndSortedData.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(filteredAndSortedData.map(item => item.symbol)));
+    }
+  };
+
+  const handleSelectItem = (symbol: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(symbol)) {
+      newSelected.delete(symbol);
+    } else {
+      newSelected.add(symbol);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const getSelectedData = () => {
+    return filteredAndSortedData.filter(item => selectedItems.has(item.symbol));
+  };
+
+  // 팝업 핸들러
+  const handleCellClick = (stock: IntegratedCompanyData, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setShowPopup({
+      stock,
+      position: { x: event.clientX, y: event.clientY }
+    });
+  };
 
   const handleSort = (field: keyof IntegratedCompanyData) => {
     if (sortField === field) {
@@ -377,7 +494,7 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
 
             {/* 다운로드 버튼 */}
             <button
-              onClick={onExportExcel}
+              onClick={() => onExportExcel(selectedItems.size > 0 ? getSelectedData() : undefined)}
               style={{
                 background: '#27ae60',
                 color: 'white',
@@ -396,11 +513,11 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
               onMouseLeave={(e) => e.currentTarget.style.background = '#27ae60'}
             >
               <i className='bx bxs-file-export'></i>
-              Excel
+              Excel {selectedItems.size > 0 && `(${selectedItems.size}개)`}
             </button>
             
             <button
-              onClick={onExportPDF}
+              onClick={() => onExportPDF(selectedItems.size > 0 ? getSelectedData() : undefined)}
               style={{
                 background: '#e74c3c',
                 color: 'white',
@@ -419,7 +536,7 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
               onMouseLeave={(e) => e.currentTarget.style.background = '#e74c3c'}
             >
               <i className='bx bxs-file-pdf'></i>
-              PDF
+              PDF {selectedItems.size > 0 && `(${selectedItems.size}개)`}
             </button>
           </div>
         </div>
@@ -434,14 +551,31 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
         }}>
           <thead>
             <tr style={{ background: '#f8f9fa' }}>
+              <th style={{
+                padding: '16px 12px',
+                textAlign: 'center',
+                borderBottom: '2px solid #dee2e6',
+                width: '50px'
+              }}>
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll}
+                  checked={selectedItems.size === filteredAndSortedData.length && filteredAndSortedData.length > 0}
+                  style={{ cursor: 'pointer' }}
+                />
+              </th>
               {[
                 { key: 'marketCapRank', label: '순위', width: '60px' },
                 { key: 'companyName', label: '기업명', width: '140px' },
                 { key: 'symbol', label: '종목코드', width: '80px' },
                 { key: 'country', label: '국가', width: '80px' },
+                { key: 'market', label: '시장', width: '80px' },
                 { key: 'currentPrice', label: '현재가', width: '100px' },
                 { key: 'changeRate', label: '등락률(%)', width: '100px' },
                 { key: 'marketCap', label: '시가총액(억)', width: '120px' },
+                { key: 'weekHigh', label: '주간고가', width: '100px' },
+                { key: 'weekLow', label: '주간저가', width: '100px' },
+                { key: 'lastWeek', label: '전주종가', width: '100px' },
                 { key: 'disclosures', label: '금주 공시', width: '200px' },
                 { key: 'issues', label: '금주 이슈', width: '200px' }
               ].map(column => (
@@ -475,12 +609,35 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
                 key={`${company.symbol}-${index}`}
                 style={{
                   borderBottom: '1px solid #f1f3f4',
-                  background: index % 2 === 0 ? 'white' : '#fafbfc',
+                  background: selectedItems.has(company.symbol) 
+                    ? '#e8f4fd' 
+                    : index % 2 === 0 ? 'white' : '#fafbfc',
                   transition: 'background-color 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f8ff'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'white' : '#fafbfc'}
+                onMouseEnter={(e) => {
+                  if (!selectedItems.has(company.symbol)) {
+                    e.currentTarget.style.backgroundColor = '#f0f8ff';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!selectedItems.has(company.symbol)) {
+                    e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'white' : '#fafbfc';
+                  }
+                }}
               >
+                {/* 선택 */}
+                <td style={{ 
+                  padding: '16px 12px', 
+                  textAlign: 'center',
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.has(company.symbol)}
+                    onChange={() => handleSelectItem(company.symbol)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
+
                 {/* 순위 */}
                 <td style={{ 
                   padding: '16px 12px', 
@@ -500,7 +657,6 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
                     cursor: 'pointer',
                     borderLeft: '3px solid transparent'
                   }}
-                  onClick={() => onCompanyClick(company.symbol)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderLeft = '3px solid #3498db';
                     e.currentTarget.style.color = '#3498db';
@@ -509,7 +665,8 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
                     e.currentTarget.style.borderLeft = '3px solid transparent';
                     e.currentTarget.style.color = '#2c3e50';
                   }}
-                  title="클릭하면 상세 페이지로 이동합니다"
+                  title="클릭하면 상세 정보를 확인할 수 있습니다"
+                  onClick={(e) => handleCellClick(company, e)}
                 >
                   {company.companyName}
                 </td>
@@ -534,6 +691,20 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
                     fontWeight: 'bold'
                   }}>
                     {company.country}
+                  </span>
+                </td>
+
+                {/* 시장 */}
+                <td style={{ padding: '16px 12px', textAlign: 'center' }}>
+                   <span style={{
+                    background: company.market === 'KOSPI' ? '#e74c3c' : company.market === 'KOSDAQ' ? '#3498db' : '#7f8c8d',
+                    color: 'white',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }}>
+                    {company.market}
                   </span>
                 </td>
 
@@ -571,6 +742,39 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
                   fontFamily: 'monospace'
                 }}>
                   {company.marketCap ? `${formatNumber(company.marketCap)}억` : 'N/A'}
+                </td>
+
+                {/* 주간고가 */}
+                <td style={{ 
+                  padding: '16px 12px', 
+                  textAlign: 'right',
+                  color: '#2c3e50',
+                  fontWeight: '600',
+                  fontFamily: 'monospace'
+                }}>
+                  {formatNumber(company.weekHigh)}원
+                </td>
+
+                {/* 주간저가 */}
+                 <td style={{ 
+                  padding: '16px 12px', 
+                  textAlign: 'right',
+                  color: '#2c3e50',
+                  fontWeight: '600',
+                  fontFamily: 'monospace'
+                }}>
+                  {formatNumber(company.weekLow)}원
+                </td>
+
+                {/* 전주종가 */}
+                <td style={{ 
+                  padding: '16px 12px', 
+                  textAlign: 'right',
+                  color: '#2c3e50',
+                  fontWeight: '600',
+                  fontFamily: 'monospace'
+                }}>
+                  {formatNumber(company.lastWeek)}원
                 </td>
 
                 {/* 금주 공시 */}
@@ -654,6 +858,14 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
           </tbody>
         </table>
       </div>
+      {/* 팝업 */}
+      {showPopup && (
+        <MiniPopup
+          stock={showPopup.stock}
+          position={showPopup.position}
+          onClose={() => setShowPopup(null)}
+        />
+      )}
     </div>
   );
 };
@@ -704,6 +916,8 @@ const DigestPage: React.FC = () => {
             changeRate: stock.changeRate,
             weekHigh: stock.weekHigh,
             weekLow: stock.weekLow,
+            lastWeek: stock.lastWeek,
+            market: STOCK_MARKET_MAPPING[stock.symbol] || 'Unknown',
             disclosures: companyDisclosures,
             issues: companyIssues
           };
@@ -760,12 +974,18 @@ const DigestPage: React.FC = () => {
     };
   }, [integratedData]);
 
-  const handleExportExcel = () => {
-    alert(`${integratedData.length}개 기업의 통합 데이터 Excel 다운로드 기능을 구현중입니다.`);
+  const handleExportExcel = (selectedData?: IntegratedCompanyData[]) => {
+    const dataToExport = selectedData || integratedData;
+    const count = dataToExport.length;
+    const type = selectedData ? '선택된' : '전체';
+    alert(`${type} ${count}개 기업의 통합 데이터 Excel 다운로드 기능을 구현중입니다.`);
   };
 
-  const handleExportPDF = () => {
-    alert(`${integratedData.length}개 기업의 통합 데이터 PDF 다운로드 기능을 구현중입니다.`);
+  const handleExportPDF = (selectedData?: IntegratedCompanyData[]) => {
+    const dataToExport = selectedData || integratedData;
+    const count = dataToExport.length;
+    const type = selectedData ? '선택된' : '전체';
+    alert(`${type} ${count}개 기업의 통합 데이터 PDF 다운로드 기능을 구현중입니다.`);
   };
 
   const handleCompanyClick = (symbol: string) => {
@@ -851,7 +1071,7 @@ const DigestPage: React.FC = () => {
         breadcrumbs={breadcrumbs}
         actions={
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn-download" onClick={handleExportExcel}>
+            <button className="btn-download" onClick={() => handleExportExcel()}>
               <i className='bx bxs-file-export'></i>
               <span className="text">Excel 다운로드</span>
             </button>

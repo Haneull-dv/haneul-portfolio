@@ -242,6 +242,22 @@ services:
     networks:
       - app-network
 
+  kpi_compare:
+    container_name: kpi_compare
+    build:
+      context: .
+      dockerfile: ./kpi_compare/Dockerfile
+    ports:
+      - "9007:9007"
+    volumes:
+      - .:/app
+    env_file:
+      - ./kpi_compare/.env
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
 
