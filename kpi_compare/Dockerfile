@@ -22,7 +22,7 @@ COPY ./weekly_db /app/weekly_db
 WORKDIR /app/kpi_compare
 
 # 7. 애플리케이션 실행
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9007"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9007", "--reload"]
 
 # 8. 포트 노출
 EXPOSE 9007 

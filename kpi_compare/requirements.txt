@@ -1,2 +1,7 @@
-fastapi==0.110.2
-uvicorn[standard]==0.29.0
+fastapi
+uvicorn
+python-dotenv
+httpx
+pandas
+cachetools
+python-multipart
