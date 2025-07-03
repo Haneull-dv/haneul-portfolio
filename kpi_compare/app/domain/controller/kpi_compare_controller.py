@@ -17,3 +17,6 @@ class KpiCompareController:
 
     async def get_kpi_for_report(self, query: str, rcept_no: str, bsns_year: str, reprt_code: str):
         return await self.service.get_kpi_for_report(query, rcept_no, bsns_year, reprt_code)
+    
+    async def get_supported_companies(self):
+        return await self.service.get_supported_companies()

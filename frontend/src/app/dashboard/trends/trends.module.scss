@@ -1,0 +1,816 @@
+// Financial Trends Analysis - 재무 분석 포트폴리오
+// validation.module.scss와 digest page.tsx와 일관된 전문적인 디자인
+
+.container {
+  padding: 0;
+  max-width: 100%;
+  background: var(--light-grey);
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 0 8px;
+  }
+}
+
+// Loading & Error States
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--dark-grey);
+  
+  i {
+    font-size: 3rem;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    animation: spin 2s linear infinite;
+  }
+  
+  h3 {
+    color: var(--dark);
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+  
+  p {
+    color: var(--dark-grey);
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  
+  i {
+    font-size: 3rem;
+    color: var(--red);
+    margin-right: 1rem;
+  }
+  
+  div {
+    h3 {
+      color: var(--red);
+      font-size: 1.25rem;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    p {
+      color: var(--dark-grey);
+      margin: 0.25rem 0;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.noData {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--dark-grey);
+  
+  i {
+    font-size: 3rem;
+    color: var(--blue);
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+// Common Card Styling
+.card {
+  background: var(--light);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    border-radius: 12px;
+  }
+}
+
+// Page Introduction Section
+.pageIntro {
+  margin-bottom: 2rem;
+  
+  .introContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    
+    @media (max-width: 1024px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+  }
+  
+  .introText {
+    flex: 1;
+    
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+      
+      i {
+        color: var(--blue);
+        font-size: 2.25rem;
+      }
+    }
+    
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--dark-grey);
+      margin: 0;
+      
+      @media (max-width: 768px) {
+        font-size: 0.875rem;
+      }
+    }
+  }
+  
+  .introStats {
+    display: flex;
+    gap: 2rem;
+    
+    @media (max-width: 768px) {
+      gap: 1.5rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+  
+  .statItem {
+    text-align: center;
+    
+    .statNumber {
+      display: block;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1;
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+    }
+    
+    .statLabel {
+      font-size: 0.875rem;
+      color: var(--dark-grey);
+      font-weight: 500;
+      margin-top: 0.25rem;
+      
+      @media (max-width: 768px) {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// Section Header
+.sectionHeader {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i {
+      color: var(--blue);
+      font-size: 1.5rem;
+    }
+  }
+  
+  p {
+    margin: 0;
+    color: var(--dark-grey);
+    font-size: 0.875rem;
+  }
+}
+
+// Auto Complete Search
+.searchContainer {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.searchInputContainer {
+  position: relative;
+  
+  i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dark-grey);
+    font-size: 1.25rem;
+    z-index: 1;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid var(--grey);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: var(--light);
+    transition: all 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(60, 145, 230, 0.1);
+    }
+    
+    &::placeholder {
+      color: var(--dark-grey);
+    }
+  }
+}
+
+.searchDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--light);
+  border: 1px solid var(--grey);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 0.25rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.searchItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--grey);
+  
+  &:hover {
+    background: var(--light-blue);
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.companyDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  
+  .companyName {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.875rem;
+  }
+  
+  .companyCode {
+    font-size: 0.75rem;
+    color: var(--dark-grey);
+    font-family: 'Courier New', monospace;
+  }
+}
+
+.gameLabel {
+  background: var(--light-blue);
+  color: var(--blue);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// Selected Companies
+.selectedCompanies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.selectedCompany {
+  display: flex;
+  align-items: center;
+  background: var(--light-blue);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  
+  .companyName {
+    color: var(--blue);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+  }
+  
+  .removeButton {
+    background: none;
+    border: none;
+    color: var(--blue);
+    cursor: pointer;
+    padding: 0.125rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background: rgba(60, 145, 230, 0.2);
+    }
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+.analyzeActions {
+  text-align: center;
+  
+  .analyzeButton {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &:hover:not(:disabled) {
+      background: #2980d9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(60, 145, 230, 0.3);
+    }
+    
+    &:disabled {
+      background: var(--dark-grey);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    i {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+// Analysis Dashboard
+.analysisContainer {
+  .analysisHeader {
+    background: var(--light);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+    
+    .backButton {
+      background: var(--light);
+      border: 2px solid var(--grey);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: var(--dark-grey);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      &:hover {
+        background: var(--grey);
+        border-color: var(--dark-grey);
+      }
+      
+      i {
+        font-size: 1rem;
+      }
+    }
+    
+    h2 {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+      color: var(--dark);
+      font-size: 1.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+      
+      i {
+        color: var(--blue);
+        font-size: 2rem;
+      }
+    }
+    
+    .analysisSubject {
+      color: var(--dark-grey);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+// Chart Container
+.chartContainer {
+  height: 400px;
+  margin: 1rem 0;
+  
+  @media (max-width: 768px) {
+    height: 300px;
+  }
+}
+
+// Category Tabs
+.categoryTabs {
+  display: flex;
+  background: var(--light);
+  border-radius: 12px;
+  padding: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .categoryTab {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--dark-grey);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+    
+    @media (max-width: 768px) {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    
+    &:hover {
+      color: var(--dark);
+    }
+    
+    &.active {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 2px 8px rgba(60, 145, 230, 0.3);
+    }
+    
+    i {
+      font-size: 1rem;
+      
+      @media (max-width: 768px) {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Export Button
+.exportButton {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  
+  &:hover {
+    background: #2980d9;
+    transform: translateY(-1px);
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+}
+
+// KPI Table
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--grey);
+}
+
+.kpiTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.875rem;
+  
+  thead {
+    background: var(--light-blue);
+    
+    th {
+      padding: 1rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--blue);
+      border-bottom: 2px solid var(--blue);
+      white-space: nowrap;
+      
+      @media (max-width: 768px) {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid var(--grey);
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background: var(--light-grey);
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        
+        @media (max-width: 768px) {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.75rem;
+        }
+        
+        &.kpiName {
+          font-weight: 600;
+          color: var(--dark);
+          
+          .kpiInfo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            
+            .kpiUnit {
+              font-size: 0.75rem;
+              color: var(--dark-grey);
+              font-weight: 400;
+            }
+          }
+        }
+        
+        &.kpiValue {
+          text-align: right;
+          font-family: 'Courier New', monospace;
+          font-weight: 500;
+          
+          &.valid {
+            color: var(--dark);
+          }
+          
+          &.invalid {
+            color: var(--dark-grey);
+            font-style: italic;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .searchContainer {
+    max-width: 100%;
+  }
+  
+  .selectedCompanies {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageIntro .introStats {
+    .statItem .statNumber {
+      font-size: 1.75rem;
+    }
+  }
+  
+  .categoryTabs {
+    .categoryTab {
+      font-size: 0.625rem;
+      padding: 0.375rem 0.5rem;
+      
+      i {
+        font-size: 0.75rem;
+      }
+    }
+  }
+} 
+
+// 재무회계 이해도 어필을 위한 스타일
+.kpiName {
+  .kpiInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.tooltipContainer {
+  position: relative;
+  display: inline-flex;
+  
+  i {
+    cursor: help;
+    color: var(--dark-grey);
+    font-size: 0.875rem;
+  }
+  
+  &:hover .kpiTooltip {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kpiTooltip {
+  display: none;
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--dark);
+  color: var(--light);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  width: 250px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--dark) transparent transparent transparent;
+  }
+}
+
+.kpiValue {
+  i {
+    color: var(--red);
+    margin-left: 0.5rem;
+  }
+}
+
+.reportSelectorCard {
+  background: var(--light);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  
+  .selectorWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    select {
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--grey);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      min-width: 200px;
+      cursor: pointer;
+    }
+    
+    p {
+      color: var(--dark-grey);
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.dataStandard {
+  text-align: right;
+  font-size: 0.875rem;
+  color: var(--dark-grey);
+  font-weight: 500;
+}
