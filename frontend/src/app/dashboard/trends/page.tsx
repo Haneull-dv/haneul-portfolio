@@ -49,8 +49,16 @@ interface Report {
 
 interface CompanyAnalysisData {
   company: Company;
-  reports: Report[];
   kpiData: KpiResponse | null;
+  selectedReport: Report;
+  error?: string;
+}
+
+interface SelectedInfo {
+  company: Company;
+  reports: Report[];
+  selectedReport: Report | null;
+  isLoadingReports: boolean;
   error?: string;
 }
 
@@ -266,28 +274,84 @@ const AutoCompleteSearch: React.FC<{
   );
 };
 
+const ReportSelectionPanel: React.FC<{
+  selectedEntries: SelectedInfo[];
+  onReportSelect: (corpCode: string, rceptNo: string) => void;
+}> = ({ selectedEntries, onReportSelect }) => {
+  if (selectedEntries.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.sectionHeader}>
+        <h3>
+          <i className='bx bxs-file-doc'></i>
+          사업보고서 선택
+        </h3>
+        <p>분석을 원하는 기업별 사업보고서를 선택하세요.</p>
+      </div>
+      <div className={styles.reportSelectionList}>
+        {selectedEntries.map(entry => (
+          <div key={entry.company.corp_code} className={styles.reportSelectionItem}>
+            <span className={styles.reportSelectionCompany}>{entry.company.corp_name}</span>
+            <div className={styles.reportSelectionDropdown}>
+              {entry.isLoadingReports ? (
+                <div className={styles.reportLoading}>
+                  <i className='bx bx-loader-alt bx-spin'></i>
+                  <span>보고서 로딩중...</span>
+                </div>
+              ) : entry.error ? (
+                <span className={styles.reportError}>{entry.error}</span>
+              ) : entry.reports.length > 0 ? (
+                <select
+                  value={entry.selectedReport?.rcept_no || ''}
+                  onChange={(e) => onReportSelect(entry.company.corp_code, e.target.value)}
+                  className={styles.reportSelect}
+                >
+                  <option value="" disabled>사업보고서를 선택하세요</option>
+                  {entry.reports.map(report => (
+                    <option key={report.rcept_no} value={report.rcept_no}>
+                      {`${report.report_nm.split('(')[0]} (${report.rcept_dt.substring(0,4)}년)`}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span>사용 가능한 사업보고서가 없습니다.</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const SelectedCompaniesPanel: React.FC<{
-  selectedCompanies: Company[];
+  selectedEntries: SelectedInfo[];
   onRemove: (company: Company) => void;
   onAnalyze: () => void;
-}> = ({ selectedCompanies, onRemove, onAnalyze }) => {
+}> = ({ selectedEntries, onRemove, onAnalyze }) => {
   return (
     <div className={styles.card}>
       <div className={styles.sectionHeader}>
         <h3>
           <i className='bx bxs-analyse'></i>
-          선택된 기업 ({selectedCompanies.length}/5)
+          선택된 분석 항목 ({selectedEntries.length}/5)
         </h3>
-        <p>분석할 기업을 선택하고 KPI 분석을 시작하세요</p>
+        <p>분석할 기업과 보고서를 확인하고 분석을 시작하세요</p>
       </div>
 
-      {selectedCompanies.length > 0 && (
+      {selectedEntries.length > 0 && (
         <div className={styles.selectedCompanies}>
-          {selectedCompanies.map((company) => (
-            <div key={company.corp_code} className={styles.selectedCompany}>
-              <span className={styles.companyName}>{company.corp_name}</span>
+          {selectedEntries.map((entry) => (
+            <div key={entry.company.corp_code} className={styles.selectedCompany}>
+              <span className={styles.companyName}>
+                {entry.company.corp_name}
+                {entry.selectedReport ? ` (${entry.selectedReport.rcept_dt.substring(0,4)}년)` : ''}
+              </span>
               <button
-                onClick={() => onRemove(company)}
+                onClick={() => onRemove(entry.company)}
                 className={styles.removeButton}
                 title="제거"
               >
@@ -301,7 +365,7 @@ const SelectedCompaniesPanel: React.FC<{
       <div className={styles.analyzeActions}>
         <button
           onClick={onAnalyze}
-          disabled={selectedCompanies.length === 0}
+          disabled={selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport)}
           className={styles.analyzeButton}
         >
           <i className='bx bxs-bar-chart-alt-2'></i>
@@ -477,88 +541,6 @@ const AnalysisDashboard: React.FC<{
   analysisData: CompanyAnalysisData[];
   onBack: () => void;
 }> = ({ analysisData, onBack }) => {
-  // 1. 보고서 목록 상태
-  const [reportsMap, setReportsMap] = useState<Record<string, Report[]>>({});
-  // 2. 공통 연도 목록
-  const [commonYears, setCommonYears] = useState<string[]>([]);
-  // 3. 선택된 연도
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  // 4. KPI 데이터 상태
-  const [kpiDataMap, setKpiDataMap] = useState<Record<string, KpiResponse | null>>({});
-  const [loading, setLoading] = useState(false);
-
-  // 1. 보고서 목록 fetch (최초 1회)
-  React.useEffect(() => {
-    const fetchAllReports = async () => {
-      const map: Record<string, Report[]> = {};
-      for (const { company } of analysisData) {
-        try {
-          const reports = await fetchReports(company.corp_code);
-          map[company.corp_code] = reports.filter(r => r.report_nm.includes('사업보고서'));
-        } catch {
-          map[company.corp_code] = [];
-        }
-      }
-      setReportsMap(map);
-    };
-    fetchAllReports();
-  }, [analysisData]);
-
-  // 2. 공통 연도 추출
-  React.useEffect(() => {
-    const allYears = Object.values(reportsMap).map(reports =>
-      new Set(reports.map(r => r.rcept_dt.substring(0, 4)))
-    );
-    if (allYears.length === 0 || allYears.some(set => set.size === 0)) {
-      setCommonYears([]);
-      setSelectedYear('');
-      return;
-    }
-    // 교집합
-    let intersection = [...allYears[0]];
-    for (let i = 1; i < allYears.length; i++) {
-      intersection = intersection.filter(y => allYears[i].has(y));
-    }
-    intersection.sort((a, b) => b.localeCompare(a)); // 최신 연도 우선
-    setCommonYears(intersection);
-    setSelectedYear(intersection[0] || '');
-  }, [reportsMap]);
-
-  // 3. 연도 선택 시 KPI fetch
-  React.useEffect(() => {
-    if (!selectedYear) return;
-    setLoading(true);
-    const fetchAllKpi = async () => {
-      const newMap: Record<string, KpiResponse | null> = {};
-      await Promise.all(
-        analysisData.map(async ({ company }) => {
-          const reports = reportsMap[company.corp_code] || [];
-          const report = reports.find(r => r.rcept_dt.startsWith(selectedYear));
-          if (!report) {
-            newMap[company.corp_code] = null;
-            return;
-          }
-          try {
-            const kpi = await fetchKpi(company.corp_code, report.rcept_no, selectedYear, '11011');
-            newMap[company.corp_code] = kpi;
-          } catch {
-            newMap[company.corp_code] = null;
-          }
-        })
-      );
-      setKpiDataMap(newMap);
-      setLoading(false);
-    };
-    fetchAllKpi();
-  }, [selectedYear, reportsMap, analysisData]);
-
-  // KPI 데이터 변환
-  const kpiAnalysisData: CompanyAnalysisData[] = analysisData.map(({ company }) => ({
-    company,
-    reports: reportsMap[company.corp_code] || [],
-    kpiData: kpiDataMap[company.corp_code] || null,
-  }));
-
   const categories = [
     { key: 'Growth', label: '성장성', icon: 'bx-trending-up' },
     { key: 'Profitability', label: '수익성', icon: 'bxs-coin' },
@@ -567,6 +549,10 @@ const AnalysisDashboard: React.FC<{
     { key: 'Cashflow', label: '현금흐름', icon: 'bxs-bank' }
   ];
   const [activeCategory, setActiveCategory] = useState('Growth');
+
+  const analysisSubjects = analysisData.map(({ company, selectedReport }) => 
+    `${company.corp_name} (${selectedReport.rcept_dt.substring(0, 4)}년)`
+  ).join(', ');
 
   return (
     <div className={styles.analysisContainer}>
@@ -580,35 +566,19 @@ const AnalysisDashboard: React.FC<{
           게임업계 KPI 분석 결과
         </h2>
         <div className={styles.analysisSubject}>
-          {analysisData.map(({ company }) => company.corp_name).join(', ')} 비교분석
+          {analysisSubjects} 비교분석
         </div>
       </div>
-      {/* 보고서 연도 선택 드롭다운 */}
-      <div className={styles.reportSelectorCard}>
-        <div className={styles.selectorWrapper}>
-          <label htmlFor="report-year">분석 기준 연도:</label>
-          <select
-            id="report-year"
-            value={selectedYear}
-            onChange={e => setSelectedYear(e.target.value)}
-            disabled={commonYears.length === 0}
-          >
-            {commonYears.map(year => (
-              <option key={year} value={year}>{year}년</option>
-            ))}
-          </select>
-          {commonYears.length === 0 && <p>공통 사업보고서 연도가 없습니다.</p>}
-        </div>
-      </div>
-      {/* KPI 데이터 로딩/표시 */}
-      {loading ? (
-        <div className={styles.loading}>
-          <i className='bx bx-loader-alt bx-spin'></i>
-          <h3>KPI 데이터를 불러오는 중...</h3>
+      
+      {analysisData.filter(d => d.kpiData).length === 0 ? (
+        <div className={styles.noData}>
+          <i className='bx bx-info-circle'></i>
+          <p>분석할 데이터가 없습니다.</p>
+          <p>선택하신 보고서의 KPI 데이터를 불러오지 못했습니다.</p>
         </div>
       ) : (
         <>
-          <RadarChartAnalysis analysisData={kpiAnalysisData} />
+          <RadarChartAnalysis analysisData={analysisData} />
           <div className={styles.categoryTabs}>
             {categories.map(({ key, label, icon }) => (
               <button
@@ -621,7 +591,7 @@ const AnalysisDashboard: React.FC<{
               </button>
             ))}
           </div>
-          <KpiTable analysisData={kpiAnalysisData} activeCategory={activeCategory} />
+          <KpiTable analysisData={analysisData} activeCategory={activeCategory} />
         </>
       )}
     </div>
@@ -631,7 +601,7 @@ const AnalysisDashboard: React.FC<{
 // Main Component with Query Support
 const TrendsPageContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<'selection' | 'analysis'>('selection');
-  const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
+  const [selectedEntries, setSelectedEntries] = useState<SelectedInfo[]>([]);
   const [analysisData, setAnalysisData] = useState<CompanyAnalysisData[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -646,56 +616,89 @@ const TrendsPageContent: React.FC = () => {
     queryFn: fetchCompanies,
   });
 
-  const handleCompanySelect = (company: Company) => {
-    setSelectedCompanies(prev => [...prev, company]);
+  const handleCompanySelect = async (company: Company) => {
+    const newEntry: SelectedInfo = {
+      company,
+      reports: [],
+      selectedReport: null,
+      isLoadingReports: true,
+    };
+    setSelectedEntries(prev => [...prev, newEntry]);
+
+    try {
+      const reports = await fetchReports(company.corp_code);
+      const businessReports = reports.filter(r => r.report_nm.includes('사업보고서'));
+      
+      setSelectedEntries(prev => prev.map(entry => 
+        entry.company.corp_code === company.corp_code 
+          ? { ...entry, reports: businessReports, isLoadingReports: false, selectedReport: businessReports[0] || null }
+          : entry
+      ));
+    } catch (error) {
+      console.error(`보고서 로딩 실패: ${company.corp_name}`, error);
+      setSelectedEntries(prev => prev.map(entry => 
+        entry.company.corp_code === company.corp_code 
+          ? { ...entry, isLoadingReports: false, error: '보고서를 불러올 수 없습니다.' }
+          : entry
+      ));
+    }
   };
 
   const handleCompanyRemove = (company: Company) => {
-    setSelectedCompanies(prev => prev.filter(c => c.corp_code !== company.corp_code));
+    setSelectedEntries(prev => prev.filter(e => e.company.corp_code !== company.corp_code));
+  };
+
+  const handleReportSelect = (corpCode: string, rceptNo: string) => {
+    setSelectedEntries(prev => prev.map(entry => {
+      if (entry.company.corp_code === corpCode) {
+        const selectedReport = entry.reports.find(r => r.rcept_no === rceptNo) || null;
+        return { ...entry, selectedReport };
+      }
+      return entry;
+    }));
   };
 
   const handleAnalyze = async () => {
-    if (selectedCompanies.length === 0) return;
+    if (selectedEntries.some(e => !e.selectedReport)) {
+      alert('모든 기업의 분석할 사업보고서를 선택해주세요.');
+      return;
+    }
     
     setIsAnalyzing(true);
     setCurrentView('analysis');
     
     try {
       const analysisResults: CompanyAnalysisData[] = await Promise.all(
-        selectedCompanies.map(async (company) => {
-          try {
-            const reports = await fetchReports(company.corp_code);
-            
-            // 가장 최근 사업보고서 선택
-            const businessReports = reports.filter(r => r.report_nm.includes('사업보고서'));
-            let kpiData = null;
-            
-            if (businessReports.length > 0) {
-              const latestReport = businessReports[0];
-              try {
-                kpiData = await fetchKpi(
-                  company.corp_code, 
-                  latestReport.rcept_no, 
-                  latestReport.rcept_dt.substring(0, 4), 
-                  '11011'
-                );
-              } catch (kpiError) {
-                console.warn(`KPI 데이터 로딩 실패: ${company.corp_name}`, kpiError);
-              }
-            }
-            
+        selectedEntries.map(async (entry) => {
+          if (!entry.selectedReport) {
+            // This case should not be reached due to the check above, but for type safety
             return {
-              company,
-              reports,
-              kpiData,
-            };
-          } catch (error) {
-            console.error(`기업 데이터 로딩 실패: ${company.corp_name}`, error);
-            return {
-              company,
-              reports: [],
+              company: entry.company,
               kpiData: null,
-              error: `데이터 로딩 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
+              selectedReport: {} as Report,
+              error: `보고서가 선택되지 않았습니다.`
+            };
+          }
+
+          try {
+            const kpiData = await fetchKpi(
+              entry.company.corp_code, 
+              entry.selectedReport.rcept_no, 
+              entry.selectedReport.rcept_dt.substring(0, 4), 
+              '11011'
+            );
+            return {
+              company: entry.company,
+              kpiData,
+              selectedReport: entry.selectedReport,
+            };
+          } catch (kpiError) {
+            console.warn(`KPI 데이터 로딩 실패: ${entry.company.corp_name}`, kpiError);
+            return {
+              company: entry.company,
+              kpiData: null,
+              selectedReport: entry.selectedReport,
+              error: `KPI 데이터 로딩 실패`
             };
           }
         })
@@ -814,13 +817,18 @@ const TrendsPageContent: React.FC = () => {
 
               <AutoCompleteSearch
                 onCompanySelect={handleCompanySelect}
-                selectedCompanies={selectedCompanies}
+                selectedCompanies={selectedEntries.map(e => e.company)}
                 companies={companiesData?.companies || []}
               />
             </div>
 
+            <ReportSelectionPanel 
+              selectedEntries={selectedEntries} 
+              onReportSelect={handleReportSelect} 
+            />
+
             <SelectedCompaniesPanel
-              selectedCompanies={selectedCompanies}
+              selectedEntries={selectedEntries}
               onRemove={handleCompanyRemove}
               onAnalyze={handleAnalyze}
             />
