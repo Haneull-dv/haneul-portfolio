@@ -1,285 +1,89 @@
-# 🏢 SKYC 마이크로서비스 아키텍처
+# 📈 코난-AI: AI 기반 금융 분석 플랫폼
+> DART 공시 데이터, 실시간 주가, 최신 뉴스를 기반으로 AI가 투자 결정을 돕는 금융 분석 대시보드
 
-이 프로젝트는 마이크로서비스 아키텍처를 기반으로 한 SKYC 시스템입니다.
+## 📜 프로젝트 개요 (Description)
+`코난-AI`는 복잡하고 분산된 금융 데이터를 수집, 분석, 시각화하여 투자자들이 더 빠르고 정확한 결정을 내릴 수 있도록 돕는 마이크로서비스 기반의 플랫폼입니다. DART의 정기 공시 보고서를 분석하여 재무 건전성을 평가하고, IR 자료를 요약하며, 최신 주가와 뉴스 트렌드를 제공하여 종합적인 투자 인사이트를 제공합니다.
 
-## 🏗️ 시스템 아키텍처
+## 🛠️ 기술 스택 (Tech Stack)
 
-```
-Frontend (Next.js 15)
-    ↓
-Gateway (API 게이트웨이)
-    ↓
-┌─────────────────────────────────────┐
-│           비즈니스 서비스들           │
-├─ StockPrice (주가 조회)              │
-├─ StockTrend (주가 트렌드)            │
-├─ IRSummary (IR 요약)               │
-├─ DSDGen (재무제표 생성)              │
-└─ DSDCheck (재무제표 검증)            │
-└─────────────────────────────────────┘
-    ↓
-PostgreSQL (데이터베이스)
+| 구분 | 기술 |
+|------|--------------------------------------------------------------------------------|
+| **Frontend** | `Next.js`, `React`, `TypeScript`, `SCSS Modules`, `TanStack Query`, `Recharts` |
+| **Backend** | `Python`, `FastAPI`, `SQLAlchemy` |
+| **Database** | `PostgreSQL` |
+| **AI/ML** | `PyTorch`, `Transformers (SLM)`, `OpenAI API` |
+| **Automation & Data Processing**| `N8N`, `Pandas`, `pdfplumber`, `Camelot` |
+| **DevOps** | `Docker`, `Docker Compose` |
 
-N8N (워크플로우 자동화) ← → 모든 서비스들
-```
+## ✨ 주요 기능 (Features)
 
-## 📁 프로젝트 구조
+- **Gateway**: `JWT` 기반 인증 및 마이크로서비스 API 라우팅
+- **Financial Trends Dashboard**:
+  - 여러 기업의 핵심 재무 지표(`KPI`) 비교 분석
+  - 성장성, 수익성, 안정성을 종합 평가하는 레이더 차트 시각화
+  - DART 사업보고서 기반의 연도별 데이터 분석
+- **IR 보고서 AI 요약**:
+  - PDF 형식의 IR 보고서를 업로드하면 `AI`가 핵심 내용을 자동 요약
+- **재무제표(DSD) 생성 및 검증**:
+  - `XBRL` 형식의 재무제표 데이터를 분석하여 표준화된 DSD(Data Set for DSD) 생성 및 검증
+- **주간 금융 리포트 자동화**:
+  - `N8N` 워크플로우를 통해 매주 주요 기업의 공시, 이슈, 주가 정보를 자동으로 수집 및 요약
+- **소형언어모델(SLM) 기반 서비스**:
+  - 금융 뉴스 실시간 분류 및 요약 기능 제공
 
+## 🎬 데모 (Demo)
+(여기에 시연 영상 GIF나 스크린샷을 추가할 예정입니다.)
+
+## 🏗️ 프로젝트 구조 (Project Structure)
 ```
 portfolio/
-├── frontend/            # Next.js 15 대시보드 (3000)
-├── gateway/             # API 게이트웨이 (8080)
-├── stockprice/          # 주가 정보 조회 서비스 (9006) ⭐ NEW
-├── stocktrend/          # 주식 트렌드 서비스 (8081)
-├── irsummary/           # IR 요약 서비스 (8083)
-├── dsdgen/              # DSD 공시용 재무데이터 생성 서비스 (8085)
-├── dsdcheck/            # DSD 공시용 재무데이터 검증 서비스 (8086)
-├── n8n_data/            # N8N 워크플로우 자동화 데이터 ⭐ NEW
-├── docker-compose.yml   # 도커 컴포즈 설정
-├── Makefile            # 서비스 관리 명령어
-└── README.md
+├── frontend/                     # Next.js 15 대시보드 (포트: 3000)
+├── gateway/                      # API 게이트웨이 (포트: 8000)
+├── kpi_compare/                  # 재무 KPI 비교 분석 서비스 (포트: 9007)
+├── conanai_irsummary/            # IR 보고서 AI 요약 서비스
+├── conanai_dsdgen/               # 재무제표(DSD) 생성 서비스
+├── conanai_dsdcheck/             # 재무제표(DSD) 검증 서비스
+├── weekly_disclosure/            # 주간 공시 정보 서비스
+├── weekly_issue/                 # 주간 이슈 트렌드 서비스
+├── weekly_stockprice/            # 주간 주가 정보 서비스
+├── slm_newsclassifier_inference/ # 뉴스 분류 SLM 서빙
+├── slm_summarizer_inference/     # 뉴스 요약 SLM 서빙
+├── n8n_data/                     # N8N 워크플로우 데이터
+├── postgres/                     # PostgreSQL 데이터베이스 설정
+└── docker-compose.yml            # (가정) 전체 서비스 실행을 위한 Docker Compose 설정
 ```
 
-## 🚀 기술 스택
-
-### Backend
-- **Python 3.11** - 백엔드 언어
-- **FastAPI** - REST API 프레임워크
-- **PostgreSQL** - 메인 데이터베이스
-- **Docker & Docker Compose** - 컨테이너화
-
-### Frontend
-- **Next.js 15** - React 프레임워크
-- **React 19** - UI 라이브러리
-- **TypeScript** - 타입 안전성
-- **SCSS Modules** - 스타일링
-
-### AI/ML
-- **OpenAI GPT-3.5-turbo** - 자연어 처리
-- **PyTorch** - 머신러닝
-- **OpenCV** - 이미지 처리
-- **Tesseract OCR** - 문자 인식
-
-### 자동화
-- **N8N** - 워크플로우 자동화
-- **Camelot** - PDF 표 추출
-- **pdfplumber** - PDF 텍스트 추출
-
-## 🚀 개발 환경 설정
-
-### 필수 요구사항
-
+## ⚙️ 설치 및 실행 방법 (Installation & Usage)
+### 요구사항
 - Docker & Docker Compose
-- Python 3.11 이상
-- Node.js 18 이상
-- Make
-- Tesseract OCR
-- Poppler-utils
+- (선택) Python 3.11+, Node.js 18+ (개별 서비스 로컬 개발 시)
 
-### 🔧 환경 설정
+### 실행
+1.  **저장소 클론**
+    ```bash
+    git clone [repository-url]
+    cd portfolio
+    ```
 
-1. **저장소 클론**
-```bash
-git clone [repository-url]
-cd portfolio
-```
+2.  **환경변수 설정**
+    각 서비스 디렉토리의 `.env.example` 파일을 복사하여 `.env` 파일을 생성하고, 필요한 환경 변수(API 키, DB 정보 등)를 설정합니다.
 
-2. **전체 시스템 실행**
-```bash
-# 모든 서비스 빌드 및 실행
-make up
+3.  **Docker Compose를 이용한 전체 시스템 실행**
+    ```bash
+    # 모든 서비스 빌드 및 백그라운드 실행
+    docker-compose up --build -d
+    ```
 
-# 서비스 상태 확인
-make ps
-```
+4.  **실행 확인**
+    - **Frontend Dashboard**: `http://localhost:3000`
+    - **Gateway (API Docs)**: `http://localhost:8000/docs`
 
-3. **개별 서비스 실행**
-```bash
-# 주가 서비스
-make up-stockprice
+## 📚 API 문서
+각 마이크로서비스는 FastAPI의 자동 생성 API 문서(Swagger UI)를 제공합니다. 게이트웨이를 통해 모든 API에 접근할 수 있지만, 개발 시 각 서비스의 API 문서를 직접 확인할 수 있습니다. (아래 포트는 예시입니다.)
 
-# N8N 워크플로우
-make up-n8n
-
-# 프론트엔드
-make up-frontend
-```
-
-## 🌐 서비스별 포트 및 접속 정보
-
-| 서비스 | 포트 | 컨테이너명 | 접속 URL | 설명 |
-|--------|------|------------|----------|------|
-| **Frontend** | 3000 | frontend | http://localhost:3000 | Next.js 대시보드 |
-| **Gateway** | 8080 | gateway | http://localhost:8080 | API 게이트웨이 |
-| **StockPrice** | 9006 | stockprice | http://localhost:9006 | 주가 정보 조회 ⭐ NEW |
-| **StockTrend** | 8081 | stock | http://localhost:8081 | 주가 트렌드 분석 |
-| **IRSummary** | 8083 | summary | http://localhost:8083 | IR 보고서 요약 |
-| **DSDGen** | 8085 | gen | http://localhost:8085 | 재무제표 생성 |
-| **DSDCheck** | 8086 | check | http://localhost:8086 | 재무제표 검증 |
-| **N8N** | 5678 | n8n | http://localhost:5678 | 워크플로우 자동화 ⭐ NEW |
-| **PostgreSQL** | 5433 | db | localhost:5433 | 데이터베이스 |
-
-### 🔐 접속 정보
-- **N8N**: Username: `admin`, Password: `password`
-- **PostgreSQL**: Username: `hc_user`, Password: `hc_password`
-
-## 📖 API 문서
-
-각 서비스의 Swagger UI 문서:
-- **Gateway**: http://localhost:8080/docs
-- **StockPrice**: http://localhost:9006/docs ⭐ NEW
-- **StockTrend**: http://localhost:8081/docs
-- **IRSummary**: http://localhost:8083/docs
-- **DSDGen**: http://localhost:8085/docs
-- **DSDCheck**: http://localhost:8086/docs
-
-## 🔧 주요 명령어
-
-### 🐳 Docker 명령어
-
-```bash
-# 전체 시스템
-make up              # 모든 서비스 시작
-make down            # 모든 서비스 중지
-make restart         # 모든 서비스 재시작
-make ps              # 서비스 상태 확인
-make logs            # 전체 로그 확인
-
-# 개별 서비스
-make up-stockprice      # 주가 서비스 시작
-make up-n8n            # N8N 시작
-make logs-stockprice   # 주가 서비스 로그
-make restart-frontend  # 프론트엔드 재시작
-
-# 주가 관련 서비스들
-make stock-services-up    # 주가 관련 서비스만 시작
-make workflow-up         # N8N + 주가 서비스들 시작
-```
-
-### 🧹 정리 명령어
-```bash
-make clean           # 사용하지 않는 리소스 정리
-make clean-all       # 모든 이미지/볼륨 정리 (주의!)
-```
-
-## 🚀 서비스별 주요 기능
-
-### 📈 StockPrice Service (9006) ⭐ NEW
-주가 정보 조회 및 분석을 위한 마이크로서비스
-- **기본 주가 조회**: `/api/v1/stockprice/?symbol=005930`
-- **트렌드 분석**: `/api/v1/stockprice/trend?symbol=005930&period=1y`
-- **주가 분석**: `/api/v1/stockprice/analysis?symbol=005930`
-
-### 🤖 N8N Workflow (5678) ⭐ NEW
-워크플로우 자동화 플랫폼
-- **주가 데이터 자동 수집**: 매일 정해진 시간에 주가 데이터 수집
-- **재무제표 분석 자동화**: 파일 업로드 시 자동 검증 및 생성
-- **시장 동향 모니터링**: 실시간 급등/급락 알림
-
-### 📊 IRSummary Service (8083)
-IR 리포트 PDF 파일 자동 분석
-- **주요 정보 추출**: 투자 의견, 목표주가, 타겟 PER
-- **실적 전망 분석**: 2Q24/2025/2026 수치 추출
-- **AI 요약**: GPT-3.5-turbo 기반 자연어 요약
-
-### 🔍 DSDCheck Service (8086)
-재무데이터 검증 서비스
-- **무결성 검증**: 계정과목 간 합계 일치 확인
-- **전년도 대사**: 전기 보고서와의 수치 비교
-- **검증 리포트**: 상세한 분석 결과 제공
-
-### 📋 DSDGen Service (8085)
-재무제표 생성 서비스
-- **표준 양식 생성**: 공시용 재무제표 자동 생성
-- **데이터 변환**: 다양한 형식의 데이터 통합
-- **규정 준수**: 금융감독원 양식 준수
-
-## 🔄 개발 워크플로우
-
-### 새로운 기능 개발
-
-1. **브랜치 생성**
-```bash
-git checkout -b feature/SKY-101-stockprice/new-feature
-```
-
-2. **개발 및 테스트**
-```bash
-# 해당 서비스만 재시작하여 테스트
-make restart-stockprice
-make logs-stockprice
-```
-
-3. **PR 생성 및 코드 리뷰**
-4. **메인 브랜치 머지**
-
-### 서비스 간 연동 개발
-- API 스펙 변경 시 영향도 확인
-- 데이터베이스 스키마 변경 시 마이그레이션 포함
-- N8N 워크플로우 변경 시 백업 및 버전 관리
-
-## 🤖 N8N 워크플로우 예시
-
-### 1. 주가 데이터 자동 수집
-```
-Cron (매일 9시) → StockPrice API → PostgreSQL → Slack 알림
-```
-
-### 2. 재무제표 분석 자동화
-```
-파일 업로드 → DSDCheck API → DSDGen API → 이메일 발송
-```
-
-### 3. 시장 동향 모니터링
-```
-Interval (10분) → StockTrend API → 조건 확인 → 다중 알림
-```
-
-## 🔧 트러블슈팅
-
-### 자주 발생하는 문제
-
-1. **포트 충돌**
-```bash
-# 포트 사용 확인
-netstat -tulpn | grep :3000
-
-# docker-compose.yml에서 포트 변경
-```
-
-2. **서비스 연결 실패**
-```bash
-# 컨테이너 상태 확인
-docker-compose ps
-
-# 네트워크 확인
-docker network ls
-```
-
-3. **로그 확인**
-```bash
-# 특정 서비스 로그
-make logs-stockprice
-
-# 실시간 로그
-docker-compose logs -f stockprice
-```
-
-## 📚 추가 문서
-
-- [대시보드 가이드](./DASHBOARD_README.md) - Next.js 15 대시보드 상세 가이드
-- [N8N 워크플로우 가이드](./N8N_WORKFLOW_GUIDE.md) - 자동화 워크플로우 설정
-- [브랜치 관리](./branch_command.txt) - Git 브랜치 전략
-- [도커 명령어](./docker_command.txt) - Docker 관련 명령어 모음
-
-## 🎯 다음 단계
-
-- [ ] 실시간 주가 데이터 연동
-- [ ] AI 기반 투자 분석 기능
-- [ ] 모바일 앱 개발
-- [ ] 고도화된 N8N 워크플로우
-- [ ] 성능 최적화 및 모니터링
-
-## 📄 라이센스
-
-이 프로젝트는 MIT 라이센스 하에 배포됩니다. 
+- **Gateway**: `http://localhost:8000/docs`
+- **KPI Compare Service**: `http://localhost:9007/docs`
+- **IR Summary Service**: `http://localhost:9003/docs`
+- **DSD Gen Service**: `http://localhost:9002/docs`
+- **DSD Check Service**: `http://localhost:9001/docs`
+- *... (나머지 서비스들도 유사한 패턴으로 제공)* 
