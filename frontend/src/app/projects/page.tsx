@@ -7,14 +7,17 @@ import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
 import PDFModal from '@/shared/components/PDFModal/PDFModal';
+import VideoModal from '@/shared/components/VideoModal/VideoModal';
 
 const pdfMap: Record<string, string> = {
   '파스타집 사업계획서': '/projects/pdfs/soar.pdf',
 };
 
 const ProjectsPage: React.FC = () => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [selectedPDF, setSelectedPDF] = useState<{url: string, title: string} | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string} | null>(null);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -31,6 +34,7 @@ const ProjectsPage: React.FC = () => {
       github: '#',
       demo: '#',
       hasModal: false,
+      hasVideo: true,
     },
     {
       title: '네오위즈 IR팀 인턴',
@@ -77,18 +81,26 @@ const ProjectsPage: React.FC = () => {
   const handleCardClick = (project: typeof projects[0]) => {
     if (project.isNeowizProject) {
       window.location.href = '/projects/neowiz';
+    } else if (project.hasVideo) {
+      setSelectedVideo({ url: '/projects/ConanAI 소개영상(자막).mp4', title: project.title });
+      setVideoModalOpen(true);
     } else if (project.hasModal && pdfMap[project.title]) {
       setSelectedPDF({ url: pdfMap[project.title], title: project.title });
-      setModalOpen(true);
+      setPdfModalOpen(true);
     } else if (pdfMap[project.title]) {
       setSelectedPDF({ url: pdfMap[project.title], title: project.title });
-      setModalOpen(true);
+      setPdfModalOpen(true);
     }
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
+  const closePdfModal = () => {
+    setPdfModalOpen(false);
     setSelectedPDF(null);
+  };
+
+  const closeVideoModal = () => {
+    setVideoModalOpen(false);
+    setSelectedVideo(null);
   };
 
   return (
@@ -237,12 +249,22 @@ const ProjectsPage: React.FC = () => {
       </CardContainer>
 
       {/* PDF 모달 */}
-      {modalOpen && selectedPDF && (
+      {pdfModalOpen && selectedPDF && (
         <PDFModal
-          isOpen={modalOpen}
-          onClose={closeModal}
+          isOpen={pdfModalOpen}
+          onClose={closePdfModal}
           pdfUrl={selectedPDF.url}
           title={selectedPDF.title}
+        />
+      )}
+
+      {/* Video 모달 */}
+      {videoModalOpen && selectedVideo && (
+        <VideoModal
+          isOpen={videoModalOpen}
+          onClose={closeVideoModal}
+          videoUrl={selectedVideo.url}
+          title={selectedVideo.title}
         />
       )}
     </Layout>
