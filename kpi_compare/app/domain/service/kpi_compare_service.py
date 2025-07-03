@@ -9,21 +9,30 @@ from dotenv import load_dotenv
 from app.config.companies import SUPPORTED_COMPANIES
 import re
 
-# .env 파일에서 환경 변수 로드
 load_dotenv()
 
 DART_API_KEY = os.getenv("DART_API_KEY")
 DART_API_URL = "https://opendart.fss.or.kr/api"
 KPI_METADATA_PATH = os.path.join(os.path.dirname(__file__), '../../data/KPI_for_dashboard_final.csv')
 
+ACCOUNT_ID_ALIASES = {
+    'ifrs_full_Revenue': ['ifrs-full_Revenue', 'ifrs_Revenue', 'dart_OperatingRevenue', 'dart_Sales'],
+    'dart_OperatingIncomeLoss': ['dart_OperatingIncomeLoss', 'ifrs-full_OperatingIncomeLoss', 'ifrs_OperatingIncomeLoss'],
+    'ifrs_full_ProfitLoss': ['ifrs-full_ProfitLoss', 'ifrs_ProfitLoss', 'dart_ProfitLossForFinancialStatements'],
+    'ifrs_full_Assets': ['ifrs-full_Assets', 'ifrs_Assets'],
+    'ifrs_full_Liabilities': ['ifrs-full_Liabilities', 'ifrs_Liabilities'],
+    'ifrs_full_Equity': ['ifrs-full_Equity', 'ifrs_Equity'],
+    'ifrs_full_CurrentAssets': ['ifrs-full_CurrentAssets', 'ifrs_CurrentAssets'],
+    'ifrs_full_CurrentLiabilities': ['ifrs-full_CurrentLiabilities', 'ifrs_CurrentLiabilities'],
+    'ifrs_full_CashFlowsFromUsedInOperatingActivities': ['ifrs-full_CashFlowsFromUsedInOperatingActivities', 'ifrs_CashFlowsFromUsedInOperatingActivities']
+}
+
 cache = TTLCache(maxsize=100, ttl=600)
 
 class KpiCompareService:
     def __init__(self):
         self.dart_api_key = DART_API_KEY
-        if not self.dart_api_key:
-            print("⚠️ DART_API_KEY가 설정되지 않았습니다. 실제 DART API 호출은 불가능합니다.")
-            self.dart_api_key = "test_key"  # 테스트용 더미 키
+        if not self.dart_api_key: self.dart_api_key = "test_key"
         self.kpi_meta = self._load_kpi_metadata()
 
     def _load_kpi_metadata(self):
@@ -31,244 +40,194 @@ class KpiCompareService:
             df = pd.read_csv(KPI_METADATA_PATH, dtype=str)
             df.set_index('재무지표명', inplace=True)
             print("📊 KPI 메타데이터 로드 완료")
-            print(f"📝 [KPI 메타데이터 항목수] {len(df)}개")
             return df
         except FileNotFoundError:
-            raise HTTPException(status_code=500, detail="KPI 메타데이터 파일을 찾을 수 없습니다.")
+            raise HTTPException(status_code=500, detail=f"KPI 메타데이터 파일을 찾을 수 없습니다: {KPI_METADATA_PATH}")
+
+    def _find_financial_value(self, financials_for_year: dict, python_safe_id: str):
+        aliases = ACCOUNT_ID_ALIASES.get(python_safe_id, [python_safe_id.replace('_', '-')])
+        for alias_id in aliases:
+            if alias_id in financials_for_year:
+                return financials_for_year[alias_id]
+        return None
 
     def _find_company_by_query(self, query: str):
         normalized_query = query.lower().replace(" ", "").strip()
         for company in SUPPORTED_COMPANIES:
-            normalized_name = company['corp_name'].lower().replace(" ", "").strip()
-            if (normalized_query == normalized_name or
+            if (normalized_query == company['corp_name'].lower().replace(" ", "").strip() or 
                 normalized_query == company['corp_code']):
-                print(f"🔍 [기업검색] '{query}' → {company}")
                 return company
-        print(f"❗️ [기업검색 실패] '{query}' (지원 안함)")
         return None
 
     async def search_company(self, query: str):
         normalized_query = query.lower().replace(" ", "").strip()
-        results = [
-            company for company in SUPPORTED_COMPANIES
-            if normalized_query in company['corp_name'].lower().replace(" ", "").strip()
-        ]
-        print(f"🔍 [기업부분검색] '{query}' → {len(results)}건")
+        results = [c for c in SUPPORTED_COMPANIES if normalized_query in c['corp_name'].lower().replace(" ", "")]
         return {"query": query, "results": results}
 
     async def get_reports(self, query: str):
         company = self._find_company_by_query(query)
-        if not company:
-            raise HTTPException(status_code=404, detail="지원하지 않는 기업이거나, 기업 정보를 찾을 수 없습니다.")
-        
+        if not company: raise HTTPException(status_code=404, detail="지원하지 않는 기업")
         corp_code = company['corp_code']
         cache_key = f"reports_{corp_code}"
-        if cache_key in cache:
-            print(f"💾 [보고서캐시 HIT] {corp_code}")
-            return cache[cache_key]
-
-        params = {
-            "crtfc_key": self.dart_api_key,
-            "corp_code": corp_code,
-            "bgn_de": "20220101",
-            "pblntf_ty": "A",
-        }
+        if cache_key in cache: return cache[cache_key]
+        params = {"crtfc_key": self.dart_api_key, "corp_code": corp_code, "bgn_de": "20220101", "pblntf_ty": "A"}
         data = await self._dart_api_call(f"{DART_API_URL}/list.json", params)
-
         report_types = ["사업보고서", "반기보고서", "분기보고서"]
-        filtered_reports = [
-            report for report in data.get("list", [])
-            if any(rt in report.get("report_nm", "") for rt in report_types)
-        ]
-
-        print(f"📑 [보고서목록] {corp_code} {len(filtered_reports)}건 반환")
+        filtered_reports = [r for r in data.get("list", []) if any(rt in r.get("report_nm", "") for rt in report_types)]
         cache[cache_key] = filtered_reports
         return filtered_reports
 
     def _safe_eval_expression(self, expression: str, context: dict):
-        """
-        안전한 수식 계산을 위한 함수
-        eval 대신 ast를 사용하여 안전하게 계산
-        """
         try:
-            # 허용된 연산자들
-            allowed_operators = {
-                ast.Add: operator.add,
-                ast.Sub: operator.sub,
-                ast.Mult: operator.mul,
-                ast.Div: operator.truediv,
-                ast.USub: operator.neg,
-                ast.UAdd: operator.pos,
-            }
-            
+            allowed_operators = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv, ast.USub: operator.neg, ast.UAdd: operator.pos}
+            allowed_functions = {'ABS': abs}
             def _eval(node):
-                if isinstance(node, ast.Num):  # 숫자
-                    return node.n
-                elif isinstance(node, ast.Name):  # 변수명
-                    if node.id in context:
-                        return context[node.id]
-                    else:
-                        raise NameError(f"Variable '{node.id}' not found")
-                elif isinstance(node, ast.BinOp):  # 이항 연산
-                    left = _eval(node.left)
-                    right = _eval(node.right)
+                if isinstance(node, ast.Num): return node.n
+                elif isinstance(node, ast.Name):
+                    if node.id in context: return context[node.id]
+                    raise NameError(f"Variable '{node.id}' not found")
+                elif isinstance(node, ast.BinOp):
+                    left, right = _eval(node.left), _eval(node.right)
                     op = allowed_operators.get(type(node.op))
                     if op:
+                        if isinstance(node.op, ast.Div) and right == 0: raise ZeroDivisionError("Division by zero")
                         return op(left, right)
-                    else:
-                        raise ValueError(f"Unsupported operator: {type(node.op)}")
-                elif isinstance(node, ast.UnaryOp):  # 단항 연산
+                    raise ValueError(f"Unsupported operator: {type(node.op)}")
+                elif isinstance(node, ast.UnaryOp):
                     operand = _eval(node.operand)
                     op = allowed_operators.get(type(node.op))
-                    if op:
-                        return op(operand)
-                    else:
-                        raise ValueError(f"Unsupported unary operator: {type(node.op)}")
-                else:
-                    raise ValueError(f"Unsupported node type: {type(node)}")
-            
-            # 표현식을 AST로 파싱
+                    if op: return op(operand)
+                    raise ValueError(f"Unsupported unary operator: {type(node.op)}")
+                elif isinstance(node, ast.Call):
+                    if node.func.id in allowed_functions:
+                        args = [_eval(arg) for arg in node.args]
+                        return allowed_functions[node.func.id](*args)
+                    raise NameError(f"Unsupported function call: {node.func.id}")
+                raise ValueError(f"Unsupported node type: {type(node)}")
             tree = ast.parse(expression, mode='eval')
-            result = _eval(tree.body)
-            return result
-            
-        except Exception as e:
-            print(f"❌ [수식 계산 오류] {expression}: {e}")
-            raise
+            return _eval(tree.body)
+        except ZeroDivisionError: raise
+        except Exception as e: raise
 
-    def _extract_time_vars(self, formula):
-        """
-        산식에서 시계열 변수 추출: ifrs-full_Revenue[t-1] → (ifrs-full_Revenue, -1)
-        """
-        pattern = r'([a-zA-Z0-9\-_]+)\[t([+-]?\d*)\]'
-        matches = re.findall(pattern, formula)
-        return set((m[0], int(m[1] or 0)) for m in matches)
+    async def _get_financials_for_report(self, corp_code, bsns_year, reprt_code):
+        current_year = int(bsns_year)
+        previous_year = current_year - 1
+        financials = {current_year: {}, previous_year: {}}
+        params = {"crtfc_key": self.dart_api_key, "corp_code": corp_code, "bsns_year": str(current_year), "reprt_code": reprt_code, "fs_div": "CFS"}
+        print(f"  -> 🌏 [DART API 요청] Year: {current_year}, ReportCode: {reprt_code} (전기/당기 데이터 동시 요청)")
+        data = await self._dart_api_call(f"{DART_API_URL}/fnlttSinglAcntAll.json", params)
 
-    def _substitute_time_vars(self, formula, year, financials):
-        """
-        산식 내 [t], [t-1] 등 시계열 변수를 실제 값으로 치환
-        """
-        def repl(match):
-            var, offset = match.group(1), match.group(2)
-            offset = int(offset or 0)
-            target_year = int(year) + offset
-            value = financials.get(target_year, {}).get(var)
-            if value is None:
-                raise ValueError(f"Missing value: {var}[{target_year}]")
-            return str(value)
-        return re.sub(r'([a-zA-Z0-9\-_]+)\[t([+-]?\d*)\]', repl, formula)
+        if data.get("status") == "013":
+            print(f"  -> ⚠️ [데이터 없음] Year: {current_year}, ReportCode: {reprt_code}")
+            return financials
 
-    async def _get_multi_year_financials(self, corp_code, years, reprt_code):
-        """
-        여러 연도(예: [t], [t-1]) 재무데이터를 한 번에 받아옴
-        """
-        result = {}
-        for y in years:
-            params = {
-                "crtfc_key": self.dart_api_key,
-                "corp_code": corp_code,
-                "bsns_year": str(y),
-                "reprt_code": reprt_code,
-                "fs_div": "CFS",
-            }
-            data = await self._dart_api_call(f"{DART_API_URL}/fnlttSinglAcntAll.json", params)
-            year_dict = {}
-            for item in data.get("list", []):
-                if item.get("thstrm_amount") and item.get("account_id"):
-                    try:
-                        amount_str = str(item["thstrm_amount"]).replace(",", "").replace("-", "")
-                        if amount_str.isdigit():
-                            amount = int(amount_str)
-                            if str(item["thstrm_amount"]).startswith("-"):
-                                amount = -amount
-                            year_dict[item["account_id"]] = amount
-                    except (ValueError, TypeError):
-                        continue
-            result[y] = year_dict
-        return result
+        def parse_amount(amount_str):
+            if not amount_str: return 0
+            s_val = str(amount_str).replace(",", "").strip()
+            return 0 if s_val == '-' else int(s_val)
+
+        for item in data.get("list", []):
+            account_id = item.get("account_id")
+            if not account_id: continue
+            if "thstrm_amount" in item: financials[current_year][account_id] = parse_amount(item["thstrm_amount"])
+            if "frmtrm_amount" in item: financials[previous_year][account_id] = parse_amount(item["frmtrm_amount"])
+        
+        print(f"  -> ✅ [데이터 수신] 당기({current_year}): {len(financials[current_year])}개, 전기({previous_year}): {len(financials[previous_year])}개 계정 수신")
+        return financials
+
+    def _validate_and_format_kpi(self, kpi_name, value, unit):
+        if isinstance(value, (int, float)):
+            if '부채비율' in kpi_name and (value > 5000 or value < 0): return "N/A (값 확인 필요)"
+            if '유동비율' in kpi_name and value > 5000: return "N/A (값 확인 필요)"
+            if '증가율' in kpi_name and abs(value) > 5000: return "N/A (값 확인 필요)"
+            # >>> 이 아래에 한 줄 추가 <<<
+            if 'ROE' in kpi_name and abs(value) > 1000: return "N/A (값 확인 필요)"
+            # >>> 여기까지 <<<
+            if unit == '백만원': value /= 1_000_000
+        
+        if isinstance(value, float): return f"{value:,.2f}"
+        elif isinstance(value, int): return f"{value:,}"
+        return str(value)
 
     async def get_kpi_for_report(self, query: str, rcept_no: str, bsns_year: str, reprt_code: str):
         company = self._find_company_by_query(query)
-        if not company:
-            raise HTTPException(status_code=404, detail="지원하지 않는 기업이거나, 기업 정보를 찾을 수 없습니다.")
-
+        if not company: raise HTTPException(status_code=404, detail="지원하지 않는 기업")
         corp_code = company['corp_code']
         cache_key = f"kpi_{corp_code}_{bsns_year}_{reprt_code}"
-        if cache_key in cache:
-            print(f"💾 [KPI캐시 HIT] {cache_key}")
-            return cache[cache_key]
+        if cache_key in cache: return cache[cache_key]
 
-        # KPI 산식에서 필요한 모든 연도 추출
-        years_needed = set()
-        for kpi_name, row in self.kpi_meta.iterrows():
-            formula = str(row['산식(AccountID)'])
-            for var, offset in self._extract_time_vars(formula):
-                years_needed.add(int(bsns_year) + offset)
-        years_needed.add(int(bsns_year))
-        years_needed = sorted(years_needed)
-        print(f"📅 [필요 연도] {years_needed}")
+        financials = await self._get_financials_for_report(corp_code, bsns_year, reprt_code)
 
-        # 여러 연도 재무데이터 한 번에 로드
-        financials = await self._get_multi_year_financials(corp_code, years_needed, reprt_code)
-
-        results = []
         grouped_results = {}
         for kpi_name, row in self.kpi_meta.iterrows():
             formula = str(row['산식(AccountID)'])
             unit = row.get('단위', '')
             category = row.get('대분류', '')
-            account_ids_str = str(row.get('account_ids', ''))
-            account_ids = [acc.strip() for acc in account_ids_str.split(',') if acc.strip() and acc.strip() != 'nan']
-            print(f"\n🧩 [KPI] {kpi_name} | 필요계정: {account_ids} | 산식: {formula}")
-            # 시계열 산식이면 치환, 아니면 기존 방식
+            
+            print(f"\n🧩 [KPI 처리 시작] {kpi_name}")
+
             try:
-                if '[t' in formula:
-                    eval_formula = self._substitute_time_vars(formula, int(bsns_year), financials)
-                    print(f"🕒 [시계열 치환식] {eval_formula}")
-                    value = self._safe_eval_expression(eval_formula, {})
-                else:
-                    # 기존 방식: 올해 데이터만 사용
-                    formula_context = {}
-                    for account_id in account_ids:
-                        v = financials.get(int(bsns_year), {}).get(account_id)
-                        if v is not None:
-                            formula_context[account_id.replace('-', '_')] = v
-                            formula_context[account_id] = v
-                    # 모든 계정이 있어야 계산
-                    if any(financials.get(int(bsns_year), {}).get(a) is None for a in account_ids):
-                        print(f"⚠️ [KPI 계산 SKIP] {kpi_name} (필요 계정 누락)")
+                eval_formula = formula
+                context = {}
+                
+                # 1. 시계열 변수 처리 (e.g., ifrs_full_Revenue[t-1])
+                time_vars_pattern = re.compile(r'([a-zA-Z0-9_]+)\[t([+-]?\d*)\]')
+                time_vars_in_formula = {match.group(0) for match in time_vars_pattern.finditer(formula)}
+                
+                for var_str in time_vars_in_formula:
+                    match = time_vars_pattern.match(var_str)
+                    python_safe_id, offset_str = match.groups()
+                    offset = int(offset_str or 0)
+                    target_year = int(bsns_year) + offset
+                    
+                    value = self._find_financial_value(financials.get(target_year, {}), python_safe_id)
+                    if value is None:
+                        raise ValueError(f"필수 데이터 누락: {python_safe_id} ({target_year}년)")
+                    
+                    safe_name = f"{python_safe_id}_t{offset}".replace('-', '_minus_')
+                    eval_formula = eval_formula.replace(var_str, safe_name)
+                    context[safe_name] = value
+
+                # 2. 일반 변수 처리
+                tree = ast.parse(eval_formula)
+                variable_names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+                
+                for python_safe_id in variable_names:
+                    if python_safe_id in context or python_safe_id.upper() == 'ABS':
                         continue
-                    eval_formula = formula
-                    for account_id in account_ids:
-                        if account_id in eval_formula:
-                            eval_formula = eval_formula.replace(account_id, account_id.replace('-', '_'))
-                    print(f"🧮 [계산식] {eval_formula}")
-                    print(f"📊 [변수값] {formula_context}")
-                    value = self._safe_eval_expression(eval_formula, formula_context)
-                print(f"✅ [KPI 계산완료] {kpi_name}: {value} {unit}")
-                kpi_result = {
-                    "kpi_name": kpi_name,
-                    "value": f"{value:,.2f}" if isinstance(value, float) else f"{value:,}",
-                    "unit": unit,
-                    "category": category,
-                    "formula": formula
-                }
-                if category not in grouped_results:
-                    grouped_results[category] = []
+                    
+                    target_year = int(bsns_year)
+                    value = self._find_financial_value(financials.get(target_year, {}), python_safe_id)
+                    if value is None:
+                        raise ValueError(f"필수 데이터 누락: {python_safe_id} ({target_year}년)")
+                    
+                    context[python_safe_id] = value
+
+                print(f"  -> 🧮 [계산식] {eval_formula}")
+                print(f"  -> 📊 [변수값] {context}")
+                
+                value = self._safe_eval_expression(eval_formula, context)
+                formatted_value = self._validate_and_format_kpi(kpi_name, value, unit)
+
+                print(f"  -> ✅ [KPI 계산완료] {kpi_name}: {formatted_value} {unit}")
+                
+                kpi_result = { "kpi_name": kpi_name, "value": formatted_value, "unit": unit, "category": category, "formula": row['산식(AccountID)'] }
+                if category not in grouped_results: grouped_results[category] = []
                 grouped_results[category].append(kpi_result)
-            except Exception as e:
-                print(f"❌ [KPI 계산 오류] {kpi_name}: {e}")
+
+            except ZeroDivisionError:
+                print(f"  -> ❌ [KPI 계산 오류] {kpi_name}: 분모가 0입니다.")
                 continue
+            except Exception as e:
+                print(f"  -> ❌ [KPI 계산 오류] {kpi_name}: {e}")
+                continue
+        
         final_results = {
-            "company_name": company['corp_name'],
-            "corp_code": corp_code,
-            "bsns_year": bsns_year,
-            "reprt_code": reprt_code,
-            "categories": grouped_results,
+            "company_name": company['corp_name'], "corp_code": corp_code, "bsns_year": bsns_year,
+            "reprt_code": reprt_code, "categories": grouped_results,
             "total_kpi_count": sum(len(kpis) for kpis in grouped_results.values())
         }
         print(f"\n🏁 [KPI 계산 완료] {final_results['total_kpi_count']}개 KPI 계산됨")
-        print(f"📋 [대분류별 현황] {[(cat, len(kpis)) for cat, kpis in grouped_results.items()]}")
         cache[cache_key] = final_results
         return final_results
 
@@ -278,17 +237,10 @@ class KpiCompareService:
                 response = await client.get(url, params=params, timeout=15.0)
                 response.raise_for_status()
                 data = response.json()
-                if data.get("status") != "000":
-                    print(f"❗️ [DART API 오류] {data.get('message')}")
+                if data.get("status") not in ["000", "013"]:
                     raise HTTPException(status_code=400, detail=f"DART API 오류: {data.get('message')}")
-                print(f"🌏 [DART 응답 성공] {url}")
                 return data
             except httpx.HTTPStatusError as e:
-                print(f"❌ [DART HTTP 오류] {e}")
                 raise HTTPException(status_code=e.response.status_code, detail=f"DART API 요청 실패: {e.response.text}")
             except httpx.RequestError as e:
-                print(f"❌ [DART API 연결 실패] {e}")
                 raise HTTPException(status_code=503, detail=f"DART API 연결 실패: {e}")
-
-def get_kpi_compare_service():
-    return KpiCompareService()
