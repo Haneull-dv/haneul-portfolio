@@ -17,10 +17,10 @@ Gateway (API 게이트웨이)
 ├─ DSDGen (재무제표 생성)                                     │
 ├─ DSDCheck (재무제표 검증)                                   │
 ├─ KPICompare (KPI 비교 분석)                                 │
-├─ NewsClassifier (뉴스 분류)                                 │
-├─ Summarizer (텍스트 요약)                                   │
+├─ NewsClassifier (뉴스 분류 ai 모델)                                 │
+├─ Summarizer (텍스트 요약 ai 모델)                                   │
 ├─ Disclosure (공시 수집)                                     │
-├─ Issue (시장 이슈 트래킹)                                   │
+├─ Issue (이슈 트래킹)                                   │
 └─ WeeklyDB (주간 데이터 통합)                                │
 └────────────────────────────────────────────────────────────┘
     ↓
