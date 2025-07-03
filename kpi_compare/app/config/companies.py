@@ -30,7 +30,6 @@ SUPPORTED_COMPANIES = [
     {'corp_name': '고스트스튜디오', 'corp_code': '01416235'},
     {'corp_name': '엠게임', 'corp_code': '00397058'},
     {'corp_name': '위메이드플레이', 'corp_code': '00815767'},
-    {'corp_name': '라인게임즈', 'corp_code': '01246894'},
     {'corp_name': '넥써쓰', 'corp_code': '01042429'},
     {'corp_name': '한빛소프트', 'corp_code': '00348292'},
     {'corp_name': '스타코링크', 'corp_code': '00373571'}

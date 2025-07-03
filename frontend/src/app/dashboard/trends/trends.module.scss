@@ -239,6 +239,73 @@
     color: var(--dark-grey);
     font-size: 0.875rem;
   }
+
+  .sectionDescription {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .infoTooltipContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    
+    i {
+      font-size: 1.1rem;
+      color: var(--dark-grey);
+      cursor: help;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: var(--blue);
+      }
+    }
+    
+    &:hover .infoTooltip {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+  }
+
+  .infoTooltip {
+    display: none;
+    visibility: hidden;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    transform: translateY(-10px);
+    background: var(--dark);
+    color: var(--light);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    width: 300px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    text-align: left;
+    line-height: 1.6;
+
+    strong {
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      right: 8px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent var(--dark) transparent;
+    }
+  }
 }
 
 // Auto Complete Search

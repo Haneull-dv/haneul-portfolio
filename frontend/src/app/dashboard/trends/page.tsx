@@ -310,11 +310,17 @@ const ReportSelectionPanel: React.FC<{
                   className={styles.reportSelect}
                 >
                   <option value="" disabled>사업보고서를 선택하세요</option>
-                  {entry.reports.map(report => (
-                    <option key={report.rcept_no} value={report.rcept_no}>
-                      {`${report.report_nm.split('(')[0]} (${report.rcept_dt.substring(0,4)}년)`}
-                    </option>
-                  ))}
+                  {entry.reports.map(report => {
+                    const businessYearMatch = report.report_nm.match(/\((\d{4})/);
+                    const businessYear = businessYearMatch ? businessYearMatch[1] : 'N/A';
+                    const reportTitle = report.report_nm.split('(')[0].trim();
+
+                    return (
+                      <option key={report.rcept_no} value={report.rcept_no}>
+                        {`${reportTitle} (${businessYear}.12)`}
+                      </option>
+                    );
+                  })}
                 </select>
               ) : (
                 <span>사용 가능한 사업보고서가 없습니다.</span>
@@ -344,21 +350,26 @@ const SelectedCompaniesPanel: React.FC<{
 
       {selectedEntries.length > 0 && (
         <div className={styles.selectedCompanies}>
-          {selectedEntries.map((entry) => (
-            <div key={entry.company.corp_code} className={styles.selectedCompany}>
-              <span className={styles.companyName}>
-                {entry.company.corp_name}
-                {entry.selectedReport ? ` (${entry.selectedReport.rcept_dt.substring(0,4)}년)` : ''}
-              </span>
-              <button
-                onClick={() => onRemove(entry.company)}
-                className={styles.removeButton}
-                title="제거"
-              >
-                <i className='bx bx-x'></i>
-              </button>
-            </div>
-          ))}
+          {selectedEntries.map((entry) => {
+            const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
+            const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
+
+            return (
+              <div key={entry.company.corp_code} className={styles.selectedCompany}>
+                <span className={styles.companyName}>
+                  {entry.company.corp_name}
+                  {displayYear}
+                </span>
+                <button
+                  onClick={() => onRemove(entry.company)}
+                  className={styles.removeButton}
+                  title="제거"
+                >
+                  <i className='bx bx-x'></i>
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -401,6 +412,20 @@ const RadarChartAnalysis: React.FC<{
 
   const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
 
+  const tooltipContent = (
+    <>
+      <strong>종합 평가 기준:</strong>
+      <br />
+      각 점수는 0점에서 100점 사이로 환산됩니다.
+      <br /><br />
+      - <strong>성장성:</strong> 매출액증가율과 영업이익증가율을 기반으로 평가합니다.
+      <br />
+      - <strong>수익성:</strong> 영업이익률, 순이익률, 자기자본이익률(ROE)을 종합하여 평가합니다.
+      <br />
+      - <strong>안정성:</strong> 부채비율과 유동비율을 바탕으로 재무 구조의 안정성을 평가합니다.
+    </>
+  );
+
   return (
     <div className={styles.card}>
       <div className={styles.sectionHeader}>
@@ -408,7 +433,13 @@ const RadarChartAnalysis: React.FC<{
           <i className='bx bxs-radar'></i>
           재무건전성 종합 분석
         </h3>
-        <p>성장성, 수익성, 안정성 3개 영역 종합 평가</p>
+        <div className={styles.sectionDescription}>
+          <p>성장성, 수익성, 안정성 3개 영역 종합 평가</p>
+          <div className={styles.infoTooltipContainer}>
+            <i className='bx bx-help-circle'></i>
+            <div className={styles.infoTooltip}>{tooltipContent}</div>
+          </div>
+        </div>
       </div>
       
       <div className={styles.chartContainer}>
@@ -550,9 +581,11 @@ const AnalysisDashboard: React.FC<{
   ];
   const [activeCategory, setActiveCategory] = useState('Growth');
 
-  const analysisSubjects = analysisData.map(({ company, selectedReport }) => 
-    `${company.corp_name} (${selectedReport.rcept_dt.substring(0, 4)}년)`
-  ).join(', ');
+  const analysisSubjects = analysisData.map(({ company, selectedReport }) => {
+    const businessYearMatch = selectedReport.report_nm.match(/\((\d{4})/);
+    const displayYear = businessYearMatch ? `(${businessYearMatch[1]}.12)` : '';
+    return `${company.corp_name} ${displayYear}`;
+  }).join(', ');
 
   return (
     <div className={styles.analysisContainer}>
@@ -627,7 +660,21 @@ const TrendsPageContent: React.FC = () => {
 
     try {
       const reports = await fetchReports(company.corp_code);
-      const businessReports = reports.filter(r => r.report_nm.includes('사업보고서'));
+      
+      const businessReports = reports.filter(r => {
+        if (!r.report_nm.includes('사업보고서')) {
+          return false;
+        }
+        // "사업보고서 (2023.12.31)" 형태에서 연도 추출
+        const match = r.report_nm.match(/\((\d{4})/);
+        if (!match) return false;
+        
+        const businessYear = parseInt(match[1], 10);
+        const currentYear = new Date().getFullYear();
+
+        // 사업연도가 현재 연도보다 같거나 큰 경우는 제외 (예: 2024년 사업보고서는 2025년에 나옴)
+        return businessYear < currentYear;
+      });
       
       setSelectedEntries(prev => prev.map(entry => 
         entry.company.corp_code === company.corp_code 
@@ -681,10 +728,13 @@ const TrendsPageContent: React.FC = () => {
           }
 
           try {
+            const businessYearMatch = entry.selectedReport.report_nm.match(/\((\d{4})/);
+            const businessYear = businessYearMatch ? businessYearMatch[1] : entry.selectedReport.rcept_dt.substring(0, 4);
+
             const kpiData = await fetchKpi(
               entry.company.corp_code, 
               entry.selectedReport.rcept_no, 
-              entry.selectedReport.rcept_dt.substring(0, 4), 
+              businessYear, 
               '11011'
             );
             return {
