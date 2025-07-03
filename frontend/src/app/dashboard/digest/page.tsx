@@ -6,7 +6,7 @@ import PageHeader from '@/shared/components/PageHeader/PageHeader';
 
 // API 베이스 URL 설정
 const STOCKPRICE_API_BASE = 'http://localhost:9006/stockprice';
-const DISCLOSURE_API_BASE = 'http://localhost:8090/disclosure';
+const DISCLOSURE_API_BASE = 'http://localhost:8090/disclosures';
 const ISSUE_API_BASE = 'http://localhost:8089/issue';
 const WEEKLY_DB_API_BASE = 'http://localhost:8001/weekly';
 
@@ -98,7 +98,7 @@ const apiClient = {
 
   // Disclosure API
   async getWeeklyDisclosures() {
-    const response = await fetch(`${DISCLOSURE_API_BASE}/db/weekly`);
+    const response = await fetch(`${DISCLOSURE_API_BASE}/recent`);
     if (!response.ok) throw new Error('공시 데이터 로딩 실패');
     return await response.json();
   },
