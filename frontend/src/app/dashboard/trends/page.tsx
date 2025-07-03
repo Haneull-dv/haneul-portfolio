@@ -1,1147 +1,731 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
+import * as XLSX from 'xlsx';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
+import styles from './trends.module.scss';
 
-// API 베이스 URL
-const STOCKPRICE_API_BASE = 'http://localhost:9006/stockprice';
-const DISCLOSURE_API_BASE = 'http://localhost:8090/disclosure';
-const ISSUE_API_BASE = 'http://localhost:8089/issue';
-const WEEKLY_DB_API_BASE = 'http://localhost:8091/weekly';
-
-// 한국 게임기업 종목코드-시장 매핑표
-const STOCK_MARKET_MAPPING: Record<string, string> = {
-  '036570': 'KOSPI',   // 엔씨소프트
-  '251270': 'KOSPI',   // 넷마블
-  '259960': 'KOSPI',   // 크래프톤
-  '263750': 'KOSPI',   // 펄어비스
-  '078340': 'KOSDAQ',  // 컴투스
-  '112040': 'KOSDAQ',  // 위메이드
-  '293490': 'KOSPI',   // 카카오게임즈
-  '095660': 'KOSDAQ',  // 네오위즈
-  '181710': 'KOSPI',   // NHN
-  '069080': 'KOSDAQ',  // 웹젠
-  '225570': 'KOSPI'    // 넥슨게임즈
-};
-
-// 주가 데이터 타입 정의
-interface WeeklyStockPrice {
-  symbol: string;
-  marketCap: number | null;
-  today: number | null;
-  lastWeek: number | null;
-  changeRate: number | null;
-  weekHigh: number | null;
-  weekLow: number | null;
-  error: string | null;
+// Types
+interface Company {
+  corp_name: string;
+  corp_code: string;
 }
 
-interface WeeklyDisclosure {
-  symbol: string;
-  companyName: string;
-  title: string;
-  date: string;
-  url?: string;
+interface CompaniesResponse {
+  companies: Company[];
+}
+
+interface KpiItem {
+  kpi_name: string;
+  value: string;
+  unit: string;
   category: string;
-  summary?: string;
+  formula: string;
 }
 
-interface WeeklyIssue {
-  symbol: string;
-  companyName: string;
-  title: string;
-  date: string;
-  category: string;
-  source: string;
-  url?: string;
-  summary?: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+interface KpiResponse {
+  company_name: string;
+  corp_code: string;
+  bsns_year: string;
+  reprt_code: string;
+  categories: Record<string, KpiItem[]>;
+  total_kpi_count: number;
 }
 
-interface GameCompany {
-  symbol: string;
-  name: string;
-  market: string;
-  sector: string;
-  country: string;
+interface Report {
+  rcept_no: string;
+  corp_cls: string;
+  corp_name: string;
+  corp_code: string;
+  stock_code: string;
+  report_nm: string;
+  rcept_dt: string;
+  flr_nm: string;
+  rm: string;
 }
 
-interface StockPriceListResponse {
-  status: string;
-  message: string;
-  data: WeeklyStockPrice[];
-  total_count: number;
-  companies_processed: number;
-  last_updated: string | null;
+interface CompanyAnalysisData {
+  company: Company;
+  reports: Report[];
+  kpiData: KpiResponse | null;
+  error?: string;
 }
 
-interface GameCompaniesResponse {
-  status: string;
-  message: string;
-  companies: GameCompany[];
-  total_count: number;
-}
+// API Functions
+const API_BASE_URL = 'http://localhost:9007';
 
-// API 호출 함수들
-const apiClient = {
-  // 모든 주가 정보 조회
-  getAllStocks: async (): Promise<StockPriceListResponse> => {
-    const response = await fetch(`${STOCKPRICE_API_BASE}/db/all`);
-    if (!response.ok) {
-      throw new Error('주가 데이터 조회에 실패했습니다.');
-    }
-    return response.json();
+// Query Client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
   },
+});
 
-  // 상승률 상위 종목 조회
-  getTopGainers: async (limit: number = 3): Promise<WeeklyStockPrice[]> => {
-    const response = await fetch(`${STOCKPRICE_API_BASE}/db/top-gainers?limit=${limit}`);
-    if (!response.ok) {
-      throw new Error('상승률 상위 종목 조회에 실패했습니다.');
-    }
-    return response.json();
-  },
-
-  // 하락률 상위 종목 조회
-  getTopLosers: async (limit: number = 3): Promise<WeeklyStockPrice[]> => {
-    const response = await fetch(`${STOCKPRICE_API_BASE}/db/top-losers?limit=${limit}`);
-    if (!response.ok) {
-      throw new Error('하락률 상위 종목 조회에 실패했습니다.');
-    }
-    return response.json();
-  },
-
-  // 게임기업 정보 조회
-  getGameCompanies: async (): Promise<GameCompaniesResponse> => {
-    const response = await fetch(`${STOCKPRICE_API_BASE}/db/companies`);
-    if (!response.ok) {
-      throw new Error('게임기업 정보 조회에 실패했습니다.');
-    }
-    return response.json();
-  },
-
-  getDbCompanies: async (): Promise<{ companies: { symbol: string; name: string; country: string }[] }> => {
-    const response = await fetch(`${WEEKLY_DB_API_BASE}/companies`);
-    if (!response.ok) {
-      throw new Error('DB 기업 정보 조회에 실패했습니다.');
-    }
-    return response.json();
-  },
-
-  // Disclosure API
-  getWeeklyDisclosures: async () => {
-    const response = await fetch(`${DISCLOSURE_API_BASE}/db/weekly`);
-    if (!response.ok) throw new Error('공시 데이터 로딩 실패');
-    return await response.json();
-  },
-
-  // Issue API
-  getWeeklyIssues: async () => {
-    const response = await fetch(`${ISSUE_API_BASE}/db/weekly`);
-    if (!response.ok) throw new Error('이슈 데이터 로딩 실패');
-    return await response.json();
-  },
-
-  // 헬스체크
-  healthCheck: async (): Promise<{ status: string; service: string }> => {
-    const response = await fetch(`${STOCKPRICE_API_BASE}/health`);
-    if (!response.ok) {
-      throw new Error('서비스 상태 확인에 실패했습니다.');
-    }
-    return response.json();
+const fetchCompanies = async (): Promise<CompaniesResponse> => {
+  const response = await fetch(`${API_BASE_URL}/kpi/companies`);
+  if (!response.ok) {
+    throw new Error('백엔드 서버에 연결할 수 없습니다. KPI 비교 서버가 실행 중인지 확인해주세요.');
   }
+  return response.json();
 };
 
-// 통합 데이터 타입
-interface EnrichedStockData extends WeeklyStockPrice {
-  companyName: string;
-  market: string;
-  country: string;
-  marketCapRank?: number;
-  disclosures: WeeklyDisclosure[];
-  issues: WeeklyIssue[];
-}
-
-const getCountryStyle = (country: string) => {
-    const styles: Record<string, { background: string; color: string }> = {
-      KR: { background: '#3498db', color: 'white' },
-      JP: { background: '#e74c3c', color: 'white' },
-      CN: { background: '#f1c40f', color: '#2c3e50' },
-      US: { background: '#2c3e50', color: 'white' },
-      EU: { background: '#9b59b6', color: 'white' },
-      default: { background: '#bdc3c7', color: '#2c3e50' },
-    };
-    return styles[country] || styles.default;
+const searchCompanies = async (query: string) => {
+  const response = await fetch(`${API_BASE_URL}/kpi/search?query=${encodeURIComponent(query)}`);
+  if (!response.ok) {
+    throw new Error('기업 검색에 실패했습니다.');
+  }
+  return response.json();
 };
 
-// 트렌디한 랭킹 카드 컴포넌트
-interface RankingCardProps {
-  stock: EnrichedStockData;
-  rank: number;
-  type: 'gainer' | 'loser';
-}
+const fetchReports = async (corpCode: string): Promise<Report[]> => {
+  const response = await fetch(`${API_BASE_URL}/kpi/${corpCode}/reports`);
+  if (!response.ok) {
+    throw new Error(`보고서 데이터를 불러올 수 없습니다: ${corpCode}`);
+  }
+  return response.json();
+};
 
-const RankingCard: React.FC<RankingCardProps> = ({ stock, rank, type }) => {
-  const isPositive = stock.changeRate && stock.changeRate > 0;
-  const cardColor = type === 'gainer' ? '#e74c3c' : '#3498db';
-  const bgColor = type === 'gainer' ? '#ffeaea' : '#eaf4ff';
+const fetchKpi = async (corpCode: string, rceptNo: string, bsnsYear: string, reprtCode: string): Promise<KpiResponse> => {
+  const response = await fetch(`${API_BASE_URL}/kpi/${corpCode}/report/${rceptNo}/kpi?bsns_year=${bsnsYear}&reprt_code=${reprtCode}`);
+  if (!response.ok) {
+    throw new Error(`KPI 데이터를 불러올 수 없습니다: ${corpCode}`);
+  }
+  return response.json();
+};
+
+// Utility Functions
+const calculateFinancialScores = (kpiData: KpiResponse) => {
+  const getKpiValue = (category: string, kpiName: string): number => {
+    const items = kpiData.categories[category] || [];
+    const item = items.find(kpi => kpi.kpi_name.includes(kpiName));
+    if (!item || item.value.includes('N/A') || item.value.includes('데이터')) return 0;
+    
+    const numValue = parseFloat(item.value.replace(/,/g, ''));
+    return isNaN(numValue) ? 0 : numValue;
+  };
+
+  // 성장성 점수 (0-100)
+  const revenueGrowth = getKpiValue('Growth', '매출액증가율');
+  const operatingGrowth = getKpiValue('Growth', '영업이익증가율');
+  const growthScore = Math.max(0, Math.min(100, ((revenueGrowth + operatingGrowth) / 2) + 50));
+
+  // 수익성 점수 (0-100)  
+  const operatingMargin = getKpiValue('Profitability', '영업이익률');
+  const netMargin = getKpiValue('Profitability', '순이익률');
+  const roe = getKpiValue('Profitability', 'ROE');
+  const profitabilityScore = Math.max(0, Math.min(100, (operatingMargin + netMargin + roe / 2) * 2));
+
+  // 안정성 점수 (0-100)
+  const debtRatio = getKpiValue('Stability', '부채비율');
+  const currentRatio = getKpiValue('Stability', '유동비율');
+  const stabilityScore = Math.max(0, Math.min(100, (200 - debtRatio / 2 + currentRatio / 2) / 2));
+
+  return {
+    growth: Math.round(growthScore),
+    profitability: Math.round(profitabilityScore),
+    stability: Math.round(stabilityScore),
+  };
+};
+
+const formatKpiValue = (value: string, unit: string): string => {
+  if (value.includes('N/A') || value.includes('데이터')) return value;
   
-  const formatNumber = (num: number | null) => {
-    if (num === null) return 'N/A';
-    return num.toLocaleString();
-  };
-
-  const getRankEmoji = (rank: number) => {
-    switch(rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `${rank}위`;
-    }
-  };
-
-  return (
-    <div style={{
-      background: bgColor,
-      borderRadius: '16px',
-      padding: '24px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-      border: `2px solid ${cardColor}`,
-      transition: 'all 0.3s ease',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* 랭킹 배지 */}
-      <div style={{
-        position: 'absolute',
-        top: '12px',
-        right: '12px',
-        background: cardColor,
-        color: 'white',
-        borderRadius: '20px',
-        padding: '4px 12px',
-        fontSize: '14px',
-        fontWeight: 'bold'
-      }}>
-        {getRankEmoji(rank)}
-      </div>
-
-      {/* 기업 정보 */}
-      <div style={{ marginBottom: '16px' }}>
-        <h3 style={{ 
-          fontSize: '20px', 
-          fontWeight: 'bold', 
-          margin: '0 0 4px 0',
-          color: '#2c3e50'
-        }}>
-          {stock.companyName}
-        </h3>
-        <div style={{ fontSize: '14px', color: '#7f8c8d' }}>
-          {stock.symbol} · {stock.market}
-        </div>
-      </div>
-
-      {/* 주가 정보 */}
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ 
-          fontSize: '28px', 
-          fontWeight: 'bold', 
-          color: '#2c3e50',
-          marginBottom: '4px'
-        }}>
-          {formatNumber(stock.today)}원
-        </div>
-        <div style={{ 
-          fontSize: '18px', 
-          fontWeight: 'bold',
-          color: cardColor,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <i className={`bx ${isPositive ? 'bx-trending-up' : 'bx-trending-down'}`}></i>
-          {stock.changeRate !== null ? `${stock.changeRate > 0 ? '+' : ''}${stock.changeRate.toFixed(2)}%` : 'N/A'}
-        </div>
-      </div>
-
-      {/* 상세 정보 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '12px',
-        fontSize: '13px',
-        color: '#5a6c7d'
-      }}>
-        <div>
-          <div style={{ fontWeight: '600', marginBottom: '2px' }}>시가총액</div>
-          <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-            {stock.marketCap ? `${formatNumber(stock.marketCap)}억원` : 'N/A'}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontWeight: '600', marginBottom: '2px' }}>주간 고가</div>
-          <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-            {formatNumber(stock.weekHigh)}원
-          </div>
-        </div>
-        <div>
-          <div style={{ fontWeight: '600', marginBottom: '2px' }}>전주 종가</div>
-          <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-            {formatNumber(stock.lastWeek)}원
-          </div>
-        </div>
-        <div>
-          <div style={{ fontWeight: '600', marginBottom: '2px' }}>주간 저가</div>
-          <div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-            {formatNumber(stock.weekLow)}원
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const numValue = parseFloat(value.replace(/,/g, ''));
+  if (isNaN(numValue)) return value;
+  
+  if (unit === '%') {
+    return `${numValue.toFixed(2)}%`;
+  } else if (unit === '백만원') {
+    return `${(numValue/1000).toFixed(0)}억원`;
+  } else if (unit === '회') {
+    return `${numValue.toFixed(2)}회`;
+  }
+  
+  return `${numValue.toLocaleString()}${unit}`;
 };
 
-// 미니 차트/정보 팝업 컴포넌트
-interface MiniPopupProps {
-  stock: EnrichedStockData;
-  onClose: () => void;
-  position: { x: number; y: number };
-}
-
-const MiniPopup: React.FC<MiniPopupProps> = ({ stock, onClose, position }) => {
-  const formatNumber = (num: number | null) => {
-    if (num === null) return 'N/A';
-    return num.toLocaleString();
-  };
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: position.y + 10,
-      left: position.x + 10,
-      background: 'white',
-      border: '2px solid #e9ecef',
-      borderRadius: '12px',
-      padding: '20px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-      zIndex: 1000,
-      minWidth: '300px',
-      maxWidth: '400px'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-        <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '18px' }}>{stock.companyName}</h4>
-        <button onClick={onClose} style={{
-          background: 'none',
-          border: 'none',
-          fontSize: '20px',
-          cursor: 'pointer',
-          color: '#7f8c8d'
-        }}>×</button>
-      </div>
-      
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '5px' }}>
-          {stock.symbol} · {stock.market} · 순위 {stock.marketCapRank || 'N/A'}
-        </div>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
-          {formatNumber(stock.today)}원
-        </div>
-        <div style={{ 
-          fontSize: '16px', 
-          fontWeight: 'bold',
-          color: stock.changeRate === null ? '#7f8c8d' : 
-                 stock.changeRate > 0 ? '#e74c3c' : 
-                 stock.changeRate < 0 ? '#3498db' : '#7f8c8d'
-        }}>
-          {stock.changeRate !== null ? 
-            `${stock.changeRate > 0 ? '+' : ''}${stock.changeRate.toFixed(2)}%` : 'N/A'}
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
-        <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>시가총액</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
-            {stock.marketCap ? `${formatNumber(stock.marketCap)}억원` : 'N/A'}
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>전주종가</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
-            {formatNumber(stock.lastWeek)}원
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 고가</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
-            {formatNumber(stock.weekHigh)}원
-          </div>
-        </div>
-        <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 저가</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
-            {formatNumber(stock.weekLow)}원
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+// 한글 초성 추출 함수
+const getInitialConsonant = (char: string): string => {
+  const code = char.charCodeAt(0) - 44032;
+  if (code < 0 || code > 11171) return char;
+  const initial = Math.floor(code / 588);
+  const initials = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  return initials[initial];
 };
 
-// 전문적인 데이터 테이블 컴포넌트
-interface DataTableProps {
-  data: EnrichedStockData[];
-  onExportExcel: (selectedData?: EnrichedStockData[]) => void;
-  onExportPDF: (selectedData?: EnrichedStockData[]) => void;
-}
+// Components
+const AutoCompleteSearch: React.FC<{
+  onCompanySelect: (company: Company) => void;
+  selectedCompanies: Company[];
+  companies: Company[];
+}> = ({ onCompanySelect, selectedCompanies, companies }) => {
+  const [query, setQuery] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-const DataTable: React.FC<DataTableProps> = ({ data, onExportExcel, onExportPDF }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<keyof EnrichedStockData>('marketCapRank');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterPositive, setFilterPositive] = useState<'all' | 'positive' | 'negative'>('all');
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [showPopup, setShowPopup] = useState<{ stock: EnrichedStockData; position: { x: number; y: number } } | null>(null);
-  const [quickFilter, setQuickFilter] = useState<'all' | 'top5_change' | 'top5_marketcap'>('all');
-  const [filterCountry, setFilterCountry] = useState('all');
-
-  const countryOptions = useMemo(() => {
-    if (!data) return ['all'];
-    const countries = new Set(data.map(item => item.country).filter(c => c !== 'Unknown'));
-    return ['all', ...Array.from(countries).sort()];
-  }, [data]);
-
-  // 필터링 및 정렬된 데이터
-  const filteredAndSortedData = useMemo(() => {
-    let filtered = data.filter(item => {
-      const matchesSearch = item.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.symbol.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesFilter = filterPositive === 'all' || 
-                           (filterPositive === 'positive' && item.changeRate && item.changeRate > 0) ||
-                           (filterPositive === 'negative' && item.changeRate && item.changeRate < 0);
-      
-      const matchesCountry = filterCountry === 'all' || item.country === filterCountry;
-      
-      return matchesSearch && matchesFilter && matchesCountry;
-    });
-
-    // 빠른 필터 적용
-    if (quickFilter === 'top5_change') {
-      filtered = filtered
-        .sort((a, b) => Math.abs(b.changeRate || 0) - Math.abs(a.changeRate || 0))
-        .slice(0, 5);
-    } else if (quickFilter === 'top5_marketcap') {
-      filtered = filtered
-        .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
-        .slice(0, 5);
+  const filterCompanies = useCallback((searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setFilteredCompanies([]);
+      return;
     }
 
-    filtered.sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
+    const normalizedQuery = searchQuery.toLowerCase().trim();
+    const results = companies.filter(company => {
+      const name = company.corp_name.toLowerCase();
       
-      if (aVal === null || aVal === undefined) return 1;
-      if (bVal === null || bVal === undefined) return -1;
+      // 일반 텍스트 검색
+      if (name.includes(normalizedQuery)) return true;
       
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      // 초성 검색
+      if (normalizedQuery.length === 1) {
+        const queryInitial = normalizedQuery;
+        const nameInitials = company.corp_name.split('').map(getInitialConsonant).join('');
+        if (nameInitials.includes(queryInitial)) return true;
       }
       
-      const aStr = String(aVal).toLowerCase();
-      const bStr = String(bVal).toLowerCase();
-      
-      if (sortDirection === 'asc') {
-        return aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
-      } else {
-        return aStr > bStr ? -1 : aStr < bStr ? 1 : 0;
+      return false;
+    });
+
+    setFilteredCompanies(results.slice(0, 10)); // 최대 10개 결과
+  }, [companies]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    filterCompanies(value);
+    setIsOpen(true);
+  };
+
+  const handleCompanySelect = (company: Company) => {
+    if (selectedCompanies.length >= 5) {
+      alert('최대 5개 기업까지만 선택할 수 있습니다.');
+      return;
+    }
+    
+    if (selectedCompanies.some(c => c.corp_code === company.corp_code)) {
+      alert('이미 선택된 기업입니다.');
+      return;
+    }
+
+    onCompanySelect(company);
+    setQuery('');
+    setFilteredCompanies([]);
+    setIsOpen(false);
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
       }
-    });
+    };
 
-    return filtered;
-  }, [data, searchTerm, sortField, sortDirection, filterPositive, quickFilter, filterCountry]);
-
-  // 선택 관련 함수
-  const handleSelectAll = () => {
-    if (selectedItems.size === filteredAndSortedData.length) {
-      setSelectedItems(new Set());
-    } else {
-      setSelectedItems(new Set(filteredAndSortedData.map(item => item.symbol)));
-    }
-  };
-
-  const handleSelectItem = (symbol: string) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(symbol)) {
-      newSelected.delete(symbol);
-    } else {
-      newSelected.add(symbol);
-    }
-    setSelectedItems(newSelected);
-  };
-
-  const getSelectedData = () => {
-    return filteredAndSortedData.filter(item => selectedItems.has(item.symbol));
-  };
-
-  // 팝업 핸들러
-  const handleCellClick = (stock: EnrichedStockData, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setShowPopup({
-      stock,
-      position: { x: event.clientX, y: event.clientY }
-    });
-  };
-
-  const handleSort = (field: keyof EnrichedStockData) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const formatNumber = (num: number | null) => {
-    if (num === null) return 'N/A';
-    return num.toLocaleString();
-  };
-
-  const getSortIcon = (field: keyof EnrichedStockData) => {
-    if (sortField !== field) return 'bx-sort';
-    return sortDirection === 'asc' ? 'bx-sort-up' : 'bx-sort-down';
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      overflow: 'hidden'
-    }}>
-      {/* 테이블 헤더 - 검색 및 필터 */}
-      <div style={{
-        padding: '20px',
-        borderBottom: '1px solid #e9ecef',
-        background: '#f8f9fa'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <h3 style={{ margin: 0, color: '#2c3e50', fontSize: '18px', fontWeight: 'bold' }}>
-            게임기업 주가 현황 ({filteredAndSortedData.length}개 기업)
-          </h3>
-          
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* 검색 */}
-            <input
-              type="text"
-              placeholder="기업명 또는 종목코드 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px',
-                minWidth: '200px'
-              }}
-            />
-            
-            {/* 필터 */}
-            <select
-              value={filterPositive}
-              onChange={(e) => setFilterPositive(e.target.value as any)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px'
-              }}
-            >
-              <option value="all">전체</option>
-              <option value="positive">상승</option>
-              <option value="negative">하락</option>
-            </select>
-
-            {/* 국가 필터 */}
-            <select
-              value={filterCountry}
-              onChange={(e) => setFilterCountry(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px',
-                background: 'white'
-              }}
-            >
-              {countryOptions.map(country => (
-                <option key={country} value={country}>
-                  {country === 'all' ? '전체 국가' : country}
-                </option>
-              ))}
-            </select>
-
-            {/* 빠른 필터 버튼 */}
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                onClick={() => setQuickFilter('all')}
-                style={{
-                  background: quickFilter === 'all' ? '#3498db' : '#f8f9fa',
-                  color: quickFilter === 'all' ? 'white' : '#7f8c8d',
-                  border: '1px solid #ddd',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '13px'
-                }}
-              >
-                전체
-              </button>
-              <button
-                onClick={() => setQuickFilter('top5_change')}
-                style={{
-                  background: quickFilter === 'top5_change' ? '#3498db' : '#f8f9fa',
-                  color: quickFilter === 'top5_change' ? 'white' : '#7f8c8d',
-                  border: '1px solid #ddd',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '13px'
-                }}
-              >
-                변화율 TOP5
-              </button>
-              <button
-                onClick={() => setQuickFilter('top5_marketcap')}
-                style={{
-                  background: quickFilter === 'top5_marketcap' ? '#3498db' : '#f8f9fa',
-                  color: quickFilter === 'top5_marketcap' ? 'white' : '#7f8c8d',
-                  border: '1px solid #ddd',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '13px'
-                }}
-              >
-                시총 TOP5
-              </button>
-            </div>
-
-            {/* 다운로드 버튼 */}
-            <button
-              onClick={() => onExportExcel(selectedItems.size > 0 ? getSelectedData() : undefined)}
-              style={{
-                background: '#27ae60',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <i className='bx bxs-file-export'></i>
-              Excel {selectedItems.size > 0 && `(${selectedItems.size}개)`}
-            </button>
-            
-            <button
-              onClick={() => onExportPDF(selectedItems.size > 0 ? getSelectedData() : undefined)}
-              style={{
-                background: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <i className='bx bxs-file-pdf'></i>
-              PDF {selectedItems.size > 0 && `(${selectedItems.size}개)`}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 테이블 */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '14px'
-        }}>
-          <thead>
-            <tr style={{ background: '#f8f9fa' }}>
-              <th style={{
-                padding: '12px 8px',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                color: '#2c3e50',
-                borderBottom: '2px solid #dee2e6',
-                width: '50px'
-              }}>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAll}
-                  checked={selectedItems.size === filteredAndSortedData.length && filteredAndSortedData.length > 0}
-                  style={{ cursor: 'pointer' }}
-                />
-              </th>
-              {[
-                { key: 'marketCapRank', label: '순위' },
-                { key: 'companyName', label: '기업명' },
-                { key: 'symbol', label: '종목코드' },
-                { key: 'country', label: '국가' },
-                { key: 'market', label: '시장' },
-                { key: 'today', label: '현재가' },
-                { key: 'changeRate', label: '등락률(%)' },
-                { key: 'marketCap', label: '시가총액(억원)' },
-                { key: 'weekHigh', label: '주간고가' },
-                { key: 'weekLow', label: '주간저가' },
-                { key: 'lastWeek', label: '전주종가' },
-                { key: 'disclosures', label: '금주 공시' },
-                { key: 'issues', label: '금주 이슈' }
-              ].map(column => (
-                <th
-                  key={column.key}
-                  onClick={() => handleSort(column.key as keyof EnrichedStockData)}
-                  style={{
-                    padding: '12px 8px',
-                    textAlign: 'left',
-                    fontWeight: 'bold',
-                    color: '#2c3e50',
-                    cursor: 'pointer',
-                    borderBottom: '2px solid #dee2e6',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {column.label}
-                    <i className={`bx ${getSortIcon(column.key as keyof EnrichedStockData)}`}></i>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAndSortedData.map((stock, index) => (
-              <tr 
-                key={`table-row-${stock.symbol}-${index}`}
-                style={{
-                  borderBottom: '1px solid #e9ecef',
-                  background: selectedItems.has(stock.symbol) 
-                    ? '#e8f4fd' 
-                    : index % 2 === 0 ? 'white' : '#f8f9fa',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedItems.has(stock.symbol)) {
-                    e.currentTarget.style.backgroundColor = '#f0f8ff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedItems.has(stock.symbol)) {
-                    e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'white' : '#f8f9fa';
-                  }
-                }}
-              >
-                <td style={{ 
-                  padding: '12px 8px', 
-                  textAlign: 'center',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.has(stock.symbol)}
-                    onChange={() => handleSelectItem(stock.symbol)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  fontWeight: 'bold', 
-                  color: '#2c3e50',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  {stock.marketCapRank || '-'}
-                </td>
-                <td 
-                  style={{ 
-                    padding: '12px 8px', 
-                    fontWeight: 'bold', 
-                    color: '#2c3e50',
-                    borderRight: '1px solid #e9ecef',
-                    cursor: 'pointer'
-                  }}
-                  onClick={(e) => handleCellClick(stock, e)}
-                  title="클릭하면 상세 정보를 확인할 수 있습니다"
-                >
-                  {stock.companyName}
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  borderRight: '1px solid #e9ecef',
-                  cursor: 'pointer'
-                }}
-                  onClick={(e) => handleCellClick(stock, e)}
-                >
-                  {stock.symbol}
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  textAlign: 'center',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  <span style={{
-                    ...getCountryStyle(stock.country),
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}>
-                    {stock.country}
-                  </span>
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  <span style={{
-                    background: stock.market === 'KOSPI' ? '#e74c3c' : stock.market === 'KOSDAQ' ? '#3498db' : '#7f8c8d',
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}>
-                    {stock.market}
-                  </span>
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  fontWeight: 'bold', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  {formatNumber(stock.today)}원
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  fontWeight: 'bold', 
-                  textAlign: 'right',
-                  borderRight: '1px solid #e9ecef',
-                  color: stock.changeRate === null ? '#7f8c8d' : 
-                         stock.changeRate > 0 ? '#e74c3c' : 
-                         stock.changeRate < 0 ? '#3498db' : '#7f8c8d'
-                }}>
-                  {stock.changeRate !== null ? 
-                    `${stock.changeRate > 0 ? '+' : ''}${stock.changeRate.toFixed(2)}%` : 'N/A'}
-                </td>
-                <td 
-                  style={{ 
-                    padding: '12px 8px', 
-                    fontWeight: 'bold', 
-                    textAlign: 'right',
-                    color: '#2c3e50',
-                    borderRight: '1px solid #e9ecef',
-                    cursor: 'pointer'
-                  }}
-                  onClick={(e) => handleCellClick(stock, e)}
-                  title="클릭하면 상세 정보를 확인할 수 있습니다"
-                >
-                  {stock.marketCap ? `${formatNumber(stock.marketCap)}억원` : 'N/A'}
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  {formatNumber(stock.weekHigh)}원
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  borderRight: '1px solid #e9ecef'
-                }}>
-                  {formatNumber(stock.weekLow)}원
-                </td>
-                <td style={{ 
-                  padding: '12px 8px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600'
-                }}>
-                  {formatNumber(stock.lastWeek)}원
-                </td>
-                <td style={{ padding: '12px 8px', borderRight: '1px solid #e9ecef' }}>
-                  {stock.disclosures.length > 0 ? (
-                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
-                      {stock.disclosures.slice(0, 2).map((disclosure, idx) => (
-                        <div key={idx} style={{ 
-                          marginBottom: '6px',
-                          padding: '6px 10px',
-                          background: '#f8f9fa',
-                          borderRadius: '6px',
-                          fontSize: '12px'
-                        }}>
-                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
-                            {disclosure.title.length > 25 ? 
-                              `${disclosure.title.substring(0, 25)}...` : 
-                              disclosure.title}
-                          </div>
-                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
-                            {disclosure.date} · {disclosure.category}
-                          </div>
-                        </div>
-                      ))}
-                      {stock.disclosures.length > 2 && (
-                        <div style={{ 
-                          fontSize: '11px', 
-                          color: '#7f8c8d', 
-                          textAlign: 'center',
-                          marginTop: '4px'
-                        }}>
-                          +{stock.disclosures.length - 2}개 더
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>공시 없음</span>
-                  )}
-                </td>
-                <td style={{ padding: '12px 8px' }}>
-                  {stock.issues.length > 0 ? (
-                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
-                      {stock.issues.slice(0, 2).map((issue, idx) => (
-                        <div key={idx} style={{ 
-                          marginBottom: '6px',
-                          padding: '6px 10px',
-                          background: issue.sentiment === 'positive' ? '#e8f5e8' :
-                                     issue.sentiment === 'negative' ? '#ffeaea' : '#f8f9fa',
-                          borderRadius: '6px',
-                          fontSize: '12px'
-                        }}>
-                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
-                            {issue.title.length > 25 ? 
-                              `${issue.title.substring(0, 25)}...` : 
-                              issue.title}
-                          </div>
-                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
-                            {issue.date} · {issue.source}
-                          </div>
-                        </div>
-                      ))}
-                      {stock.issues.length > 2 && (
-                        <div style={{ 
-                          fontSize: '11px', 
-                          color: '#7f8c8d', 
-                          textAlign: 'center',
-                          marginTop: '4px'
-                        }}>
-                          +{stock.issues.length - 2}개 더
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>이슈 없음</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 팝업 */}
-      {showPopup && (
-        <MiniPopup
-          stock={showPopup.stock}
-          position={showPopup.position}
-          onClose={() => setShowPopup(null)}
+    <div ref={searchRef} className={styles.searchContainer}>
+      <div className={styles.searchInputContainer}>
+        <i className='bx bx-search'></i>
+        <input
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+          placeholder="기업명 검색 (예: ㄴ, 네이버, 넥슨...)"
+          className={styles.searchInput}
         />
+      </div>
+      
+      {isOpen && filteredCompanies.length > 0 && (
+        <div className={styles.searchDropdown}>
+          {filteredCompanies.map((company) => (
+            <div
+              key={company.corp_code}
+              className={styles.searchItem}
+              onClick={() => handleCompanySelect(company)}
+            >
+              <div className={styles.companyDetails}>
+                <span className={styles.companyName}>{company.corp_name}</span>
+                <span className={styles.companyCode}>{company.corp_code}</span>
+              </div>
+              <span className={styles.gameLabel}>게임</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
 };
 
-const TrendsPage: React.FC = () => {
-  const [topGainers, setTopGainers] = useState<EnrichedStockData[]>([]);
-  const [topLosers, setTopLosers] = useState<EnrichedStockData[]>([]);
-  const [allStocksData, setAllStocksData] = useState<EnrichedStockData[]>([]);
-  const [companies, setCompanies] = useState<GameCompany[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+const SelectedCompaniesPanel: React.FC<{
+  selectedCompanies: Company[];
+  onRemove: (company: Company) => void;
+  onAnalyze: () => void;
+}> = ({ selectedCompanies, onRemove, onAnalyze }) => {
+  return (
+    <div className={styles.card}>
+      <div className={styles.sectionHeader}>
+        <h3>
+          <i className='bx bxs-analyse'></i>
+          선택된 기업 ({selectedCompanies.length}/5)
+        </h3>
+        <p>분석할 기업을 선택하고 KPI 분석을 시작하세요</p>
+      </div>
+
+      {selectedCompanies.length > 0 && (
+        <div className={styles.selectedCompanies}>
+          {selectedCompanies.map((company) => (
+            <div key={company.corp_code} className={styles.selectedCompany}>
+              <span className={styles.companyName}>{company.corp_name}</span>
+              <button
+                onClick={() => onRemove(company)}
+                className={styles.removeButton}
+                title="제거"
+              >
+                <i className='bx bx-x'></i>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.analyzeActions}>
+        <button
+          onClick={onAnalyze}
+          disabled={selectedCompanies.length === 0}
+          className={styles.analyzeButton}
+        >
+          <i className='bx bxs-bar-chart-alt-2'></i>
+          KPI 분석 시작
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const RadarChartAnalysis: React.FC<{
+  analysisData: CompanyAnalysisData[];
+}> = ({ analysisData }) => {
+  const chartData = useMemo(() => {
+    const metrics = ['성장성', '수익성', '안정성'];
+    return metrics.map(metric => {
+      const dataPoint: any = { metric };
+      
+      analysisData.forEach(({ company, kpiData }) => {
+        if (kpiData) {
+          const scores = calculateFinancialScores(kpiData);
+          switch(metric) {
+            case '성장성': dataPoint[company.corp_name] = scores.growth; break;
+            case '수익성': dataPoint[company.corp_name] = scores.profitability; break;
+            case '안정성': dataPoint[company.corp_name] = scores.stability; break;
+          }
+        }
+      });
+      
+      return dataPoint;
+    });
+  }, [analysisData]);
+
+  const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.sectionHeader}>
+        <h3>
+          <i className='bx bxs-radar'></i>
+          재무건전성 종합 분석
+        </h3>
+        <p>성장성, 수익성, 안정성 3개 영역 종합 평가</p>
+      </div>
+      
+      <div className={styles.chartContainer}>
+        <ResponsiveContainer width="100%" height={400}>
+          <RadarChart data={chartData}>
+            <PolarGrid />
+            <PolarAngleAxis dataKey="metric" />
+            <PolarRadiusAxis 
+              angle={90} 
+              domain={[0, 100]}
+              tick={false}
+            />
+            {analysisData.filter(item => item.kpiData).map(({ company }, index) => (
+              <Radar
+                key={company.corp_code}
+                name={company.corp_name}
+                dataKey={company.corp_name}
+                stroke={colors[index % colors.length]}
+                fill={colors[index % colors.length]}
+                fillOpacity={0.1}
+                strokeWidth={2}
+              />
+            ))}
+            <RechartsTooltip />
+            <Legend />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+const KpiTable: React.FC<{
+  analysisData: CompanyAnalysisData[];
+  activeCategory: string;
+}> = ({ analysisData, activeCategory }) => {
+  
+  const exportToExcel = () => {
+    const companiesWithData = analysisData.filter(item => item.kpiData);
+    if (companiesWithData.length === 0) return;
+
+    const kpiItems = companiesWithData[0].kpiData?.categories[activeCategory] || [];
+    
+    const excelData = kpiItems.map(kpiItem => {
+      const row: any = { '재무지표': kpiItem.kpi_name };
+      
+      companiesWithData.forEach(({ company, kpiData }) => {
+        const companyKpi = kpiData?.categories[activeCategory]?.find(k => k.kpi_name === kpiItem.kpi_name);
+        row[company.corp_name] = companyKpi ? formatKpiValue(companyKpi.value, companyKpi.unit) : 'N/A';
+      });
+      
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${activeCategory} KPI`);
+    
+    const fileName = `게임업계_${activeCategory}_KPI분석_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
+  const companiesWithData = analysisData.filter(item => item.kpiData);
+  if (companiesWithData.length === 0) {
+    return (
+      <div className={styles.card}>
+        <div className={styles.noData}>
+          <i className='bx bx-info-circle'></i>
+          <p>분석할 데이터가 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const kpiItems = companiesWithData[0].kpiData?.categories[activeCategory] || [];
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.sectionHeader}>
+        <h3>
+          <i className='bx bxs-report'></i>
+          {activeCategory} KPI 상세 분석
+        </h3>
+        <button onClick={exportToExcel} className={styles.exportButton}>
+          <i className='bx bxs-download'></i>
+          엑셀 저장
+        </button>
+      </div>
+
+      <div className={styles.tableWrapper}>
+        <table className={styles.kpiTable}>
+          <thead>
+            <tr>
+              <th>재무지표</th>
+              {companiesWithData.map(({ company }) => (
+                <th key={company.corp_code}>{company.corp_name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {kpiItems.map((kpiItem, index) => (
+              <tr key={index}>
+                <td className={styles.kpiName}>
+                  <div className={styles.kpiInfo}>
+                    <span>{kpiItem.kpi_name}</span>
+                    <span className={styles.kpiUnit}>{kpiItem.unit}</span>
+                  </div>
+                </td>
+                {companiesWithData.map(({ company, kpiData }) => {
+                  const companyKpi = kpiData?.categories[activeCategory]?.find(k => k.kpi_name === kpiItem.kpi_name);
+                  const value = companyKpi ? formatKpiValue(companyKpi.value, companyKpi.unit) : 'N/A';
+                  const isValid = !value.includes('N/A') && !value.includes('데이터');
+                  
+                  return (
+                    <td key={company.corp_code} className={`${styles.kpiValue} ${isValid ? styles.valid : styles.invalid}`}>
+                      {value}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const AnalysisDashboard: React.FC<{
+  analysisData: CompanyAnalysisData[];
+  onBack: () => void;
+}> = ({ analysisData, onBack }) => {
+  // 1. 보고서 목록 상태
+  const [reportsMap, setReportsMap] = useState<Record<string, Report[]>>({});
+  // 2. 공통 연도 목록
+  const [commonYears, setCommonYears] = useState<string[]>([]);
+  // 3. 선택된 연도
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  // 4. KPI 데이터 상태
+  const [kpiDataMap, setKpiDataMap] = useState<Record<string, KpiResponse | null>>({});
+  const [loading, setLoading] = useState(false);
+
+  // 1. 보고서 목록 fetch (최초 1회)
+  React.useEffect(() => {
+    const fetchAllReports = async () => {
+      const map: Record<string, Report[]> = {};
+      for (const { company } of analysisData) {
+        try {
+          const reports = await fetchReports(company.corp_code);
+          map[company.corp_code] = reports.filter(r => r.report_nm.includes('사업보고서'));
+        } catch {
+          map[company.corp_code] = [];
+        }
+      }
+      setReportsMap(map);
+    };
+    fetchAllReports();
+  }, [analysisData]);
+
+  // 2. 공통 연도 추출
+  React.useEffect(() => {
+    const allYears = Object.values(reportsMap).map(reports =>
+      new Set(reports.map(r => r.rcept_dt.substring(0, 4)))
+    );
+    if (allYears.length === 0 || allYears.some(set => set.size === 0)) {
+      setCommonYears([]);
+      setSelectedYear('');
+      return;
+    }
+    // 교집합
+    let intersection = [...allYears[0]];
+    for (let i = 1; i < allYears.length; i++) {
+      intersection = intersection.filter(y => allYears[i].has(y));
+    }
+    intersection.sort((a, b) => b.localeCompare(a)); // 최신 연도 우선
+    setCommonYears(intersection);
+    setSelectedYear(intersection[0] || '');
+  }, [reportsMap]);
+
+  // 3. 연도 선택 시 KPI fetch
+  React.useEffect(() => {
+    if (!selectedYear) return;
+    setLoading(true);
+    const fetchAllKpi = async () => {
+      const newMap: Record<string, KpiResponse | null> = {};
+      await Promise.all(
+        analysisData.map(async ({ company }) => {
+          const reports = reportsMap[company.corp_code] || [];
+          const report = reports.find(r => r.rcept_dt.startsWith(selectedYear));
+          if (!report) {
+            newMap[company.corp_code] = null;
+            return;
+          }
+          try {
+            const kpi = await fetchKpi(company.corp_code, report.rcept_no, selectedYear, '11011');
+            newMap[company.corp_code] = kpi;
+          } catch {
+            newMap[company.corp_code] = null;
+          }
+        })
+      );
+      setKpiDataMap(newMap);
+      setLoading(false);
+    };
+    fetchAllKpi();
+  }, [selectedYear, reportsMap, analysisData]);
+
+  // KPI 데이터 변환
+  const kpiAnalysisData: CompanyAnalysisData[] = analysisData.map(({ company }) => ({
+    company,
+    reports: reportsMap[company.corp_code] || [],
+    kpiData: kpiDataMap[company.corp_code] || null,
+  }));
+
+  const categories = [
+    { key: 'Growth', label: '성장성', icon: 'bx-trending-up' },
+    { key: 'Profitability', label: '수익성', icon: 'bxs-coin' },
+    { key: 'Stability', label: '안정성', icon: 'bxs-shield' },
+    { key: 'Activity', label: '활동성', icon: 'bx-refresh' },
+    { key: 'Cashflow', label: '현금흐름', icon: 'bxs-bank' }
+  ];
+  const [activeCategory, setActiveCategory] = useState('Growth');
+
+  return (
+    <div className={styles.analysisContainer}>
+      <div className={styles.analysisHeader}>
+        <button onClick={onBack} className={styles.backButton}>
+          <i className='bx bx-arrow-back'></i>
+          기업 선택으로 돌아가기
+        </button>
+        <h2>
+          <i className='bx bxs-bar-chart-alt-2'></i>
+          게임업계 KPI 분석 결과
+        </h2>
+        <div className={styles.analysisSubject}>
+          {analysisData.map(({ company }) => company.corp_name).join(', ')} 비교분석
+        </div>
+      </div>
+      {/* 보고서 연도 선택 드롭다운 */}
+      <div className={styles.reportSelectorCard}>
+        <div className={styles.selectorWrapper}>
+          <label htmlFor="report-year">분석 기준 연도:</label>
+          <select
+            id="report-year"
+            value={selectedYear}
+            onChange={e => setSelectedYear(e.target.value)}
+            disabled={commonYears.length === 0}
+          >
+            {commonYears.map(year => (
+              <option key={year} value={year}>{year}년</option>
+            ))}
+          </select>
+          {commonYears.length === 0 && <p>공통 사업보고서 연도가 없습니다.</p>}
+        </div>
+      </div>
+      {/* KPI 데이터 로딩/표시 */}
+      {loading ? (
+        <div className={styles.loading}>
+          <i className='bx bx-loader-alt bx-spin'></i>
+          <h3>KPI 데이터를 불러오는 중...</h3>
+        </div>
+      ) : (
+        <>
+          <RadarChartAnalysis analysisData={kpiAnalysisData} />
+          <div className={styles.categoryTabs}>
+            {categories.map(({ key, label, icon }) => (
+              <button
+                key={key}
+                className={`${styles.categoryTab} ${activeCategory === key ? styles.active : ''}`}
+                onClick={() => setActiveCategory(key)}
+              >
+                <i className={`bx ${icon}`}></i>
+                {label}
+              </button>
+            ))}
+          </div>
+          <KpiTable analysisData={kpiAnalysisData} activeCategory={activeCategory} />
+        </>
+      )}
+    </div>
+  );
+};
+
+// Main Component with Query Support
+const TrendsPageContent: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'selection' | 'analysis'>('selection');
+  const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
+  const [analysisData, setAnalysisData] = useState<CompanyAnalysisData[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Market Trends', active: true }
+    { label: 'Financial Trends', active: true }
   ];
 
-  // 데이터 통합 함수 (중복 제거 포함)
-  const enrichStockData = (
-    stockData: WeeklyStockPrice[], 
-    companies: GameCompany[],
-    disclosures: WeeklyDisclosure[],
-    issues: WeeklyIssue[],
-    dbCompanies: { symbol: string; name: string; country: string }[]
-  ): EnrichedStockData[] => {
-    // 안전성 검사
-    if (!Array.isArray(stockData) || stockData.length === 0) {
-      return [];
-    }
-    
-    if (!Array.isArray(companies)) {
-      companies = [];
-    }
+  // 기업 목록 조회
+  const { data: companiesData, isLoading, error } = useQuery({
+    queryKey: ['companies'],
+    queryFn: fetchCompanies,
+  });
 
-    // 중복 제거: symbol 기준으로 유니크한 데이터만 유지
-    const uniqueStocks = stockData.filter((stock, index, self) => 
-      stock && stock.symbol && index === self.findIndex(s => s && s.symbol === stock.symbol)
-    );
-
-    return uniqueStocks.map(stock => {
-      const company = companies.find(c => c && c.symbol === stock.symbol);
-      const dbCompany = dbCompanies.find(c => c && c.symbol === stock.symbol);
-      const companyDisclosures = disclosures.filter(d => d.symbol === stock.symbol);
-      const companyIssues = issues.filter(i => i.symbol === stock.symbol);
-      return {
-        ...stock,
-        companyName: company?.name || stock.symbol || 'Unknown',
-        market: STOCK_MARKET_MAPPING[stock.symbol] || company?.market || 'Unknown',
-        country: dbCompany?.country || 'Unknown',
-        disclosures: companyDisclosures,
-        issues: companyIssues
-      };
-    }).sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
-      .map((stock, index) => ({
-        ...stock,
-        marketCapRank: stock.marketCap ? index + 1 : undefined
-      }));
+  const handleCompanySelect = (company: Company) => {
+    setSelectedCompanies(prev => [...prev, company]);
   };
 
-  const fetchData = async () => {
+  const handleCompanyRemove = (company: Company) => {
+    setSelectedCompanies(prev => prev.filter(c => c.corp_code !== company.corp_code));
+  };
+
+  const handleAnalyze = async () => {
+    if (selectedCompanies.length === 0) return;
+    
+    setIsAnalyzing(true);
+    setCurrentView('analysis');
+    
     try {
-      setLoading(true);
-      const [
-        gainersData, 
-        losersData, 
-        companiesData, 
-        allStocksResponse,
-        disclosuresResponse,
-        issuesResponse,
-        dbCompaniesResponse
-      ] = await Promise.all([
-        apiClient.getTopGainers(3),
-        apiClient.getTopLosers(3),
-        apiClient.getGameCompanies(),
-        apiClient.getAllStocks(),
-        apiClient.getWeeklyDisclosures().catch(() => ({ data: [] })),
-        apiClient.getWeeklyIssues().catch(() => ({ data: [] })),
-        apiClient.getDbCompanies().catch(() => ({ companies: [] }))
-      ]);
-
-      // 데이터 유효성 검사
-      const validGainers = Array.isArray(gainersData) ? gainersData : [];
-      const validLosers = Array.isArray(losersData) ? losersData : [];
-      const validCompanies = Array.isArray(companiesData?.companies) ? companiesData.companies : [];
-      const validAllStocks = Array.isArray(allStocksResponse?.data) ? allStocksResponse.data : [];
-      const validDisclosures = Array.isArray(disclosuresResponse.data) ? disclosuresResponse.data : [];
-      const validIssues = Array.isArray(issuesResponse.data) ? issuesResponse.data : [];
-      const validDbCompanies = Array.isArray(dbCompaniesResponse.companies) ? dbCompaniesResponse.companies : [];
-
-      setCompanies(validCompanies);
+      const analysisResults: CompanyAnalysisData[] = await Promise.all(
+        selectedCompanies.map(async (company) => {
+          try {
+            const reports = await fetchReports(company.corp_code);
+            
+            // 가장 최근 사업보고서 선택
+            const businessReports = reports.filter(r => r.report_nm.includes('사업보고서'));
+            let kpiData = null;
+            
+            if (businessReports.length > 0) {
+              const latestReport = businessReports[0];
+              try {
+                kpiData = await fetchKpi(
+                  company.corp_code, 
+                  latestReport.rcept_no, 
+                  latestReport.rcept_dt.substring(0, 4), 
+                  '11011'
+                );
+              } catch (kpiError) {
+                console.warn(`KPI 데이터 로딩 실패: ${company.corp_name}`, kpiError);
+              }
+            }
+            
+            return {
+              company,
+              reports,
+              kpiData,
+            };
+          } catch (error) {
+            console.error(`기업 데이터 로딩 실패: ${company.corp_name}`, error);
+            return {
+              company,
+              reports: [],
+              kpiData: null,
+              error: `데이터 로딩 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`
+            };
+          }
+        })
+      );
       
-      // 데이터 통합 (빈 배열도 안전하게 처리)
-      const enrichedGainers = enrichStockData(validGainers, validCompanies, validDisclosures, validIssues, validDbCompanies);
-      const enrichedLosers = enrichStockData(validLosers, validCompanies, validDisclosures, validIssues, validDbCompanies);
-      const enrichedAllStocks = enrichStockData(validAllStocks, validCompanies, validDisclosures, validIssues, validDbCompanies);
-
-      setTopGainers(enrichedGainers);
-      setTopLosers(enrichedLosers);
-      setAllStocksData(enrichedAllStocks);
-      setLastUpdated(new Date().toLocaleString('ko-KR'));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '데이터 로딩 중 오류가 발생했습니다.');
+      setAnalysisData(analysisResults);
+    } catch (error) {
+      console.error('분석 중 오류 발생:', error);
+      alert('분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setCurrentView('selection');
     } finally {
-      setLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleRefresh = () => {
-    setError(null);
-    fetchData();
+  const handleBack = () => {
+    setCurrentView('selection');
+    setAnalysisData([]);
   };
 
-  // 엑셀 다운로드 함수
-  const handleExportExcel = (selectedData?: EnrichedStockData[]) => {
-    const dataToExport = selectedData || allStocksData;
-    const count = dataToExport.length;
-    const type = selectedData ? '선택된' : '전체';
-    
-    // 실제 구현 시 xlsx 라이브러리 사용
-    alert(`${type} ${count}개 기업의 Excel 다운로드 기능을 구현중입니다.`);
-  };
-
-  // PDF 다운로드 함수
-  const handleExportPDF = (selectedData?: EnrichedStockData[]) => {
-    const dataToExport = selectedData || allStocksData;
-    const count = dataToExport.length;
-    const type = selectedData ? '선택된' : '전체';
-    
-    // 실제 구현 시 jspdf 라이브러리 사용
-    alert(`${type} ${count}개 기업의 PDF 다운로드 기능을 구현중입니다.`);
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
-        <PageHeader 
-          title="Market Trends" 
-          breadcrumbs={breadcrumbs}
-          actions={
-            <button className="btn-download" onClick={handleRefresh}>
-              <i className='bx bx-refresh bx-spin'></i>
-              <span className="text">새로고침</span>
-            </button>
-          }
-        />
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          minHeight: '60vh',
-          flexDirection: 'column'
-        }}>
-          <i className='bx bx-loader-alt bx-spin' style={{ fontSize: '3rem', color: '#e91e63', marginBottom: '20px' }}></i>
-          <p style={{ color: '#666', fontSize: '18px' }}>시장 동향 데이터를 불러오는 중...</p>
+        <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
+        <div className={styles.container}>
+          <div className={styles.loading}>
+            <i className='bx bx-loader-alt bx-spin'></i>
+            <h3>게임업계 기업 데이터를 불러오는 중...</h3>
+            <p>잠시만 기다려주세요</p>
+          </div>
         </div>
       </Layout>
     );
@@ -1150,37 +734,32 @@ const TrendsPage: React.FC = () => {
   if (error) {
     return (
       <Layout>
-        <PageHeader 
-          title="Market Trends" 
-          breadcrumbs={breadcrumbs}
-          actions={
-            <button className="btn-download" onClick={handleRefresh}>
-              <i className='bx bx-refresh'></i>
-              <span className="text">다시 시도</span>
-            </button>
-          }
-        />
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          minHeight: '60vh',
-          flexDirection: 'column'
-        }}>
-          <i className='bx bxs-error' style={{ fontSize: '3rem', color: '#e74c3c', marginBottom: '20px' }}></i>
-          <h3 style={{ color: '#e74c3c', marginBottom: '10px' }}>데이터 로딩 오류</h3>
-          <p style={{ color: '#666', textAlign: 'center', marginBottom: '20px' }}>{error}</p>
-          <button onClick={handleRefresh} style={{
-            background: '#e91e63',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}>
-            다시 시도
-          </button>
+        <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
+        <div className={styles.container}>
+          <div className={styles.error}>
+            <i className='bx bx-error'></i>
+            <div>
+              <h3>서버 연결 오류</h3>
+              <p>KPI 비교 서버(localhost:9007)에 연결할 수 없습니다.</p>
+              <p>백엔드 서버가 실행 중인지 확인해주세요.</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isAnalyzing) {
+    return (
+      <Layout>
+        <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
+        <div className={styles.container}>
+          <div className={styles.loading}>
+            <i className='bx bx-loader-alt bx-spin'></i>
+            <h3>재무 데이터를 분석하는 중...</h3>
+            <p>DART 공시 데이터를 기반으로 KPI를 계산하고 있습니다.</p>
+            <p>최대 1분 정도 소요될 수 있습니다.</p>
+          </div>
         </div>
       </Layout>
     );
@@ -1188,129 +767,84 @@ const TrendsPage: React.FC = () => {
 
   return (
     <Layout>
-      <PageHeader 
-        title="Market Trends" 
-        breadcrumbs={breadcrumbs}
-        actions={
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn-download" onClick={() => handleExportExcel()}>
-              <i className='bx bxs-file-export'></i>
-              <span className="text">Excel 다운로드</span>
-            </button>
-            <button className="btn-download" onClick={handleRefresh}>
-              <i className='bx bx-refresh'></i>
-              <span className="text">새로고침</span>
-            </button>
-          </div>
-        }
-      />
+      <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
 
-      <div style={{ padding: '20px' }}>
-        {/* 요약 정보 헤더 */}
-        <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-          color: 'white',
-          padding: '30px', 
-          borderRadius: '16px', 
-          marginBottom: '30px',
-          textAlign: 'center'
-        }}>
-          <h1 style={{ margin: '0 0 10px 0', fontSize: '28px', fontWeight: 'bold' }}>
-            🎮 게임기업 주가 동향 분석
-          </h1>
-          <p style={{ margin: '0 0 15px 0', fontSize: '16px', opacity: 0.9 }}>
-            실시간 주가 정보 및 시장 동향 분석 (총 {allStocksData.length}개 기업)
-          </p>
-          {lastUpdated && (
-            <p style={{ fontSize: '14px', margin: 0, opacity: 0.8 }}>
-              📊 마지막 업데이트: {lastUpdated}
-            </p>
-          )}
-        </div>
-
-        {/* 상위 랭킹 카드 섹션 */}
-        <div style={{ marginBottom: '40px' }}>
-          {/* 상승률 TOP 3 */}
-          <section style={{ marginBottom: '30px' }}>
-            <h2 style={{ 
-              marginBottom: '20px', 
-              color: '#2c3e50',
-              fontSize: '22px',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              📈 주간 상승률 TOP 3
-            </h2>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-              gap: '20px' 
-            }}>
-              {topGainers.map((stock, index) => (
-                <RankingCard 
-                  key={`gainer-${stock.symbol}-${index}`}
-                  stock={stock} 
-                  rank={index + 1}
-                  type="gainer"
-                />
-              ))}
+      <div className={styles.container}>
+        {currentView === 'selection' && (
+          <>
+            <div className={styles.pageIntro}>
+              <div className={styles.card}>
+                <div className={styles.introContent}>
+                  <div className={styles.introText}>
+                    <h1>
+                      <i className='bx bxs-bar-chart-alt-2'></i>
+                      게임업계 재무 분석 플랫폼
+                    </h1>
+                    <p>
+                      DART 공시 데이터를 기반으로 게임업계 상장기업의 재무건전성을 종합 분석합니다.
+                      성장성, 수익성, 안정성 등 핵심 KPI를 통해 객관적인 재무 비교가 가능합니다.
+                    </p>
+                  </div>
+                  <div className={styles.introStats}>
+                    <div className={styles.statItem}>
+                      <span className={styles.statNumber}>{companiesData?.companies?.length || 0}</span>
+                      <span className={styles.statLabel}>분석 대상 기업</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statNumber}>9</span>
+                      <span className={styles.statLabel}>핵심 재무지표</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statNumber}>5</span>
+                      <span className={styles.statLabel}>분석 카테고리</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </section>
 
-          {/* 하락률 TOP 3 */}
-          <section style={{ marginBottom: '30px' }}>
-            <h2 style={{ 
-              marginBottom: '20px', 
-              color: '#2c3e50',
-              fontSize: '22px',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              📉 주간 하락률 TOP 3
-            </h2>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-              gap: '20px' 
-            }}>
-              {topLosers.map((stock, index) => (
-                <RankingCard 
-                  key={`loser-${stock.symbol}-${index}`}
-                  stock={stock} 
-                  rank={index + 1}
-                  type="loser"
-                />
-              ))}
+            <div className={styles.card}>
+              <div className={styles.sectionHeader}>
+                <h3>
+                  <i className='bx bx-search'></i>
+                  기업 검색 및 선택
+                </h3>
+                <p>분석할 게임회사를 검색하고 선택하세요 (최대 5개)</p>
+              </div>
+
+              <AutoCompleteSearch
+                onCompanySelect={handleCompanySelect}
+                selectedCompanies={selectedCompanies}
+                companies={companiesData?.companies || []}
+              />
             </div>
-          </section>
-        </div>
 
-        {/* 전체 데이터 테이블 */}
-        <section>
-          <h2 style={{ 
-            marginBottom: '20px', 
-            color: '#2c3e50',
-            fontSize: '22px',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            📊 전체 게임기업 주가 현황 (시가총액 순)
-          </h2>
-          <DataTable 
-            data={allStocksData}
-            onExportExcel={handleExportExcel}
-            onExportPDF={handleExportPDF}
+            <SelectedCompaniesPanel
+              selectedCompanies={selectedCompanies}
+              onRemove={handleCompanyRemove}
+              onAnalyze={handleAnalyze}
+            />
+          </>
+        )}
+
+        {currentView === 'analysis' && (
+          <AnalysisDashboard
+            analysisData={analysisData}
+            onBack={handleBack}
           />
-        </section>
+        )}
       </div>
     </Layout>
   );
 };
 
-export default TrendsPage; 
+// Wrapper Component with QueryClientProvider
+const TrendsPage: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TrendsPageContent />
+    </QueryClientProvider>
+  );
+};
+
+export default TrendsPage;

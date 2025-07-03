@@ -6,6 +6,13 @@ router = APIRouter(
     tags=["KPI 비교"]
 )
 
+@router.get("/companies", summary="지원 기업 목록 조회")
+async def get_supported_companies(
+    controller: KpiCompareController = Depends()
+):
+    """지원하는 게임회사 목록을 반환합니다."""
+    return await controller.get_supported_companies()
+
 @router.get("/search", summary="기업 검색")
 async def search_company(
     query: str = Query(..., description="검색할 기업명, 종목코드, DART 8자리 코드"),

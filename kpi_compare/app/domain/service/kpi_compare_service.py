@@ -231,6 +231,10 @@ class KpiCompareService:
         cache[cache_key] = final_results
         return final_results
 
+    async def get_supported_companies(self):
+        """지원하는 게임회사 목록을 반환합니다."""
+        return {"companies": SUPPORTED_COMPANIES}
+
     async def _dart_api_call(self, url: str, params: dict):
         async with httpx.AsyncClient() as client:
             try:
