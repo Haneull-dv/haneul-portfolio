@@ -103,7 +103,7 @@ const accountStructure: AccountStructureItem[] = [
     { name: "자본과부채총계", indent: 0, isBold: true, path: "자본과부채총계" }
 ];
 
-const DEFAULT_EXCEL_FILE_NAME = 'neowiz_report.xlsx';
+const DEFAULT_EXCEL_FILE_NAME = '[주식회사네오위즈]사업보고서_재무제표(2025.03.19)_ko.xlsx';
 
 // --- Main Component ---
 const ValidationPage: React.FC = () => {
