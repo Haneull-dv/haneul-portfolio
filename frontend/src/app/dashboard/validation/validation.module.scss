@@ -309,6 +309,31 @@
   font-family: 'Roboto Mono', monospace;
   font-weight: 500;
   color: var(--dark);
+  position: relative;
+
+  &[title]::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+  }
+
+  &[title]:hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
 
   &.match {
     background-color: rgba(46, 204, 113, 0.1);

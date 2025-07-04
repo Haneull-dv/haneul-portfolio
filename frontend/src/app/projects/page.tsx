@@ -27,7 +27,7 @@ const ProjectsPage: React.FC = () => {
   const projects = [
     {
       title: 'Conan AI',
-      description: '재무팀 및 IR팀을 위한 업무 자동화 플랫폼입니다. 재무제표 합계검증 및 전기보고서 대사, 재무제표 DSD 생성, 동종업계 주요 공시 및 실적 요약, 애널리스트 리포트 요약 기능을 제공합니다.',
+      description: "IR 및 재무팀의 반복적인 수작업 업무를 자동화하여 핵심 업무에 집중할 수 있는 환경을 만들고자 했습니다. 문제 해결을 위한 아이디어를 구체화하여 업무 자동화 플랫폼 'Conan AI'를 기획하였고, 스타트업 경진대회 본선에 진출하며 아이디어의 사업성과 실현 가능성을 인정받았습니다. 이 과정을 통해 기획력과 비즈니스 실행 능력을 길렀습니다.",
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
       status: 'In Progress',
       image: '/projects/conanai.png',
@@ -38,7 +38,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '네오위즈 IR팀 인턴',
-      description: '공시 업무와 주주총회를 지원했습니다. IR미팅을 대응하고 IR자료를 제작하는 등 다양한 업무도 수행했습니다.',
+      description: '기업의 지배구조에 관심을 갖고 네오위즈 IR팀에서 6개월간 근무했습니다. 주주총회 기획부터 공시 자료 작성, 애널리스트 미팅 지원까지 IR의 핵심 프로세스를 경험했습니다.',
       technologies: ['Next.js', 'TypeScript', 'PostgreSQL', 'Socket.io'],
       status: 'Completed',
       image: '/projects/네오위즈.png',
@@ -49,7 +49,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '미래정치연구소 연구보조원',
-      description: '동유럽 5개국의 시민-정당 관계 동향을 모니터링하여 월간 보고서를 작성했습니다. 주요 이슈를 구조화하여 요약하고 인사이트를 도출하여 월례발표회에서 정기 발표를 수행했습니다 .',
+      description: '동유럽 5개국의 시민-정당 관계 동향을 추적, 분석하여 월간 보고서를 작성했습니다. 핵심 이슈를 구조화하고 데이터 기반의 인사이트를 도출했으며, 이를 월례 발표회에서 효과적으로 전달했습니다.',
       technologies: ['Research', 'Excel', 'Word', 'Policy Analysis'],
       status: 'Completed',
       image: '/projects/미래정치연구소.png',
@@ -59,7 +59,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '파스타집 사업계획서',
-      description: '아르바이트 하던 파스타집의 사업개선을 위해 사장님께 제안한 자료입니다. 마케팅, 사업개선 방안, 동종업계 비교 등의 내용을 담았습니다.',
+      description: '단순한 아르바이트 경험에 그치지 않고, 매장의 성장을 위해 사업 개선안을 기획 및 제안했습니다.',
       technologies: ['Business Plan', 'Marketing', 'Analysis'],
       status: 'Completed',
       image: '/projects/쏘어_사업계획서.png',
