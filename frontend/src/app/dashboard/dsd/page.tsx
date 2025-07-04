@@ -208,7 +208,7 @@ const DSDPage: React.FC = () => {
           />
           <label htmlFor="file-upload" className={styles.uploadLabel}>
             <i className='bx bx-cloud-upload'></i>
-            <span>엑셀 파일을 선택하거나 드래그하세요</span>
+            <span>엑셀 파일을 선택하거나 드래그하세요.</span>
           </label>
           {file && (
             <div className={styles.fileInfo}>

@@ -31,65 +31,90 @@
   margin-bottom: 24px;
 }
 
+.leftPanel {
+    flex: 1;
+    padding-right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rightPanel {
+    flex: 1;
+    padding-left: 2rem;
+    border-left: 1px solid var(--border-color);
+    min-height: 500px;
+}
+
+.section {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+/* ⭐️ FIX: h4를 로컬 스코프로 제한 */
+.section :global(h4) {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* ⭐️ FIX: 이전 파일 업로드 스타일 복원 */
 .uploadArea {
-  border: 2px dashed var(--grey);
-  border-radius: 12px;
-  padding: 40px 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-  position: relative;
-  &:hover {
-    border-color: var(--blue);
-    background: var(--light-blue);
-  }
+    position: relative;
+    border: 2px dashed var(--grey);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        border-color: var(--blue);
+        background-color: var(--light-blue);
+    }
 }
 
 .fileInput {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  top: 0;
-  left: 0;
+    display: none;
 }
 
 .uploadLabel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  color: var(--dark-grey);
-  i {
-    font-size: 48px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     color: var(--blue);
-  }
-  span {
-    font-weight: 500;
-  }
+
+    i {
+        font-size: 2rem;
+        color: var(--blue);
+    }
 }
 
 .fileInfo {
-  margin-top: 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: var(--light-blue);
-  border-radius: 8px;
-  color: var(--blue);
-  font-weight: 500;
-  i {
-    font-size: 24px;
-    color: #27ae60;
-  }
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #303030;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    i {
+        color: #207245; // Excel icon color
+        font-size: 1.2rem;
+    }
 }
 
 .actionContainer {
     display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    gap: 1.5rem;
 }
 
 .actionItem {
