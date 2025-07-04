@@ -1,78 +1,34 @@
+// --- 파일명: src/app/dashboard/validation/validation.module.scss ---
+
+// --- Base Styles (Card, Upload, etc.) ---
 .container {
   padding: 0;
   max-width: 100%;
-  
-  @media (max-width: 768px) {
-    padding: 0 8px;
-  }
-}
-
-.uploadSection {
-  margin-bottom: 24px;
-  
-  @media (max-width: 768px) {
-    margin-bottom: 16px;
-  }
 }
 
 .card {
   background: var(--light);
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   margin-bottom: 24px;
-
-  @media (max-width: 768px) {
-    padding: 20px;
-    margin-bottom: 16px;
-    border-radius: 16px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 16px;
-    border-radius: 12px;
-  }
 
   h3 {
     margin: 0 0 20px 0;
     color: var(--dark);
-    font-size: 18px;
+    font-size: 1.25rem;
     font-weight: 600;
-    
-    @media (max-width: 768px) {
-      font-size: 16px;
-      margin-bottom: 16px;
-    }
   }
-
   h4 {
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     color: var(--dark);
-    font-size: 16px;
+    font-size: 1.1rem;
     font-weight: 600;
-    
-    @media (max-width: 768px) {
-      font-size: 15px;
-      margin-bottom: 10px;
-    }
   }
+}
 
-  h5 {
-    margin: 0 0 16px 0;
-    color: var(--blue);
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 12px;
-    background: var(--light-blue);
-    border-radius: 8px;
-    display: inline-block;
-    
-    @media (max-width: 768px) {
-      font-size: 13px;
-      padding: 6px 10px;
-      margin-bottom: 12px;
-    }
-  }
+.uploadSection, .actionSection {
+  margin-bottom: 24px;
 }
 
 .uploadArea {
@@ -82,17 +38,6 @@
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
-
-  @media (max-width: 768px) {
-    padding: 30px 16px;
-    border-radius: 10px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 24px 12px;
-    border-radius: 8px;
-  }
-
   &:hover {
     border-color: var(--blue);
     background: var(--light-blue);
@@ -116,31 +61,10 @@
   gap: 12px;
   cursor: pointer;
   color: var(--dark-grey);
-  font-size: 16px;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-    gap: 10px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-    gap: 8px;
-  }
-
   i {
     font-size: 48px;
     color: var(--blue);
-    
-    @media (max-width: 768px) {
-      font-size: 40px;
-    }
-    
-    @media (max-width: 480px) {
-      font-size: 36px;
-    }
   }
-
   span {
     font-weight: 500;
   }
@@ -148,58 +72,17 @@
 
 .fileInfo {
   margin-top: 16px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   padding: 12px 20px;
   background: var(--light-blue);
   border-radius: 8px;
   color: var(--blue);
   font-weight: 500;
-
-  @media (max-width: 768px) {
-    padding: 10px 16px;
-    font-size: 14px;
-    margin-top: 12px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 8px 12px;
-    font-size: 13px;
-    flex-direction: column;
-    gap: 4px;
-  }
-
   i {
-    font-size: 20px;
-    
-    @media (max-width: 480px) {
-      font-size: 18px;
-    }
-  }
-}
-
-.actionSection {
-  margin-bottom: 24px;
-  
-  @media (max-width: 768px) {
-    margin-bottom: 16px;
-  }
-}
-
-.actionGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-
-  @media (max-width: 1024px) {
-    gap: 20px;
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    font-size: 24px;
+    color: #27ae60;
   }
 }
 
@@ -208,106 +91,20 @@
   border: 1px solid var(--grey);
   border-radius: 12px;
   background: var(--light);
-
-  @media (max-width: 768px) {
-    padding: 16px;
-    border-radius: 10px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 14px;
-    border-radius: 8px;
-  }
-
-  h4 {
-    color: var(--dark);
-    margin-bottom: 8px;
-  }
-
   p {
     color: var(--dark-grey);
     margin-bottom: 16px;
     font-size: 14px;
     line-height: 1.5;
-    
-    @media (max-width: 768px) {
-      font-size: 13px;
-      margin-bottom: 14px;
-    }
-    
-    @media (max-width: 480px) {
-      font-size: 12px;
-      margin-bottom: 12px;
-    }
-  }
-}
-
-.inputGroup {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-
-  @media (max-width: 768px) {
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-}
-
-.textInput,
-.numberInput {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px solid var(--grey);
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-
-  @media (max-width: 768px) {
-    padding: 10px 14px;
-    font-size: 13px;
-    border-radius: 6px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(60, 145, 230, 0.1);
-  }
-
-  &::placeholder {
-    color: var(--dark-grey);
-  }
-}
-
-.numberInput {
-  max-width: 120px;
-
-  @media (max-width: 768px) {
-    max-width: 100px;
-  }
-
-  @media (max-width: 480px) {
-    max-width: none;
   }
 }
 
 .actionButton {
-  width: 100%;
+  width: 200px;
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -315,530 +112,109 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-
-  @media (max-width: 768px) {
-    padding: 11px 18px;
-    font-size: 13px;
-    border-radius: 6px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 12px 16px;
-    font-size: 14px;
-    gap: 6px;
-  }
-
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
   }
-
   i {
-    font-size: 16px;
-    
-    @media (max-width: 768px) {
-      font-size: 15px;
-    }
-    
-    @media (max-width: 480px) {
-      font-size: 16px;
-    }
+    font-size: 1.2rem;
   }
-
   &.primary {
     background: var(--blue);
     color: white;
-
     &:hover:not(:disabled) {
       background: #2980d9;
-      transform: translateY(-1px);
-    }
-  }
-
-  &.secondary {
-    background: var(--orange);
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: #e67e22;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(60, 145, 230, 0.3);
     }
   }
 }
 
+// --- Results Section Styles ---
 .resultsSection {
-  margin-top: 24px;
-  
-  @media (max-width: 768px) {
-    margin-top: 16px;
-  }
+  padding-top: 24px;
 }
 
 .resultHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--grey);
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  h3 {
-    margin: 0;
-    color: var(--dark);
-    font-size: 20px;
-    font-weight: 600;
-    
-    @media (max-width: 768px) {
-      font-size: 18px;
-    }
-  }
 }
 
 .summary {
   display: flex;
+  gap: 16px;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    gap: 12px;
-    width: 100%;
-  }
 }
 
-.validationSummary {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    gap: 12px;
-  }
-}
-
-.yearSummary {
+.totalSheets, .mismatchCount {
+  padding: 8px 14px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--dark);
-
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
+  font-weight: 600;
 }
 
 .totalSheets {
   background: var(--light-blue);
   color: var(--blue);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  
-  @media (max-width: 768px) {
-    font-size: 11px;
-    padding: 3px 10px;
-  }
 }
 
-.success {
-  color: #27ae60;
-  font-weight: 600;
-}
-
-.error {
-  color: #e74c3c;
-  font-weight: 600;
-}
-
-// 재무상태표 테이블 스타일 - 수정된 버전
-.financialTableContainer {
-  overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid var(--grey);
-  background: white;
-  margin-bottom: 20px;
-}
-
-.financialTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-
-  thead {
-    background: var(--light-blue);
-    
-    th {
-      padding: 16px 12px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--blue);
-      border-bottom: 2px solid var(--blue);
-      white-space: nowrap;
-
-      @media (max-width: 768px) {
-        padding: 12px 10px;
-        font-size: 12px;
-      }
-
-      // 첫 번째 헤더 셀의 틈새 문제 해결
-      &:first-child {
-        border-top-left-radius: 12px;
-      }
-
-      &:last-child {
-        border-top-right-radius: 12px;
-      }
-
-      &.accountColumn {
-        min-width: 250px;
-        
-        @media (max-width: 768px) {
-          min-width: 200px;
-        }
-      }
-
-      &.amountColumn {
-        min-width: 120px;
-        text-align: right;
-        
-        @media (max-width: 768px) {
-          min-width: 100px;
-        }
-      }
-    }
-  }
-
-  tbody {
-    tr.financialRow {
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.2s ease-in-out;
-
-      &:hover {
-        background-color: #f8f9fa;
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      td {
-        padding: 12px;
-        vertical-align: middle;
-
-        @media (max-width: 768px) {
-          padding: 10px 8px;
-        }
-
-        &.accountCell {
-          font-weight: 500;
-          color: var(--dark);
-        }
-
-        &.amountCell {
-          text-align: right;
-          font-family: 'Courier New', monospace;
-          font-weight: 500;
-          color: #333 !important; // 숫자는 항상 진한 색상으로 표시
-          
-          // 기존 검증 상태 색상
-          &.validMatch {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-          }
-
-          &.validMismatch {
-            background-color: #f8d7da;
-            border-left: 4px solid #dc3545;
-          }
-
-          // 상위 계정 금액 셀 (연두색 배경)
-          &.parentAccountAmount {
-            background-color: #e6f4ea !important;
-            border-left: 4px solid #34a853 !important;
-            font-weight: 700;
-            color: #333 !important; // 텍스트는 항상 진한 색상
-          }
-
-          // 하위 계정 하이라이트 (호버 시에만 연노란색)
-          &.highlightedChildAmount {
-            background-color: #fff9e6 !important;
-            border: 2px solid #ffeb3b !important;
-            box-shadow: 0 0 8px rgba(255, 235, 59, 0.5);
-            font-weight: 700;
-            color: #333 !important; // 텍스트는 항상 진한 색상
-            animation: highlightPulse 1.5s ease-in-out infinite;
-          }
-        }
-      }
-    }
-  }
-}
-
-// 하위 계정 하이라이트 애니메이션 - 이름 변경
-@keyframes highlightPulse {
-  0% {
-    box-shadow: 0 0 8px rgba(255, 235, 59, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 16px rgba(255, 235, 59, 0.8);
-  }
-  100% {
-    box-shadow: 0 0 8px rgba(255, 235, 59, 0.5);
-  }
-}
-
-// 툴팁 스타일
-.tooltip {
-  background: rgba(33, 37, 41, 0.95);
-  color: white;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: fadeIn 0.2s ease-in-out;
-
-  @media (max-width: 768px) {
-    padding: 12px;
-    max-width: 280px;
-    font-size: 13px;
-  }
-}
-
-.tooltipContent {
-  .formula {
-    font-family: 'Courier New', monospace;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin: 8px 0;
-    font-weight: 600;
-    border-left: 3px solid #34a853;
-  }
-
-  .childList {
-    margin-top: 12px;
-
-    ul {
-      margin: 8px 0 0 0;
-      padding-left: 20px;
-      list-style-type: none;
-
-      li {
-        padding: 4px 0;
-        position: relative;
-        
-        &::before {
-          content: "▸";
-          color: #34a853;
-          margin-right: 8px;
-          font-weight: bold;
-        }
-      }
-    }
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-// 범례 업데이트
-.legend {
-  display: flex;
-  gap: 24px;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-  background: var(--light);
-  border-radius: 8px;
-  border: 1px solid var(--grey);
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    gap: 16px;
-    justify-content: flex-start;
-    padding: 12px;
-  }
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--dark);
-
-  @media (max-width: 768px) {
-    font-size: 13px;
-    gap: 6px;
-  }
-}
-
-.legendColor {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-
-  @media (max-width: 768px) {
-    width: 16px;
-    height: 16px;
-  }
-
-  &.validMatch {
-    background-color: #fff3cd;
-    border-color: #ffc107;
-  }
-
-  &.validMismatch {
-    background-color: #f8d7da;
-    border-color: #dc3545;
-  }
-
-  &.noValidation {
-    background-color: white;
-    border-color: #ddd;
-  }
-
-  // 새로운 범례 색상
-  &.parentAccountLegend {
-    background-color: #e6f4ea;
-    border-color: #34a853;
-  }
-
-  &.highlightedChildLegend {
-    background-color: #fff9e6;
-    border-color: #ffeb3b;
-  }
-}
-
-// 사용법 정보 카드
-.usageInfo {
-  margin-top: 20px;
-
-  @media (max-width: 768px) {
-    margin-top: 16px;
-  }
-}
-
-.infoCard {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-radius: 12px;
-  border: 1px solid #bbdefb;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
-
-  @media (max-width: 768px) {
-    padding: 12px;
-    gap: 10px;
-    font-size: 14px;
-  }
-
-  i {
-    color: #2196f3;
-    font-size: 24px;
-    margin-top: 2px;
-    flex-shrink: 0;
-
-    @media (max-width: 768px) {
-      font-size: 20px;
-    }
-  }
-
-  div {
-    color: #1565c0;
-    line-height: 1.5;
-
-    strong {
-      color: #0d47a1;
-      display: block;
-      margin-bottom: 4px;
-    }
-  }
-}
-
-// 누락된 기존 스타일 클래스들 복원
 .mismatchCount {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-    padding: 5px 10px;
-  }
-
   &.success {
     background: #d4edda;
     color: #155724;
   }
-
   &.error {
     background: #f8d7da;
     color: #721c24;
   }
 }
 
-.totalItems {
-  padding: 6px 12px;
-  background: var(--light-blue);
-  color: var(--blue);
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-    padding: 5px 10px;
-  }
-}
-
-.sheetResult {
-  margin-bottom: 32px;
-
-  @media (max-width: 768px) {
-    margin-bottom: 24px;
-  }
-
-  h4 {
-    color: var(--dark);
-    margin-bottom: 16px;
-    font-size: 18px;
-    font-weight: 600;
-    
-    @media (max-width: 768px) {
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-  }
-}
-
-.yearSection {
+.resultTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 24px;
-  
-  @media (max-width: 768px) {
-    margin-bottom: 20px;
+  border-bottom: 2px solid var(--grey);
+}
+
+.tabButton {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--dark-grey);
+  position: relative;
+  transition: color 0.3s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+
+  &:hover {
+    color: var(--dark);
   }
+
+  &.active {
+    color: var(--blue);
+    font-weight: 600;
+    border-bottom-color: var(--blue);
+  }
+}
+
+.tabMismatchBadge {
+  display: inline-block;
+  margin-left: 8px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .tableContainer {
@@ -847,281 +223,117 @@
   border: 1px solid var(--grey);
 }
 
-.validationTable,
-.comparisonTable {
+.resultTable {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  min-width: 600px;
+  min-width: 800px;
+  font-size: 14px;
 
-  @media (max-width: 768px) {
-    min-width: 500px;
-    font-size: 13px;
-  }
-
-  thead {
-    background: var(--grey);
-    
-    th {
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--dark);
-      font-size: 14px;
-      border-bottom: 1px solid var(--dark-grey);
-      white-space: nowrap;
-
-      @media (max-width: 768px) {
-        padding: 10px 12px;
-        font-size: 13px;
-      }
+  thead th {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    border-bottom: 2px solid var(--grey);
+    white-space: nowrap;
+    &:first-child {
+      text-align: center;
+    }
+    &:not(:first-child) {
+      text-align: right;
     }
   }
 
-  tbody {
-    tr {
-      transition: background-color 0.2s ease;
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--grey);
+    color: var(--dark);
+    white-space: nowrap;
+  }
 
-      &:hover {
-        background: var(--light-blue);
-      }
-
-      td {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--grey);
-        font-size: 14px;
-        color: var(--dark);
-
-        @media (max-width: 768px) {
-          padding: 10px 12px;
-          font-size: 13px;
-        }
-      }
-    }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tbody tr:hover td {
+      background-color: var(--light-blue);
   }
 }
 
-.validationRow,
-.comparisonRow {
-  &.match {
-    background: rgba(212, 237, 218, 0.3);
-    
-    &:hover {
-      background: rgba(212, 237, 218, 0.5);
-    }
-  }
-
-  &.mismatch {
-    background: rgba(248, 215, 218, 0.3);
-    
-    &:hover {
-      background: rgba(248, 215, 218, 0.5);
-    }
-  }
+.boldCell {
+  font-weight: 600;
 }
 
 .numberCell {
   text-align: right;
-  font-family: 'Courier New', monospace;
-  font-weight: 500;
+  font-family: 'Roboto Mono', monospace;
 
-  &.difference {
-    color: var(--red);
+  &.match {
+    background-color: rgba(46, 204, 113, 0.1);
+    font-weight: 500;
+  }
+  &.mismatch {
+    background-color: rgba(231, 76, 60, 0.1);
     font-weight: 600;
   }
-}
-
-.statusCell {
-  text-align: center;
-}
-
-.status {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-
-  @media (max-width: 768px) {
-    padding: 3px 10px;
-    font-size: 11px;
-  }
-
-  &.success {
-    background: #d4edda;
-    color: #155724;
-  }
-
-  &.error {
-    background: #f8d7da;
-    color: #721c24;
+  &.none {
+    // No special style
   }
 }
 
-// Dark mode support
-[data-theme="dark"] {
-  .card {
-    background: var(--dark-grey);
-    
-    h3, h4 {
-      color: var(--light);
-    }
+// --- 이 코드를 validation.module.scss 파일 맨 아래에 추가 ---
 
-    h5 {
-      background: rgba(60, 145, 230, 0.2);
-      color: var(--blue);
-    }
+// 상호 하이라이팅 스타일
+.highlightRow td {
+  background-color: var(--light-orange) !important;
+  transition: background-color 0.1s ease-in-out;
+}
+
+// --- validation.module.scss 파일의 .numberCell 부분을 아래 코드로 교체 ---
+
+.numberCell {
+  text-align: right;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+  color: var(--dark); // ⭐️ FIX: 숫자 색상을 항상 기본색으로 고정
+
+  &.match {
+    background-color: rgba(46, 204, 113, 0.1); // 연두색 배경
+  }
+  &.mismatch {
+    background-color: rgba(231, 76, 60, 0.1); // 연한 빨간색 배경
+  }
+  &.none {
+    // No special style
+  }
+}
+
+// --- 파일 맨 아래에 이 코드를 추가 ---
+.exportButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--grey);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e0e0e0;
   }
 
-  .uploadArea {
-    border-color: var(--dark);
-    
-    &:hover {
-      background: rgba(60, 145, 230, 0.1);
-    }
-  }
-
-  .uploadLabel {
-    color: var(--light);
-  }
-
-  .actionItem {
-    background: var(--dark-grey);
-    border-color: var(--dark);
-
-    h4 {
-      color: var(--light);
-    }
-
-    p {
-      color: var(--dark-grey);
-    }
-  }
-
-  .textInput,
-  .numberInput {
-    background: var(--dark);
-    border-color: var(--dark);
-    color: var(--light);
-
-    &::placeholder {
-      color: var(--dark-grey);
-    }
-
-    &:focus {
-      border-color: var(--blue);
-    }
-  }
-
-  .validationTable,
-  .comparisonTable {
-    background: var(--dark-grey);
-
-    thead {
-      background: var(--dark);
-
-      th {
-        color: var(--light);
-        border-bottom-color: var(--dark-grey);
-      }
-    }
-
-    tbody {
-      td {
-        color: var(--light);
-        border-bottom-color: var(--dark);
-      }
-    }
-  }
-
-  .resultHeader {
-    border-bottom-color: var(--dark);
-
-    h3 {
-      color: var(--light);
-    }
-  }
-
-  .sheetResult h4 {
-    color: var(--light);
-  }
-
-  .financialTable {
-    background: var(--dark-grey);
-
-    thead {
-      background: var(--dark);
-
-      th {
-        color: var(--light);
-        border-bottom-color: var(--blue);
-      }
-    }
-
-    tbody {
-      tr.financialRow {
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        td {
-          color: var(--light);
-          border-bottom-color: var(--dark);
-
-          &.amountCell {
-            &.validMatch {
-              background-color: rgba(255, 193, 7, 0.2);
-              border-left-color: #ffc107;
-            }
-
-            &.validMismatch {
-              background-color: rgba(220, 53, 69, 0.2);
-              border-left-color: #dc3545;
-            }
-
-            &.parentAccountAmount {
-              background-color: rgba(230, 244, 234, 0.2) !important;
-              border-left-color: #34a853 !important;
-            }
-
-            &.highlightedChildAmount {
-              background-color: rgba(255, 249, 230, 0.2) !important;
-              border-color: #ffeb3b !important;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  .legend {
-    background: var(--dark-grey);
-    border-color: var(--dark);
-  }
-
-  .legendItem {
-    color: var(--light);
-  }
-
-  .infoCard {
-    background: linear-gradient(135deg, rgba(227, 242, 253, 0.1) 0%, rgba(243, 229, 245, 0.1) 100%);
-    border-color: rgba(187, 222, 251, 0.3);
-
-    i {
-      color: #64b5f6;
-    }
-
-    div {
-      color: #90caf9;
-
-      strong {
-        color: #bbdefb;
-      }
-    }
-  }
-
-  .tooltip {
-    background: rgba(66, 66, 66, 0.95);
-    border-color: rgba(255, 255, 255, 0.2);
+  i {
+    font-size: 16px;
   }
 }
