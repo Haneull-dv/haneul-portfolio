@@ -86,17 +86,46 @@
   }
 }
 
+.actionContainer {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
 .actionItem {
-  padding: 20px;
-  border: 1px solid var(--grey);
-  border-radius: 12px;
-  background: var(--light);
-  p {
-    color: var(--dark-grey);
-    margin-bottom: 16px;
-    font-size: 14px;
-    line-height: 1.5;
-  }
+    flex: 1;
+    min-width: 300px;
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+
+    h4 {
+        margin-top: 0;
+    }
+
+    p {
+        flex-grow: 1;
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.formInput {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
 }
 
 .actionButton {
@@ -127,6 +156,15 @@
       background: #2980d9;
       transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(60, 145, 230, 0.3);
+    }
+  }
+  &.orange {
+    background: #f39c12; // Orange color
+    color: white;
+    &:hover:not(:disabled) {
+      background: #e67e22;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
     }
   }
 }
@@ -269,48 +307,25 @@
 .numberCell {
   text-align: right;
   font-family: 'Roboto Mono', monospace;
+  font-weight: 500;
+  color: var(--dark);
 
   &.match {
     background-color: rgba(46, 204, 113, 0.1);
-    font-weight: 500;
   }
   &.mismatch {
     background-color: rgba(231, 76, 60, 0.1);
-    font-weight: 600;
   }
   &.none {
     // No special style
   }
 }
 
-// --- 이 코드를 validation.module.scss 파일 맨 아래에 추가 ---
-
-// 상호 하이라이팅 스타일
 .highlightRow td {
   background-color: var(--light-orange) !important;
   transition: background-color 0.1s ease-in-out;
 }
 
-// --- validation.module.scss 파일의 .numberCell 부분을 아래 코드로 교체 ---
-
-.numberCell {
-  text-align: right;
-  font-family: 'Roboto Mono', monospace;
-  font-weight: 500;
-  color: var(--dark); // ⭐️ FIX: 숫자 색상을 항상 기본색으로 고정
-
-  &.match {
-    background-color: rgba(46, 204, 113, 0.1); // 연두색 배경
-  }
-  &.mismatch {
-    background-color: rgba(231, 76, 60, 0.1); // 연한 빨간색 배경
-  }
-  &.none {
-    // No special style
-  }
-}
-
-// --- 파일 맨 아래에 이 코드를 추가 ---
 .exportButtons {
   display: flex;
   gap: 12px;
