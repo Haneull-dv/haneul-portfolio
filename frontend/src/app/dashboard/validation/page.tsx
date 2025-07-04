@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './validation.module.scss';
@@ -28,6 +28,13 @@ interface FootingResponse {
   mismatch_count: number;
 }
 
+interface AccountStructureItem {
+  name: string;
+  indent: number;
+  isBold: boolean;
+  path?: string;
+}
+
 // --- DART Comparison Interfaces ---
 interface MismatchDetail {
   account_nm: string;
@@ -45,56 +52,58 @@ interface ComparisonResult {
 }
 
 // ⭐️ FIX: 하드코딩 목록에 들여쓰기 정보와 원본 텍스트를 포함
-const accountStructure = [
+const accountStructure: AccountStructureItem[] = [
     { name: "자산 [개요]", indent: 0, isBold: true },
-    { name: "    유동자산", indent: 1, isBold: false },
-    { name: "        현금및현금성자산", indent: 2, isBold: false },
-    { name: "        매출채권및기타채권", indent: 2, isBold: false },
-    { name: "        당기법인세자산", indent: 2, isBold: false },
-    { name: "        금융자산", indent: 2, isBold: false },
-    { name: "        기타자산", indent: 2, isBold: false },
-    { name: "        재고자산", indent: 2, isBold: false },
-    { name: "        매각예정비유동자산", indent: 2, isBold: false },
-    { name: "    비유동자산", indent: 1, isBold: false },
-    { name: "        매출채권및기타채권", indent: 2, isBold: false },
-    { name: "        관계기업투자", indent: 2, isBold: false },
-    { name: "        유형자산", indent: 2, isBold: false },
-    { name: "        사용권자산", indent: 2, isBold: false },
-    { name: "        투자부동산", indent: 2, isBold: false },
-    { name: "        무형자산", indent: 2, isBold: false },
-    { name: "        금융자산", indent: 2, isBold: false },
-    { name: "        순확정급여자산", indent: 2, isBold: false },
-    { name: "        기타자산", indent: 2, isBold: false },
-    { name: "        이연법인세자산", indent: 2, isBold: false },
-    { name: "    자산총계", indent: 1, isBold: true },
+    { name: "    유동자산", indent: 1, isBold: false, path: "자산총계 > 유동자산" },
+    { name: "        현금및현금성자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 현금및현금성자산" },
+    { name: "        매출채권및기타채권", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 매출채권및기타채권" },
+    { name: "        당기법인세자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 당기법인세자산" },
+    { name: "        금융자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 금융자산" },
+    { name: "        기타자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 기타자산" },
+    { name: "        재고자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 재고자산" },
+    { name: "        매각예정비유동자산", indent: 2, isBold: false, path: "자산총계 > 유동자산 > 매각예정비유동자산" },
+    { name: "    비유동자산", indent: 1, isBold: false, path: "자산총계 > 비유동자산" },
+    { name: "        매출채권및기타채권", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 매출채권및기타채권" },
+    { name: "        관계기업투자", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 관계기업투자" },
+    { name: "        유형자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 유형자산" },
+    { name: "        사용권자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 사용권자산" },
+    { name: "        투자부동산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 투자부동산" },
+    { name: "        무형자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 무형자산" },
+    { name: "        금융자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 금융자산" },
+    { name: "        순확정급여자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 순확정급여자산" },
+    { name: "        기타자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 기타자산" },
+    { name: "        이연법인세자산", indent: 2, isBold: false, path: "자산총계 > 비유동자산 > 이연법인세자산" },
+    { name: "    자산총계", indent: 1, isBold: true, path: "자산총계" },
     { name: "부채 [개요]", indent: 0, isBold: true },
-    { name: "    유동부채", indent: 1, isBold: false },
-    { name: "        매입채무및기타채무", indent: 2, isBold: false },
-    { name: "        금융부채", indent: 2, isBold: false },
-    { name: "        리스부채", indent: 2, isBold: false },
-    { name: "        당기법인세부채", indent: 2, isBold: false },
-    { name: "        충당부채", indent: 2, isBold: false },
-    { name: "        매각예정비유동부채", indent: 2, isBold: false },
-    { name: "        기타부채", indent: 2, isBold: false },
-    { name: "    비유동부채", indent: 1, isBold: false },
-    { name: "        매입채무및기타채무", indent: 2, isBold: false },
-    { name: "        금융부채", indent: 2, isBold: false },
-    { name: "        리스부채", indent: 2, isBold: false },
-    { name: "        충당부채", indent: 2, isBold: false },
-    { name: "        기타부채", indent: 2, isBold: false },
-    { name: "        순확정급여부채", indent: 2, isBold: false },
-    { name: "        이연법인세부채", indent: 2, isBold: false },
-    { name: "    부채총계", indent: 1, isBold: true },
+    { name: "    유동부채", indent: 1, isBold: false, path: "부채총계 > 유동부채" },
+    { name: "        매입채무및기타채무", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 매입채무및기타채무" },
+    { name: "        금융부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 금융부채" },
+    { name: "        리스부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 리스부채" },
+    { name: "        당기법인세부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 당기법인세부채" },
+    { name: "        충당부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 충당부채" },
+    { name: "        매각예정비유동부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 매각예정비유동부채" },
+    { name: "        기타부채", indent: 2, isBold: false, path: "부채총계 > 유동부채 > 기타부채" },
+    { name: "    비유동부채", indent: 1, isBold: false, path: "부채총계 > 비유동부채" },
+    { name: "        매입채무및기타채무", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 매입채무및기타채무" },
+    { name: "        금융부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 금융부채" },
+    { name: "        리스부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 리스부채" },
+    { name: "        충당부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 충당부채" },
+    { name: "        기타부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 기타부채" },
+    { name: "        순확정급여부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 순확정급여부채" },
+    { name: "        이연법인세부채", indent: 2, isBold: false, path: "부채총계 > 비유동부채 > 이연법인세부채" },
+    { name: "    부채총계", indent: 1, isBold: true, path: "부채총계" },
     { name: "자본 [개요]", indent: 0, isBold: true },
-    { name: "    지배기업의소유지분", indent: 1, isBold: false },
-    { name: "        자본금", indent: 2, isBold: false },
-    { name: "        주식발행초과금", indent: 2, isBold: false },
-    { name: "        이익잉여금", indent: 2, isBold: false },
-    { name: "        기타자본", indent: 2, isBold: false },
-    { name: "    비지배지분", indent: 1, isBold: false },
-    { name: "    자본총계", indent: 1, isBold: true },
-    { name: "자본과부채총계", indent: 0, isBold: true }
+    { name: "    지배기업의소유지분", indent: 1, isBold: false, path: "자본총계 > 지배기업의소유지분" },
+    { name: "        자본금", indent: 2, isBold: false, path: "자본총계 > 지배기업의소유지분 > 자본금" },
+    { name: "        주식발행초과금", indent: 2, isBold: false, path: "자본총계 > 지배기업의소유지분 > 주식발행초과금" },
+    { name: "        이익잉여금", indent: 2, isBold: false, path: "자본총계 > 지배기업의소유지분 > 이익잉여금" },
+    { name: "        기타자본", indent: 2, isBold: false, path: "자본총계 > 지배기업의소유지분 > 기타자본" },
+    { name: "    비지배지분", indent: 1, isBold: false, path: "자본총계 > 비지배지분" },
+    { name: "    자본총계", indent: 1, isBold: true, path: "자본총계" },
+    { name: "자본과부채총계", indent: 0, isBold: true, path: "자본과부채총계" }
 ];
+
+const DEFAULT_EXCEL_FILE_NAME = 'neowiz_report.xlsx';
 
 // --- Main Component ---
 const ValidationPage: React.FC = () => {
@@ -108,6 +117,26 @@ const ValidationPage: React.FC = () => {
 
   const breadcrumbs = [ { label: 'Dashboard', href: '/dashboard' }, { label: 'Validation', active: true }];
 
+  useEffect(() => {
+    // 페이지 로드 시 기본 엑셀 파일을 불러옵니다.
+    const loadDefaultFile = async () => {
+      try {
+        const response = await fetch(`/${DEFAULT_EXCEL_FILE_NAME}`);
+        if (!response.ok) {
+          throw new Error('기본 엑셀 파일을 불러오는 데 실패했습니다.');
+        }
+        const blob = await response.blob();
+        const defaultFile = new File([blob], DEFAULT_EXCEL_FILE_NAME, { type: blob.type });
+        setFile(defaultFile);
+      } catch (error) {
+        console.error(error);
+        // alert(error.message); // 사용자에게 알릴 필요가 있다면 활성화
+      }
+    };
+
+    loadDefaultFile();
+  }, []);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
@@ -120,6 +149,12 @@ const ValidationPage: React.FC = () => {
 
   const handleFootingValidation = async () => {
     if (!file) { alert('엑셀 파일을 먼저 업로드해주세요.'); return; }
+
+    if (file.name !== DEFAULT_EXCEL_FILE_NAME) {
+      alert('사용자 지정 엑셀 파일은 현재 지원되지 않습니다. 계정과목 체계가 달라 검증을 진행할 수 없습니다.');
+      return;
+    }
+
     setLoading(true);
     setFootingResponse(null);
     setComparisonResult(null);
@@ -156,38 +191,41 @@ const ValidationPage: React.FC = () => {
     if (!footingResponse) return null;
     const processed: Record<string, { headers: string[], rows: any[] }> = {};
 
+    // 경로를 기반으로 재귀적으로 검증 항목을 찾는 헬퍼 함수
+    const findItemByPath = (items: FootingResultItem[], path: string): FootingResultItem | undefined => {
+      const segments = path.split(' > ');
+      let currentLevelItems: FootingResultItem[] | undefined = items;
+      let foundItem: FootingResultItem | undefined;
+
+      for (const segment of segments) {
+        if (!currentLevelItems) return undefined;
+        foundItem = currentLevelItems.find(item => item.item.trim() === segment.trim());
+        if (!foundItem) return undefined;
+        currentLevelItems = foundItem.children;
+      }
+      return foundItem;
+    };
+
     for (const sheetResult of footingResponse.results) {
         const yearHeaders = Object.keys(sheetResult.results_by_year);
-        // ⭐️ FIX: 첫 번째 헤더를 빈 문자열로 변경
         const headers = ["", ...yearHeaders];
         
-        const validationMaps: Record<string, Map<string, FootingResultItem>> = {};
-        for (const year of yearHeaders) {
-            const map = new Map<string, FootingResultItem>();
-            const flatten = (items: FootingResultItem[], parentPath: string = '') => {
-                for (const item of items) {
-                    const currentPath = parentPath ? `${parentPath} > ${item.item}` : item.item;
-                    map.set(item.item.trim(), item); // 공백 제거한 이름으로 매칭
-                    if (item.children) flatten(item.children, currentPath);
-                }
-            };
-            flatten(sheetResult.results_by_year[year]);
-            validationMaps[year] = map;
-        }
-
         const rows = accountStructure.map(accountInfo => {
-            const cleanAccountName = accountInfo.name.trim().replace(/\[.*?\]/g, '').trim();
             const row: Record<string, any> = { 
-                '': accountInfo.name, // 첫 번째 열은 원본 텍스트 그대로
+                '': accountInfo.name,
                 'indent': accountInfo.indent,
                 'isBold': accountInfo.isBold
             };
 
             for (const year of yearHeaders) {
-                const validationItem = validationMaps[year]?.get(cleanAccountName);
+                const validationItem = accountInfo.path 
+                    ? findItemByPath(sheetResult.results_by_year[year], accountInfo.path)
+                    : undefined;
+
                 row[year] = {
                     value: validationItem?.actual ?? null,
                     status: validationItem ? (validationItem.is_match ? 'match' : 'mismatch') : 'none',
+                    expected: validationItem?.expected ?? null,
                 };
             }
             return row;
@@ -278,16 +316,21 @@ const ValidationPage: React.FC = () => {
                           {processedData[sheetResult.sheet].headers.map((header, colIndex) => {
                             const isFirstColumn = colIndex === 0;
                             const cellData = row[header];
+                            const tooltipText =
+                              cellData?.status === 'mismatch' && cellData.expected != null
+                                ? `기대값: ${formatNumber(cellData.expected)}`
+                                : '';
+
                             return (
-                              <td 
-                                key={`${header}-${colIndex}`} 
-                                // ⭐️ FIX: 들여쓰기 스타일 적용
+                              <td
+                                key={`${header}-${colIndex}`}
                                 style={isFirstColumn ? { paddingLeft: `${row.indent * 20 + 10}px` } : {}}
                                 className={isFirstColumn ? (row.isBold ? styles.boldCell : '') : `${styles.numberCell} ${cellData ? styles[cellData.status] : ''}`}
+                                {...(tooltipText && { title: tooltipText })}
                               >
                                 {isFirstColumn ? cellData : formatNumber(cellData?.value)}
                               </td>
-                            )
+                            );
                           })}
                         </tr>
                       ))}
