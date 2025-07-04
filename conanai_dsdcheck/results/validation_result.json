@@ -1,0 +1,678 @@
+{
+  "results": [
+    {
+      "sheet": "D210000",
+      "title": "연결재무상태표",
+      "results_by_year": {
+        "2024-12-31": [
+          {
+            "item": "자산부채자본일치 (자산총계 = 부채총계+자본총계)",
+            "expected": 619998368755.0,
+            "actual": 619998368755.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 101061621627.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 518936747128.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채자본합계일치 (자본과부채총계 = 부채총계+자본총계)",
+            "expected": 619998368755.0,
+            "actual": 619998368755.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 101061621627.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 518936747128.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자산총계",
+            "expected": 619998368755.0,
+            "actual": 619998368755.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동자산",
+                "expected": null,
+                "actual": 314032311342.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동자산",
+                "expected": null,
+                "actual": 305966057413.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채총계",
+            "expected": 101061621627.0,
+            "actual": 101061621627.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동부채",
+                "expected": null,
+                "actual": 81059842634.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동부채",
+                "expected": null,
+                "actual": 20001778993.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본총계",
+            "expected": 518936747128.0,
+            "actual": 518936747128.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "지배기업의소유지분",
+                "expected": 487326368909.0,
+                "actual": 487326368909.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "자본금",
+                    "expected": null,
+                    "actual": 11016859500.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "주식발행초과금",
+                    "expected": null,
+                    "actual": 129989360454.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "이익잉여금",
+                    "expected": null,
+                    "actual": 420820557520.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "기타자본",
+                    "expected": null,
+                    "actual": -74500408565.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "비지배지분",
+                "expected": null,
+                "actual": 31610378219.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본과부채총계",
+            "expected": 619998368755.0,
+            "actual": 619998368755.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": 101061621627.0,
+                "actual": 101061621627.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "유동부채",
+                    "expected": null,
+                    "actual": 81059842634.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "비유동부채",
+                    "expected": null,
+                    "actual": 20001778993.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "자본총계",
+                "expected": 518936747128.0,
+                "actual": 518936747128.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "지배기업의소유지분",
+                    "expected": 487326368909.0,
+                    "actual": 487326368909.0,
+                    "is_match": true,
+                    "children": [
+                      {
+                        "item": "자본금",
+                        "expected": null,
+                        "actual": 11016859500.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "주식발행초과금",
+                        "expected": null,
+                        "actual": 129989360454.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "이익잉여금",
+                        "expected": null,
+                        "actual": 420820557520.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "기타자본",
+                        "expected": null,
+                        "actual": -74500408565.0,
+                        "is_match": true,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "item": "비지배지분",
+                    "expected": null,
+                    "actual": 31610378219.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "2023-12-31": [
+          {
+            "item": "자산부채자본일치 (자산총계 = 부채총계+자본총계)",
+            "expected": 671428658604.0,
+            "actual": 671428658604.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 143808323008.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 527620335596.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채자본합계일치 (자본과부채총계 = 부채총계+자본총계)",
+            "expected": 671428658604.0,
+            "actual": 671428658604.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 143808323008.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 527620335596.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자산총계",
+            "expected": 671428658604.0,
+            "actual": 671428658604.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동자산",
+                "expected": null,
+                "actual": 297611084329.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동자산",
+                "expected": null,
+                "actual": 373817574275.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채총계",
+            "expected": 143808323008.0,
+            "actual": 143808323008.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동부채",
+                "expected": null,
+                "actual": 113217299930.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동부채",
+                "expected": null,
+                "actual": 30591023078.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본총계",
+            "expected": 527620335596.0,
+            "actual": 527620335596.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "지배기업의소유지분",
+                "expected": 489431524672.0,
+                "actual": 489431524672.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "자본금",
+                    "expected": null,
+                    "actual": 11016859500.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "주식발행초과금",
+                    "expected": null,
+                    "actual": 129989360454.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "이익잉여금",
+                    "expected": null,
+                    "actual": 428203933399.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "기타자본",
+                    "expected": null,
+                    "actual": -79778628681.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "비지배지분",
+                "expected": null,
+                "actual": 38188810924.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본과부채총계",
+            "expected": 671428658604.0,
+            "actual": 671428658604.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": 143808323008.0,
+                "actual": 143808323008.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "유동부채",
+                    "expected": null,
+                    "actual": 113217299930.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "비유동부채",
+                    "expected": null,
+                    "actual": 30591023078.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "자본총계",
+                "expected": 527620335596.0,
+                "actual": 527620335596.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "지배기업의소유지분",
+                    "expected": 489431524672.0,
+                    "actual": 489431524672.0,
+                    "is_match": true,
+                    "children": [
+                      {
+                        "item": "자본금",
+                        "expected": null,
+                        "actual": 11016859500.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "주식발행초과금",
+                        "expected": null,
+                        "actual": 129989360454.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "이익잉여금",
+                        "expected": null,
+                        "actual": 428203933399.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "기타자본",
+                        "expected": null,
+                        "actual": -79778628681.0,
+                        "is_match": true,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "item": "비지배지분",
+                    "expected": null,
+                    "actual": 38188810924.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "2022-12-31": [
+          {
+            "item": "자산부채자본일치 (자산총계 = 부채총계+자본총계)",
+            "expected": 560087394644.0,
+            "actual": 560087394644.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 101331086165.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 458756308479.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채자본합계일치 (자본과부채총계 = 부채총계+자본총계)",
+            "expected": 560087394644.0,
+            "actual": 560087394644.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": null,
+                "actual": 101331086165.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "자본총계",
+                "expected": null,
+                "actual": 458756308479.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자산총계",
+            "expected": 560087394644.0,
+            "actual": 560087394644.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동자산",
+                "expected": null,
+                "actual": 253547138099.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동자산",
+                "expected": null,
+                "actual": 306540256545.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "부채총계",
+            "expected": 101331086165.0,
+            "actual": 101331086165.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "유동부채",
+                "expected": null,
+                "actual": 87336191850.0,
+                "is_match": true,
+                "children": []
+              },
+              {
+                "item": "비유동부채",
+                "expected": null,
+                "actual": 13994894315.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본총계",
+            "expected": 458756308479.0,
+            "actual": 458756308479.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "지배기업의소유지분",
+                "expected": 449070372841.0,
+                "actual": 449070372841.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "자본금",
+                    "expected": null,
+                    "actual": 11016859500.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "주식발행초과금",
+                    "expected": null,
+                    "actual": 129989360454.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "이익잉여금",
+                    "expected": null,
+                    "actual": 380995284875.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "기타자본",
+                    "expected": null,
+                    "actual": -72931131988.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "비지배지분",
+                "expected": null,
+                "actual": 9685935638.0,
+                "is_match": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "item": "자본과부채총계",
+            "expected": 560087394644.0,
+            "actual": 560087394644.0,
+            "is_match": true,
+            "children": [
+              {
+                "item": "부채총계",
+                "expected": 101331086165.0,
+                "actual": 101331086165.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "유동부채",
+                    "expected": null,
+                    "actual": 87336191850.0,
+                    "is_match": true,
+                    "children": []
+                  },
+                  {
+                    "item": "비유동부채",
+                    "expected": null,
+                    "actual": 13994894315.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "item": "자본총계",
+                "expected": 458756308479.0,
+                "actual": 458756308479.0,
+                "is_match": true,
+                "children": [
+                  {
+                    "item": "지배기업의소유지분",
+                    "expected": 449070372841.0,
+                    "actual": 449070372841.0,
+                    "is_match": true,
+                    "children": [
+                      {
+                        "item": "자본금",
+                        "expected": null,
+                        "actual": 11016859500.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "주식발행초과금",
+                        "expected": null,
+                        "actual": 129989360454.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "이익잉여금",
+                        "expected": null,
+                        "actual": 380995284875.0,
+                        "is_match": true,
+                        "children": []
+                      },
+                      {
+                        "item": "기타자본",
+                        "expected": null,
+                        "actual": -72931131988.0,
+                        "is_match": true,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "item": "비지배지분",
+                    "expected": null,
+                    "actual": 9685935638.0,
+                    "is_match": true,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "total_sheets": 1,
+  "mismatch_count": 0
+}
