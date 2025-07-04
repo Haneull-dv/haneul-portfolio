@@ -71,4 +71,3 @@ async def check_footing(file: UploadFile = File(...)) -> FootingResponse:
 @router.get("/health")
 async def health_check():
     return {"message": "Hello World from dsdfooting"}
-

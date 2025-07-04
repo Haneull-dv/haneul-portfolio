@@ -103,6 +103,8 @@ services:
       - "8086:8086"
     volumes:
       - ./conanai_dsdcheck:/app
+    environment:
+      - DART_API_KEY=dummy_api_key
     env_file:
       - ./conanai_dsdcheck/.env
     depends_on:

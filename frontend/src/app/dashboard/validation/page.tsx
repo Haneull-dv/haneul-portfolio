@@ -1,669 +1,329 @@
+// --- 파일명: src/app/dashboard/validation/page.tsx (최종 디테일 수정 버전) ---
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './validation.module.scss';
+import * as XLSX from 'xlsx'; // 엑셀 생성을 위한 라이브러리 import
 
-// VALIDATION_RULES from backend - 백엔드의 validation_rules.py와 동일한 구조
-const VALIDATION_RULES = {
-  "연결재무상태표": {
-    "__special_checks__": {
-      "자산부채자본일치": {
-        "항목1": "자산총계",
-        "항목2": ["부채총계", "자본총계"],
-        "연산자": "="
-      },
-      "부채자본합계일치": {
-        "항목1": "자본과부채총계",
-        "항목2": ["부채총계", "자본총계"],
-        "연산자": "="
-      }
-    },
-    
-    // 최상위 검증 규칙
-    "자본과부채총계": ["부채총계", "자본총계"],
-    "자산총계": ["유동자산", "비유동자산"],
-    "부채총계": ["유동부채", "비유동부채"],
-    "자본총계": ["지배기업의소유지분", "비지배지분"],
-    
-    // 자산 섹션
-    "유동자산": [
-      "유동자산 > 현금및현금성자산",
-      "유동자산 > 매출채권및기타채권",
-      "유동자산 > 당기법인세자산",
-      "유동자산 > 금융자산",
-      "유동자산 > 기타자산",
-      "유동자산 > 재고자산",
-      "유동자산 > 매각예정비유동자산"
-    ],
-    
-    "비유동자산": [
-      "비유동자산 > 매출채권및기타채권",
-      "비유동자산 > 관계기업투자",
-      "비유동자산 > 유형자산",
-      "비유동자산 > 사용권자산",
-      "비유동자산 > 투자부동산",
-      "비유동자산 > 무형자산",
-      "비유동자산 > 금융자산",
-      "비유동자산 > 순확정급여자산",
-      "비유동자산 > 기타자산",
-      "비유동자산 > 이연법인세자산"
-    ],
-    
-    // 부채 섹션
-    "유동부채": [
-      "유동부채 > 매입채무및기타채무",
-      "유동부채 > 금융부채",
-      "유동부채 > 리스부채",
-      "유동부채 > 당기법인세부채",
-      "유동부채 > 충당부채",
-      "유동부채 > 매각예정비유동부채",
-      "유동부채 > 기타부채"
-    ],
-    
-    "비유동부채": [
-      "비유동부채 > 매입채무및기타채무",
-      "비유동부채 > 금융부채",
-      "비유동부채 > 리스부채",
-      "비유동부채 > 충당부채",
-      "비유동부채 > 기타부채",
-      "비유동부채 > 순확정급여부채",
-      "비유동부채 > 이연법인세부채"
-    ],
-    
-    // 자본 섹션
-    "지배기업의소유지분": [
-      "지배기업의소유지분 > 자본금",
-      "지배기업의소유지분 > 주식발행초과금",
-      "지배기업의소유지분 > 이익잉여금",
-      "지배기업의소유지분 > 기타자본"
-    ]
-  }
-};
-
-interface ValidationResult {
+// --- Interface Definitions ---
+interface FootingResultItem {
   item: string;
-  expected: number;
-  actual: number;
+  expected: number | null;
+  actual: number | null;
   is_match: boolean;
-  children?: ValidationResult[];
+  children?: FootingResultItem[];
+}
+
+interface YearlyFootingSheetResult {
+  sheet: string;
+  title: string;
+  results_by_year: Record<string, FootingResultItem[]>;
 }
 
 interface FootingResponse {
+  results: YearlyFootingSheetResult[];
   total_sheets: number;
   mismatch_count: number;
-  results: Array<{
-    sheet: string;
-    title: string;
-    results_by_year: Record<string, ValidationResult[]>;
-  }>;
 }
 
-interface ComparisonResult {
-  fs_div: string;
-  sj_div: string;
-  account_nm: string;
-  excel_amount: number;
-  dart_amount: number;
-  is_match: boolean;
-  difference: number;
-}
+const accountStructure = [
+    { key: "자산 [개요]", name: "자산 [개요]", indent: 0, isBold: true },
+    { key: "유동자산", name: "    유동자산", indent: 1, isBold: false },
+    { key: "현금및현금성자산", name: "        현금및현금성자산", indent: 2, isBold: false },
+    { key: "매출채권및기타채권", name: "        매출채권및기타채권", indent: 2, isBold: false },
+    { key: "당기법인세자산", name: "        당기법인세자산", indent: 2, isBold: false },
+    { key: "금융자산", name: "        금융자산", indent: 2, isBold: false },
+    { key: "기타자산", name: "        기타자산", indent: 2, isBold: false },
+    { key: "재고자산", name: "        재고자산", indent: 2, isBold: false },
+    { key: "매각예정비유동자산", name: "        매각예정비유동자산", indent: 2, isBold: false },
+    { key: "비유동자산", name: "    비유동자산", indent: 1, isBold: false },
+    { key: "매출채권및기타채권-1", name: "        매출채권및기타채권", indent: 2, isBold: false },
+    { key: "관계기업투자", name: "        관계기업투자", indent: 2, isBold: false },
+    { key: "유형자산", name: "        유형자산", indent: 2, isBold: false },
+    { key: "사용권자산", name: "        사용권자산", indent: 2, isBold: false },
+    { key: "투자부동산", name: "        투자부동산", indent: 2, isBold: false },
+    { key: "무형자산", name: "        무형자산", indent: 2, isBold: false },
+    { key: "금융자산-1", name: "        금융자산", indent: 2, isBold: false },
+    { key: "순확정급여자산", name: "        순확정급여자산", indent: 2, isBold: false },
+    { key: "기타자산-1", name: "        기타자산", indent: 2, isBold: false },
+    { key: "이연법인세자산", name: "        이연법인세자산", indent: 2, isBold: false },
+    { key: "자산총계", name: "    자산총계", indent: 1, isBold: true },
+    { key: "부채 [개요]", name: "부채 [개요]", indent: 0, isBold: true },
+    { key: "유동부채", name: "    유동부채", indent: 1, isBold: false },
+    { key: "매입채무및기타채무", name: "        매입채무및기타채무", indent: 2, isBold: false },
+    { key: "금융부채", name: "        금융부채", indent: 2, isBold: false },
+    { key: "리스부채", name: "        리스부채", indent: 2, isBold: false },
+    { key: "당기법인세부채", name: "        당기법인세부채", indent: 2, isBold: false },
+    { key: "충당부채", name: "        충당부채", indent: 2, isBold: false },
+    { key: "매각예정비유동부채", name: "        매각예정비유동부채", indent: 2, isBold: false },
+    { key: "기타부채", name: "        기타부채", indent: 2, isBold: false },
+    { key: "비유동부채", name: "    비유동부채", indent: 1, isBold: false },
+    { key: "매입채무및기타채무-1", name: "        매입채무및기타채무", indent: 2, isBold: false },
+    { key: "금융부채-1", name: "        금융부채", indent: 2, isBold: false },
+    { key: "리스부채-1", name: "        리스부채", indent: 2, isBold: false },
+    { key: "충당부채-1", name: "        충당부채", indent: 2, isBold: false },
+    { key: "기타부채-1", name: "        기타부채", indent: 2, isBold: false },
+    { key: "순확정급여부채", name: "        순확정급여부채", indent: 2, isBold: false },
+    { key: "이연법인세부채", name: "        이연법인세부채", indent: 2, isBold: false },
+    { key: "부채총계", name: "    부채총계", indent: 1, isBold: true },
+    { key: "자본 [개요]", name: "자본 [개요]", indent: 0, isBold: true },
+    { key: "지배기업의소유지분", name: "    지배기업의소유지분", indent: 1, isBold: false },
+    { key: "자본금", name: "        자본금", indent: 2, isBold: false },
+    { key: "주식발행초과금", name: "        주식발행초과금", indent: 2, isBold: false },
+    { key: "이익잉여금", name: "        이익잉여금", indent: 2, isBold: false },
+    { key: "기타자본", name: "        기타자본", indent: 2, isBold: false },
+    { key: "비지배지분", name: "    비지배지분", indent: 1, isBold: false },
+    { key: "자본총계", name: "    자본총계", indent: 1, isBold: true },
+    { key: "자본과부채총계", name: "자본과부채총계", indent: 0, isBold: true }
+];
 
-// 확장된 FinancialRowData 인터페이스
-interface FinancialRowData {
-  account_name: string;
-  path: string;
-  indent_level: number;
-  amounts: Record<string, number | null>;
-  validation_status: Record<string, boolean | null>;
-  is_parent?: boolean; // 이 행이 VALIDATION_RULES의 key에 해당하는가?
-  child_paths?: string[]; // is_parent가 true일 경우, 하위 계정들의 path 목록
-}
-
-interface FinancialStatementData {
-  sheet_name: string;
-  title: string;
-  years: string[];
-  rows: FinancialRowData[];
-  validation_summary: Record<string, { total: number; match: number; mismatch: number }>;
-}
-
-// 툴팁 컴포넌트
-interface TooltipProps {
-  parentAccount: string;
-  childAccounts: string[];
-  position: { x: number; y: number };
-}
-
-const Tooltip: React.FC<TooltipProps> = ({ parentAccount, childAccounts, position }) => {
-  const formula = `${parentAccount} = ${childAccounts.join(' + ')}`;
-  
-  return (
-    <div 
-      className={styles.tooltip}
-      style={{ 
-        left: position.x, 
-        top: position.y,
-        position: 'fixed',
-        zIndex: 1000
-      }}
-    >
-      <div className={styles.tooltipContent}>
-        <strong>합계 공식:</strong>
-        <div className={styles.formula}>{formula}</div>
-        <div className={styles.childList}>
-          <strong>구성 항목:</strong>
-          <ul>
-            {childAccounts.map((child, index) => (
-              <li key={index}>{child}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+// --- Main Component ---
 const ValidationPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'footing' | 'comparison' | 'financial' | null>(null);
-  const [footingResults, setFootingResults] = useState<FootingResponse | null>(null);
-  const [comparisonResults, setComparisonResults] = useState<ComparisonResult[] | null>(null);
-  const [financialData, setFinancialData] = useState<FinancialStatementData | null>(null);
-  
-  // 호버 상태 관리 - 수정된 로직
-  const [hoveredParentAccount, setHoveredParentAccount] = useState<string | null>(null);
-  const [tooltipData, setTooltipData] = useState<{
-    show: boolean;
-    parentAccount: string;
-    childAccounts: string[];
-    position: { x: number; y: number };
-  }>({ show: false, parentAccount: '', childAccounts: [], position: { x: 0, y: 0 } });
+  const [footingResponse, setFootingResponse] = useState<FootingResponse | null>(null);
+  const [activeResultTab, setActiveResultTab] = useState<string | null>(null);
 
-  const breadcrumbs = [
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Validation', active: true }
-  ];
-
-  // 상위 계정인지 판별하는 함수
-  const isParentAccount = (accountName: string): boolean => {
-    const rules = VALIDATION_RULES["연결재무상태표"];
-    return Object.keys(rules).includes(accountName) && accountName !== "__special_checks__";
-  };
-
-  // 하위 계정 목록을 가져오는 함수
-  const getChildAccounts = (parentAccount: string): string[] => {
-    const rules = VALIDATION_RULES["연결재무상태표"] as Record<string, any>;
-    return rules[parentAccount] || [];
-  };
-
-  // 특정 행이 현재 호버된 상위 계정의 하위 계정인지 확인하는 함수
-  const isChildOfHoveredParent = (row: FinancialRowData): boolean => {
-    if (!hoveredParentAccount) return false;
-    
-    const childAccounts = getChildAccounts(hoveredParentAccount);
-    return childAccounts.some(childName => 
-      row.account_name === childName || 
-      row.path.includes(childName) ||
-      row.account_name.includes(childName.replace(/^.*> /, '')) // "유동자산 > 현금및현금성자산" -> "현금및현금성자산"
-    );
-  };
-
-  // 마우스 호버 핸들러 - 수정된 로직
-  const handleRowHover = (row: FinancialRowData, event: React.MouseEvent) => {
-    if (isParentAccount(row.account_name)) {
-      const childAccounts = getChildAccounts(row.account_name);
-      
-      setHoveredParentAccount(row.account_name);
-      
-      // 툴팁 표시
-      setTooltipData({
-        show: true,
-        parentAccount: row.account_name,
-        childAccounts: childAccounts,
-        position: { x: event.clientX + 10, y: event.clientY + 10 }
-      });
-    }
-  };
-
-  // 마우스 벗어남 핸들러 - 수정된 로직
-  const handleRowLeave = () => {
-    setHoveredParentAccount(null);
-    setTooltipData(prev => ({ ...prev, show: false }));
-  };
+  const breadcrumbs = [ { label: 'Dashboard', href: '/dashboard' }, { label: 'Validation', active: true }];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      // Reset results when new file is uploaded
-      setFootingResults(null);
-      setComparisonResults(null);
-      setFinancialData(null);
-      setActiveTab(null);
+      setFootingResponse(null);
+      setActiveResultTab(null);
     }
   };
 
   const handleFootingValidation = async () => {
-    if (!file) {
-      alert('엑셀 파일을 먼저 업로드해주세요.');
-      return;
-    }
-
+    if (!file) { alert('엑셀 파일을 먼저 업로드해주세요.'); return; }
     setLoading(true);
-    setActiveTab('financial');
-    
+    setFootingResponse(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      // 재무상태표 원본 데이터 가져오기 - 포트 8001로 변경
-      const response = await fetch('http://localhost:8086/api/v1/dsdfooting/get-financial-data', {
-        method: 'POST',
-        body: formData,
-      });
-
+      const response = await fetch('http://localhost:8086/api/v1/dsdfooting/check-footing', { method: 'POST', body: formData });
       if (!response.ok) {
-        if (response.status === 0 || !response.status) {
-          throw new Error('백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
-        }
-        throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.detail || '검증 요청이 실패했습니다.');
       }
+      const result: FootingResponse = await response.json();
+      setFootingResponse(result);
+      if (result.results.length > 0) {
+        setActiveResultTab(result.results[0].sheet);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      if (error instanceof Error) {
+        alert(`검증 중 오류가 발생했습니다: ${error.message}`);
+      } else {
+        alert('알 수 없는 오류가 발생했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const result: FinancialStatementData = await response.json();
-      
-      // 각 행에 대해 is_parent와 child_paths 설정
-      const enhancedRows = result.rows.map(row => {
-        const isParent = isParentAccount(row.account_name);
-        const childPaths = isParent ? getChildAccounts(row.account_name) : [];
+  const processedData = useMemo(() => {
+    if (!footingResponse) return null;
+    const processed: Record<string, { headers: string[], rows: any[] }> = {};
+
+    for (const sheetResult of footingResponse.results) {
+        const yearHeaders = Object.keys(sheetResult.results_by_year);
+        const headers = ["", ...yearHeaders];
         
-        return {
-          ...row,
-          is_parent: isParent,
-          child_paths: childPaths
+        const validationData: FootingResultItem[] = [];
+        const flatten = (items: FootingResultItem[]) => {
+            for (const item of items) {
+                validationData.push(item);
+                if (item.children) flatten(item.children);
+            }
         };
-      });
-      
-      setFinancialData({
-        ...result,
-        rows: enhancedRows
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        alert('백엔드 서버에 연결할 수 없습니다.\n\n해결 방법:\n1. conanai_dsdcheck 폴더에서 서버를 실행해주세요\n2. 터미널에서: uvicorn app.main:app --host 0.0.0.0 --port 8001');
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        alert(`검증 중 오류가 발생했습니다: ${errorMessage}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleComparison = async () => {
-    if (!file) {
-      alert('엑셀 파일을 먼저 업로드해주세요.');
-      return;
-    }
-    setLoading(true);
-    setActiveTab('comparison');
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      // compare-auto는 corp_name, year를 파일명에서 추출하므로 네오위즈/2024로 고정됨
-      const response = await fetch('http://localhost:8086/compare-auto', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        if (response.status === 0 || !response.status) {
-          throw new Error('백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
+        if (yearHeaders.length > 0) {
+            flatten(sheetResult.results_by_year[yearHeaders[0]]);
         }
-        throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
-      }
-      const result: ComparisonResult[] = await response.json();
-      setComparisonResults(result);
-    } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        alert('백엔드 서버에 연결할 수 없습니다.\n\n해결 방법:\n1. conanai_dsdcheck 폴더에서 서버를 실행해주세요\n2. 터미널에서: uvicorn app.main:app --host 0.0.0.0 --port 8001');
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        alert(`대사 중 오류가 발생했습니다: ${errorMessage}`);
-      }
-    } finally {
-      setLoading(false);
+        
+        const rows = validationData.slice(0, accountStructure.length).map((item, index) => {
+            const accountInfo = accountStructure[index] || { name: item.item, indent: 0, isBold: false };
+            const row: Record<string, any> = { 
+                '': accountInfo.name,
+                'indent': accountInfo.indent,
+                'isBold': accountInfo.isBold
+            };
+            for (const year of yearHeaders) {
+                const yearData = sheetResult.results_by_year[year];
+                let validationItem: FootingResultItem | undefined;
+                const findItem = (items: FootingResultItem[], targetIndex: number, currentIndex: {val: number}): FootingResultItem | undefined => {
+                    for(const i of items) {
+                        if(currentIndex.val === targetIndex) return i;
+                        currentIndex.val++;
+                        if(i.children) {
+                            const found = findItem(i.children, targetIndex, currentIndex);
+                            if(found) return found;
+                        }
+                    }
+                };
+                validationItem = findItem(yearData, index, {val: 0});
+
+                row[year] = {
+                    value: validationItem?.actual ?? null,
+                    status: validationItem ? (validationItem.is_match ? 'match' : 'mismatch') : 'none',
+                };
+            }
+            return row;
+        });
+        
+        processed[sheetResult.sheet] = { headers, rows };
     }
+    return processed;
+  }, [footingResponse]);
+
+  const formatValueForDisplay = (value: any) => {
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value.toLocaleString('ko-KR');
+    }
+    return '';
   };
 
-  const getValidationStatusColor = (status: boolean | null) => {
-    if (status === null) return '';
-    return status ? styles.validMatch : styles.validMismatch;
+  const formatValueForExport = (value: any): string | number => {
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value;
+    }
+    return '';
   };
 
-  const formatNumber = (value: number | null) => {
-    if (value === null || value === undefined) return '-';
-    return value.toLocaleString();
+  const getCleanTableData = (sheet: string) => {
+    const data = processedData?.[sheet];
+    if (!data) return { headers: [], data: [] };
+
+    const cleanHeaders = data.headers.map(h => h === '' ? '계정과목' : h);
+    const cleanData = data.rows.map(row => {
+        const newRow: Record<string, any> = {};
+        data.headers.forEach(header => {
+            const key = header === '' ? '계정과목' : header;
+            const cellValue = row[header];
+            newRow[key] = header === '' ? row[''] : formatValueForExport(cellValue?.value);
+        });
+        return newRow;
+    });
+    return { headers: cleanHeaders, data: cleanData };
   };
 
-  const renderValidationItem = (item: ValidationResult, level: number = 0) => {
-    return (
-      <React.Fragment key={`${item.item}-${level}`}>
-        <tr className={`${styles.validationRow} ${!item.is_match ? styles.mismatch : styles.match}`}>
-          <td style={{ paddingLeft: `${level * 20 + 10}px` }}>
-            {level > 0 && '└ '}{item.item}
-          </td>
-          <td className={styles.numberCell}>
-            {item.expected?.toLocaleString() || '-'}
-          </td>
-          <td className={styles.numberCell}>
-            {item.actual?.toLocaleString() || '-'}
-          </td>
-          <td className={styles.statusCell}>
-            <span className={`${styles.status} ${item.is_match ? styles.success : styles.error}`}>
-              {item.is_match ? '일치' : '불일치'}
-            </span>
-          </td>
-        </tr>
-        {item.children?.map(child => renderValidationItem(child, level + 1))}
-      </React.Fragment>
-    );
+  const copyTableToClipboard = (sheet: string) => {
+    const { headers, data } = getCleanTableData(sheet);
+    const tsv = [
+      headers.join('\t'),
+      ...data.map(row => headers.map(h => row[h]).join('\t'))
+    ].join('\n');
+    navigator.clipboard.writeText(tsv).then(() => alert('표가 클립보드에 복사되었습니다.'));
+  };
+
+  const downloadTableAsXLSX = (sheet: string) => {
+    const { headers, data } = getCleanTableData(sheet);
+    const worksheet = XLSX.utils.json_to_sheet(data, { header: headers, skipHeader: true });
+    XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A1" });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet);
+    XLSX.writeFile(workbook, `${sheet}.xlsx`);
   };
 
   return (
     <Layout>
-      <PageHeader 
-        title="Validation" 
-        breadcrumbs={breadcrumbs}
-        actions={
-          <a href="#" className="btn-download">
-            <i className='bx bxs-cloud-download bx-fade-down-hover'></i>
-            <span className="text">Get PDF</span>
-          </a>
-        }
-      />
-
+      <PageHeader title="재무제표 검증" breadcrumbs={breadcrumbs} />
       <div className={styles.container}>
-        {/* File Upload Section */}
-        <div className={styles.uploadSection}>
-          <div className={styles.card}>
-            <h3>엑셀 파일 업로드</h3>
-            <div className={styles.uploadArea}>
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileUpload}
-                className={styles.fileInput}
-                id="file-upload"
-              />
-              <label htmlFor="file-upload" className={styles.uploadLabel}>
-                <i className='bx bx-cloud-upload'></i>
-                <span>엑셀 파일을 선택하거나 드래그하세요</span>
-              </label>
-              {file && (
-                <div className={styles.fileInfo}>
-                  <i className='bx bx-file'></i>
-                  <span>{file.name}</span>
-                </div>
-              )}
-            </div>
+        {/* ... (Upload, Action Section은 동일) ... */}
+        <div className={styles.card}>
+          <h3>1. 엑셀 파일 업로드</h3>
+          <div className={styles.uploadArea}>
+            <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className={styles.fileInput} id="file-upload" />
+            <label htmlFor="file-upload" className={styles.uploadLabel}>
+              <i className='bx bx-cloud-upload'></i>
+              <span>엑셀 파일을 선택하거나 드래그하세요</span>
+            </label>
+            {file && <div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>}
+          </div>
+        </div>
+        <div className={styles.card}>
+          <h3>2. 검증 실행</h3>
+          <div className={styles.actionItem}>
+            <h4>재무제표 합계검증</h4>
+            <p>업로드된 엑셀 파일의 재무상태표 시트에 대해 합계 일치 여부를 자동 검증합니다.</p>
+            <button onClick={handleFootingValidation} disabled={loading || !file} className={`${styles.actionButton} ${styles.primary}`}>
+              {loading ? '검증 중...' : '검증 시작하기'}
+            </button>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className={styles.actionSection}>
-          <div className={styles.card}>
-            <div className={styles.actionGrid}>
-              <div className={styles.actionItem}>
-                <h4>합계검증</h4>
-                <p>자산·부채·자본 합계 일치 여부를 자동 검증하고 재무상태표를 시각화합니다.</p>
-                <button 
-                  onClick={handleFootingValidation}
-                  disabled={loading}
-                  className={`${styles.actionButton} ${styles.primary}`}
-                >
-                  {loading && activeTab === 'financial' ? (
-                    <>
-                      <i className='bx bx-loader-alt bx-spin'></i>
-                      검증 중...
-                    </>
-                  ) : (
-                    <>
-                      <i className='bx bxs-check-shield'></i>
-                      검증 시작하기
-                    </>
-                  )}
-                </button>
+        {footingResponse && processedData && (
+          <div className={`${styles.card} ${styles.resultsSection}`}>
+            <div className={styles.resultHeader}>
+              <h3>3. 검증 결과</h3>
+              <div className={styles.summary}>
+                <span className={styles.totalSheets}>검증 시트: {footingResponse.total_sheets}개</span>
+                <span className={`${styles.mismatchCount} ${footingResponse.mismatch_count > 0 ? styles.error : styles.success}`}>
+                  총 불일치 항목: {footingResponse.mismatch_count}개
+                </span>
               </div>
-              <div className={styles.actionItem}>
-                <h4>전기보고서 대사</h4>
-                <p>DART API를 통해 전분기 보고서와 비교 검증합니다.</p>
-                <button 
-                  onClick={handleComparison}
-                  disabled={loading}
-                  className={`${styles.actionButton} ${styles.secondary}`}
-                >
-                  {loading && activeTab === 'comparison' ? (
-                    <>
-                      <i className='bx bx-loader-alt bx-spin'></i>
-                      대사 중...
-                    </>
-                  ) : (
-                    <>
-                      <i className='bx bxs-analyse'></i>
-                      대사 시작하기
-                    </>
-                  )}
+              {/* ⭐️ FIX: 내보내기 버튼 기능 추가 */}
+              <div className={styles.exportButtons}>
+                <button onClick={() => copyTableToClipboard(activeResultTab!)} className={styles.exportButton}>
+                  <i className='bx bx-copy'></i> 표 복사
+                </button>
+                <button onClick={() => downloadTableAsXLSX(activeResultTab!)} className={styles.exportButton}>
+                  <i className='bx bxs-file-export'></i> 엑셀로 내보내기
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+            <div className={styles.resultTabs}>
+              {footingResponse.results.map(result => (
+                <button key={result.sheet} className={`${styles.tabButton} ${activeResultTab === result.sheet ? styles.active : ''}`} onClick={() => setActiveResultTab(result.sheet)}>
+                  {result.title} ({result.sheet})
+                </button>
+              ))}
+            </div>
+            {footingResponse.results.map(sheetResult => {
+              const currentSheetData = processedData[sheetResult.sheet];
+              if (!currentSheetData || activeResultTab !== sheetResult.sheet) return null;
 
-        {/* Results Section */}
-        {(footingResults || comparisonResults || financialData) && (
-          <div className={styles.resultsSection}>
-            {financialData && activeTab === 'financial' && (
-              <div className={styles.card}>
-                <div className={styles.resultHeader}>
-                  <h3>재무상태표 및 합계검증 결과</h3>
-                  <div className={styles.summary}>
-                    <span className={styles.totalSheets}>시트: {financialData.title}</span>
-                    <div className={styles.validationSummary}>
-                      {Object.entries(financialData.validation_summary).map(([year, summary]) => (
-                        <span key={year} className={styles.yearSummary}>
-                          {year}: <span className={styles.success}>{summary.match}개 일치</span> / 
-                          <span className={styles.error}>{summary.mismatch}개 불일치</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.financialTableContainer}>
-                  <table className={styles.financialTable}>
+              return (
+                <div key={sheetResult.sheet} className={styles.tableContainer}>
+                  <table className={styles.resultTable}>
                     <thead>
                       <tr>
-                        <th className={styles.accountColumn}>계정과목</th>
-                        {financialData.years.map(year => (
-                          <th key={year} className={styles.amountColumn}>{year}</th>
-                        ))}
+                        {currentSheetData.headers.map((header, index) => <th key={`${header}-${index}`}>{header}</th>)}
                       </tr>
                     </thead>
                     <tbody>
-                      {financialData.rows.map((row, index) => (
-                        <tr 
-                          key={index} 
-                          className={`${styles.financialRow}`}
-                          onMouseEnter={(e) => handleRowHover(row, e)}
-                          onMouseLeave={handleRowLeave}
-                        >
-                          <td 
-                            className={`${styles.accountCell}`}
-                            style={{ paddingLeft: `${row.indent_level * 20 + 10}px` }}
-                          >
-                            {row.account_name}
-                          </td>
-                          {financialData.years.map(year => (
-                            <td 
-                              key={year}
-                              className={`${styles.amountCell} ${getValidationStatusColor(row.validation_status[year])} ${
-                                isParentAccount(row.account_name) ? styles.parentAccountAmount : ''
-                              } ${
-                                isChildOfHoveredParent(row) ? styles.highlightedChildAmount : ''
-                              }`}
-                            >
-                              {formatNumber(row.amounts[year])}
-                            </td>
-                          ))}
+                      {currentSheetData.rows.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          {currentSheetData.headers.map((header, colIndex) => {
+                            const isFirstColumn = colIndex === 0;
+                            const cellData = row[header];
+                            return (
+                              <td 
+                                key={`${header}-${colIndex}`} 
+                                style={isFirstColumn ? { paddingLeft: `${row.indent * 20 + 10}px` } : {}}
+                                className={isFirstColumn ? (row.isBold ? styles.boldCell : '') : `${styles.numberCell} ${cellData ? styles[cellData.status] : ''}`}
+                              >
+                                {isFirstColumn ? cellData : formatValueForDisplay(cellData.value)}
+                              </td>
+                            )
+                          })}
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-
-                <div className={styles.legend}>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendColor} ${styles.validMatch}`}></div>
-                    <span>합계검증 일치</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendColor} ${styles.validMismatch}`}></div>
-                    <span>합계검증 불일치</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendColor} ${styles.noValidation}`}></div>
-                    <span>검증 대상 아님</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendColor} ${styles.parentAccountLegend}`}></div>
-                    <span>상위 계정 (합계) - 마우스 호버 시 하위 항목 표시</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendColor} ${styles.highlightedChildLegend}`}></div>
-                    <span>하위 계정 (구성 항목)</span>
-                  </div>
-                </div>
-
-                <div className={styles.usageInfo}>
-                  <div className={styles.infoCard}>
-                    <i className='bx bx-info-circle'></i>
-                    <div>
-                      <strong>사용법:</strong> 연두색으로 표시된 상위 계정 행에 마우스를 올리면, 
-                      해당 계정을 구성하는 하위 계정들의 금액이 연노란색으로 하이라이트되며 
-                      합계 공식이 툴팁으로 표시됩니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {footingResults && activeTab === 'footing' && (
-              <div className={styles.card}>
-                <div className={styles.resultHeader}>
-                  <h3>재무제표 합계검증 결과</h3>
-                  <div className={styles.summary}>
-                    <span className={styles.totalSheets}>검증 시트: {footingResults.total_sheets}개</span>
-                    <span className={`${styles.mismatchCount} ${footingResults.mismatch_count > 0 ? styles.error : styles.success}`}>
-                      불일치 항목: {footingResults.mismatch_count}개
-                    </span>
-                  </div>
-                </div>
-
-                {footingResults.results.map((result, index) => (
-                  <div key={index} className={styles.sheetResult}>
-                    <h4>{result.title} ({result.sheet})</h4>
-                    
-                    {Object.entries(result.results_by_year).map(([year, items]) => (
-                      <div key={year} className={styles.yearSection}>
-                        <h5>{year}</h5>
-                        <div className={styles.tableContainer}>
-                          <table className={styles.validationTable}>
-                            <thead>
-                              <tr>
-                                <th>계정과목</th>
-                                <th>기대값</th>
-                                <th>실제값</th>
-                                <th>상태</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {items.map(item => renderValidationItem(item))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {comparisonResults && activeTab === 'comparison' && (
-              <div className={styles.card}>
-                <div className={styles.resultHeader}>
-                  <h3>전기보고서 대사 결과</h3>
-                  <div className={styles.summary}>
-                    <span className={styles.totalItems}>총 {comparisonResults.length}개 항목</span>
-                    <span className={`${styles.mismatchCount} ${comparisonResults.filter(r => !r.is_match).length > 0 ? styles.error : styles.success}`}>
-                      불일치 항목: {comparisonResults.filter(r => !r.is_match).length}개
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.tableContainer}>
-                  <table className={styles.comparisonTable}>
-                    <thead>
-                      <tr>
-                        <th>구분</th>
-                        <th>재무제표</th>
-                        <th>계정과목</th>
-                        <th>업로드 파일</th>
-                        <th>DART 데이터</th>
-                        <th>차이</th>
-                        <th>상태</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {comparisonResults.map((item, index) => (
-                        <tr key={index} className={`${styles.comparisonRow} ${!item.is_match ? styles.mismatch : styles.match}`}>
-                          <td>{item.fs_div}</td>
-                          <td>{item.sj_div}</td>
-                          <td>{item.account_nm}</td>
-                          <td className={styles.numberCell}>{item.excel_amount?.toLocaleString() || '-'}</td>
-                          <td className={styles.numberCell}>{item.dart_amount?.toLocaleString() || '-'}</td>
-                          <td className={`${styles.numberCell} ${item.difference !== 0 ? styles.difference : ''}`}>
-                            {item.difference?.toLocaleString() || '0'}
-                          </td>
-                          <td className={styles.statusCell}>
-                            <span className={`${styles.status} ${item.is_match ? styles.success : styles.error}`}>
-                              {item.is_match ? '일치' : '불일치'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+              )
+            })}
           </div>
         )}
       </div>
-
-      {/* Tooltip */}
-      {tooltipData.show && (
-        <Tooltip
-          parentAccount={tooltipData.parentAccount}
-          childAccounts={tooltipData.childAccounts}
-          position={tooltipData.position}
-        />
-      )}
     </Layout>
   );
 };
 
-export default ValidationPage; 
+export default ValidationPage;
