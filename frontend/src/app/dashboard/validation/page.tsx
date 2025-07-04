@@ -2,13 +2,12 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './validation.module.scss';
 import { useDropzone } from 'react-dropzone';
 import Modal from '@/shared/components/Modal/Modal';
-import { ValidationResultTable, DartComparisonTable } from '@/features/dashboard/validation';
 
 // --- Interface Definitions ---
 interface FootingResultItem {
@@ -121,6 +120,7 @@ const ValidationPage: React.FC = () => {
   const [dartResult, setDartResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const breadcrumbs = [ { label: 'Dashboard', href: '/dashboard' }, { label: 'Validation', active: true }];
 
@@ -153,13 +153,13 @@ const ValidationPage: React.FC = () => {
   }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFootingResponse(null);
-      setComparisonResult(null);
-      setActiveResultTab(null);
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]);
     }
+  };
+
+  const handleUploadAreaClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleFootingValidation = async () => {
@@ -167,8 +167,8 @@ const ValidationPage: React.FC = () => {
 
     if (file.name !== DEFAULT_EXCEL_FILE_NAME) {
       showModal(
-        '⚠️ 파일 확인이 필요해요!',
-        '현재 이 기능은 표준 계정과목 체계에 맞춰져 있어요.\n업로드하신 파일은 구조가 달라 검증이 어렵습니다.\n\n테스트를 위해 준비된 기본 샘플 파일을 이용해주세요.'
+        '🚧 기능 준비 중',
+        '현재 이 기능은 "네오위즈"의 계정과목 체계에 맞춘 검증 과정을 시연하기 위해 설정되었습니다.\n 업로드하신 파일은 계정과목 구조가 달라 정확한 검증이 어렵습니다. 기능 테스트를 위해 준비된 표준 샘플 파일을 이용해 주시기 바랍니다.'
       );
       return;
     }
@@ -275,10 +275,16 @@ const ValidationPage: React.FC = () => {
         <PageHeader title="재무제표 검증" breadcrumbs={breadcrumbs} />
         <div className={styles.container}>
           <div className={styles.card}>
-            <h3>1. 엑셀 파일 업로드</h3>
-            <div className={styles.uploadArea}>
-              <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className={styles.fileInput} id="file-upload" />
-              <label htmlFor="file-upload" className={styles.uploadLabel}>
+            <h3>엑셀 파일 업로드</h3>
+            <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileUpload}
+                className={styles.fileInput}
+              />
+              <label className={styles.uploadLabel}>
                 <i className='bx bx-cloud-upload'></i>
                 <span>엑셀 파일을 선택하거나 드래그하세요</span>
               </label>
@@ -286,7 +292,7 @@ const ValidationPage: React.FC = () => {
             </div>
           </div>
           <div className={styles.card}>
-            <h3>2. 검증 실행</h3>
+            <h3>검증 실행</h3>
             <div className={styles.actionContainer}>
               <div className={styles.actionItem}>
                 <h4>합계검증</h4>
@@ -312,7 +318,7 @@ const ValidationPage: React.FC = () => {
           {footingResponse && processedData && (
             <div className={`${styles.card} ${styles.resultsSection}`}>
               <div className={styles.resultHeader}>
-                <h3>3. 검증 결과</h3>
+                <h3>검증 결과</h3>
                 <div className={styles.summary}>
                   <span className={styles.totalSheets}>검증 시트: {footingResponse.total_sheets}개</span>
                   <span className={`${styles.mismatchCount} ${footingResponse.mismatch_count > 0 ? styles.error : styles.success}`}>
