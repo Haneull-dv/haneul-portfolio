@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
+import styles from './digest.module.scss';
+import clsx from 'clsx';
 
 // API 베이스 URL 설정
 const STOCKPRICE_API_BASE = 'http://localhost:9006/stockprice';
@@ -12,18 +14,74 @@ const WEEKLY_DB_API_BASE = 'http://localhost:8001/weekly';
 
 // 한국 게임기업 종목코드-시장 매핑표
 const STOCK_MARKET_MAPPING: Record<string, string> = {
+  // 메인 게임기업
   '036570': 'KOSPI',   // 엔씨소프트
   '251270': 'KOSPI',   // 넷마블
   '259960': 'KOSPI',   // 크래프톤
   '263750': 'KOSPI',   // 펄어비스
+  '293490': 'KOSPI',   // 카카오게임즈
+  '225570': 'KOSPI',   // 넥슨게임즈
+  '181710': 'KOSPI',   // NHN
+  '035420': 'KOSPI',   // 네이버
+  '035720': 'KOSPI',   // 카카오
+  
+  // KOSDAQ 게임기업
   '078340': 'KOSDAQ',  // 컴투스
   '112040': 'KOSDAQ',  // 위메이드
-  '293490': 'KOSPI',   // 카카오게임즈
   '095660': 'KOSDAQ',  // 네오위즈
-  '181710': 'KOSPI',   // NHN
   '069080': 'KOSDAQ',  // 웹젠
-  '225570': 'KOSPI'    // 넥슨게임즈
+  '192080': 'KOSDAQ',  // 더블유게임즈
+  '145720': 'KOSDAQ',  // 더블다운인터액티브
+  '089500': 'KOSDAQ',  // 그라비티
+  '194480': 'KOSDAQ',  // 데브시스터즈
+  '217270': 'KOSDAQ',  // 넵튠
+  '101730': 'KOSDAQ',  // 위메이드맥스
+  '063080': 'KOSDAQ',  // 컴투스홀딩스
+  '067000': 'KOSDAQ',  // 조이시티
+  '950190': 'KOSDAQ',  // 미투젠
+  '123420': 'KOSDAQ',  // 위메이드플레이
+  '201490': 'KOSDAQ',  // 미투온
+  '348030': 'KOSDAQ',  // 모비릭스
+  '052790': 'KOSDAQ',  // 액토즈소프트
+  '331520': 'KOSDAQ',  // 밸로프
+  '205500': 'KOSDAQ',  // 넥써쓰
+  '462870': 'KOSDAQ',  // 시프트업
+  
+  // 해외 기업 (참고용)
+  'ATVI': 'NASDAQ',   // Activision Blizzard
+  'EA': 'NASDAQ',     // Electronic Arts
+  'TTWO': 'NASDAQ',   // Take-Two Interactive
+  'RBLX': 'NYSE',     // Roblox Corporation
+  'U': 'NYSE',        // Unity Software
+  'ZNGA': 'NASDAQ',   // Zynga
+  '7974': 'TSE',      // Nintendo
+  '9684': 'TSE',      // Square Enix
+  '3659': 'TSE',      // Nexon
+  '0700': 'HKEX',     // Tencent
+  '9999': 'HKEX'      // NetEase
 };
+
+// 백엔드(weekly_stockprice/app/config/companies.py)와 동일한 정보
+const GAME_COMPANIES_MAP: Record<string, string> = {
+  "네이버": "035420", "카카오": "035720", "크래프톤": "259960", "엔씨소프트": "036570", "넷마블": "251270",
+  "펄어비스": "263750", "카카오게임즈": "293490", "넥슨게임즈": "225570", "위메이드": "112040", "네오위즈": "095660",
+  "NHN": "181710", "컴투스": "078340", "더블유게임즈": "192080", "더블다운인터액티브": "145720", "그라비티": "089500",
+  "데브시스터즈": "194480", "웹젠": "069080", "넵튠": "217270", "위메이드맥스": "101730", "컴투스홀딩스": "063080",
+  "조이시티": "067000", "미투젠": "950190", "위메이드플레이": "123420", "미투온": "201490", "모비릭스": "348030",
+  "액토즈소프트": "052790", "밸로프": "331520", "넥써쓰": "205500", "시프트업": "462870",
+  "Tencent": "00700", "Netease": "09999", "Baidu": "09888",
+  "Kingsoft": "03888", "Perfect World": "002624", "Netdragon": "00777", "Sohu": "SOHU", "Cheetah Mobile": "CMCM",
+  "Nintendo": "7974", "Nexon": "3659", "Bandai-Namco": "7832", "Capcom": "9697", "KONAMI": "9766",
+  "Square-Enix": "9684", "Sega": "6460", "Gungho": "3765", "DeNA": "2432", "Gree": "3632",
+  "COLOPL": "3668", "Klab": "3656",
+  "Electronic-Arts": "EA", "Roblox": "RBLX", "Take-Two": "TTWO", "Playtika": "PLTK", "Sciplay": "SCPL",
+  "CD Projekt SA": "CDR", "Ubisoft": "UBI"
+};
+
+const SYMBOL_TO_NAME_MAP: { [key: string]: string } = {};
+Object.entries(GAME_COMPANIES_MAP).forEach(([name, symbol]) => {
+  SYMBOL_TO_NAME_MAP[symbol] = name;
+});
 
 // 데이터 타입 정의
 interface WeeklyStockPrice {
@@ -44,25 +102,29 @@ interface GameCompany {
 }
 
 interface WeeklyDisclosure {
-  symbol: string;
-  companyName: string;
-  title: string;
-  date: string;
-  url?: string;
-  category: string;
-  summary?: string;
+  id: number;
+  company_name: string;
+  stock_code: string;
+  disclosure_title: string;
+  disclosure_date: string;
+  report_name: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface WeeklyIssue {
-  symbol: string;
-  companyName: string;
-  title: string;
-  date: string;
-  category: string;
-  source: string;
-  url?: string;
-  summary?: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  id: string;
+  corp: string;
+  summary: string;
+  original_title: string;
+  confidence: number;
+  matched_keywords?: string[];
+  news_url?: string;
+  published_date?: string;
+  category?: string;
+  sentiment?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface IntegratedCompanyData {
@@ -85,27 +147,70 @@ interface IntegratedCompanyData {
 const apiClient = {
   // Stock Price API
   async getAllStocks() {
+    console.log('🚀 주가 API 호출 시작:', `${STOCKPRICE_API_BASE}/db/all`);
     const response = await fetch(`${STOCKPRICE_API_BASE}/db/all`);
-    if (!response.ok) throw new Error('주가 데이터 로딩 실패');
-    return await response.json();
+    console.log('📡 주가 API 응답 상태:', response.status, response.statusText);
+    if (!response.ok) {
+      console.error('❌ 주가 API 오류:', response.status, response.statusText);
+      throw new Error(`주가 데이터 로딩 실패: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('📈 주가 API 응답:', data);
+    return data;
   },
 
   async getGameCompanies() {
+    console.log('🚀 기업 정보 API 호출 시작:', `${WEEKLY_DB_API_BASE}/companies`);
     const response = await fetch(`${WEEKLY_DB_API_BASE}/companies`);
-    if (!response.ok) throw new Error('기업 정보 로딩 실패');
-    return await response.json();
+    console.log('📡 기업 정보 API 응답 상태:', response.status, response.statusText);
+    if (!response.ok) {
+      console.error('❌ 기업 정보 API 오류:', response.status, response.statusText);
+      throw new Error(`기업 정보 로딩 실패: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('🏢 기업 정보 API 응답:', data);
+    return data;
   },
 
   // Disclosure API
   async getWeeklyDisclosures() {
+    console.log('🚀 공시 API 호출 시작:', `${DISCLOSURE_API_BASE}/recent`);
     const response = await fetch(`${DISCLOSURE_API_BASE}/recent`);
-    if (!response.ok) throw new Error('공시 데이터 로딩 실패');
-    return await response.json();
+    console.log('📡 공시 API 응답 상태:', response.status, response.statusText);
+    if (!response.ok) {
+      console.error('❌ 공시 API 오류:', response.status, response.statusText);
+      throw new Error(`공시 데이터 로딩 실패: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('🔍 공시 API 원본 응답:', data);
+    console.log('🔍 공시 API 응답 타입:', typeof data);
+    console.log('🔍 공시 data 필드:', data.data);
+    if (data.data && data.data.length > 0) {
+      console.log('🔍 첫 번째 공시 아이템:', data.data[0]);
+      console.log('🔍 첫 번째 공시 아이템 키들:', Object.keys(data.data[0]));
+    }
+    return data;
+  },
+
+  // 공시 + 기업 정보 통합 API
+  async getDisclosuresWithCompanies() {
+    console.log('🚀 공시+기업 API 호출 시작:', `${DISCLOSURE_API_BASE}/recent-with-companies`);
+    const response = await fetch(`${DISCLOSURE_API_BASE}/recent-with-companies`);
+    console.log('📡 공시+기업 API 응답 상태:', response.status, response.statusText);
+    if (!response.ok) {
+      console.error('❌ 공시+기업 API 오류:', response.status, response.statusText);
+      throw new Error(`공시+기업 데이터 로딩 실패: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('🔍 공시+기업 API 원본 응답:', data);
+    console.log('🔍 공시 개수:', data.disclosures?.length || 0);
+    console.log('🔍 기업 개수:', data.companies?.length || 0);
+    return data;
   },
 
   // Issue API
   async getWeeklyIssues() {
-    const response = await fetch(`${ISSUE_API_BASE}/db/weekly`);
+    const response = await fetch(`${ISSUE_API_BASE}/recent`);
     if (!response.ok) throw new Error('이슈 데이터 로딩 실패');
     return await response.json();
   },
@@ -122,17 +227,23 @@ const apiClient = {
   }
 };
 
-const getCountryStyle = (country: string) => {
-    const styles: Record<string, { background: string; color: string }> = {
-      KR: { background: '#3498db', color: 'white' },
-      JP: { background: '#e74c3c', color: 'white' },
-      CN: { background: '#f1c40f', color: '#2c3e50' },
-      US: { background: '#2c3e50', color: 'white' },
-      EU: { background: '#9b59b6', color: 'white' },
-      default: { background: '#bdc3c7', color: '#2c3e50' },
+const getCountryClass = (country: string) => {
+    const classes: Record<string, string> = {
+      KR: styles.countryKR,
+      JP: styles.countryJP,
+      CN: styles.countryCN,
+      US: styles.countryUS,
+      EU: styles.countryEU,
     };
-    return styles[country] || styles.default;
+    return classes[country] || styles.countryDefault;
 };
+
+const getMarketClass = (market: string) => {
+  const lowerMarket = market.toLowerCase();
+  if (lowerMarket.includes('kospi')) return styles.kospi;
+  if (lowerMarket.includes('kosdaq')) return styles.kosdaq;
+  return styles.unknown;
+}
 
 // 미니 정보 팝업 컴포넌트
 interface MiniPopupProps {
@@ -147,66 +258,49 @@ const MiniPopup: React.FC<MiniPopupProps> = ({ stock, onClose, position }) => {
     return num.toLocaleString();
   };
 
+  const changeRateColor = stock.changeRate === null ? styles.textNeutral :
+                          stock.changeRate > 0 ? styles.textPositive :
+                          styles.textNegative;
+
   return (
-    <div style={{
-      position: 'fixed',
+    <div className={styles.miniPopup} style={{
       top: position.y + 10,
       left: position.x + 10,
-      background: 'white',
-      border: '2px solid #e9ecef',
-      borderRadius: '12px',
-      padding: '20px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-      zIndex: 1000,
-      minWidth: '300px',
-      maxWidth: '400px'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-        <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '18px' }}>{stock.companyName}</h4>
-        <button onClick={onClose} style={{
-          background: 'none',
-          border: 'none',
-          fontSize: '20px',
-          cursor: 'pointer',
-          color: '#7f8c8d'
-        }}>×</button>
+      <div className={styles.popupHeader}>
+        <h4>{stock.companyName}</h4>
+        <button onClick={onClose} className={styles.closeButton}>×</button>
       </div>
       
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '5px' }}>
+      <div className={styles.infoSection}>
+        <div className={styles.metaInfo}>
           {stock.symbol} · {stock.country} · 순위 {stock.marketCapRank || 'N/A'}
         </div>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
+        <div className={styles.price}>
           {formatNumber(stock.currentPrice)}원
         </div>
-        <div style={{ 
-          fontSize: '16px', 
-          fontWeight: 'bold',
-          color: stock.changeRate === null ? '#7f8c8d' : 
-                 stock.changeRate > 0 ? '#e74c3c' : 
-                 stock.changeRate < 0 ? '#3498db' : '#7f8c8d'
-        }}>
+        <div className={clsx(styles.changeRate, changeRateColor)}>
           {stock.changeRate !== null ? 
             `${stock.changeRate > 0 ? '+' : ''}${stock.changeRate.toFixed(2)}%` : 'N/A'}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
+      <div className={styles.grid}>
         <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>시가총액</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+          <div className={styles.gridLabel}>시가총액</div>
+          <div className={styles.gridValue}>
             {stock.marketCap ? `${formatNumber(stock.marketCap)}억원` : 'N/A'}
           </div>
         </div>
         <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 고가</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+          <div className={styles.gridLabel}>주간 고가</div>
+          <div className={styles.gridValue}>
             {formatNumber(stock.weekHigh)}원
           </div>
         </div>
         <div>
-          <div style={{ color: '#7f8c8d', fontWeight: '600' }}>주간 저가</div>
-          <div style={{ color: '#2c3e50', fontWeight: 'bold' }}>
+          <div className={styles.gridLabel}>주간 저가</div>
+          <div className={styles.gridValue}>
             {formatNumber(stock.weekLow)}원
           </div>
         </div>
@@ -238,72 +332,29 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, color, 
     return '#7f8c8d';
   };
 
+  const cardStyle = {
+    '--card-color': color,
+    '--card-bg': `${color}1A`,
+  } as React.CSSProperties;
+
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '16px',
-      padding: '24px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-      border: '1px solid #f1f3f4',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '4px',
-        height: '100%',
-        background: color
-      }} />
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#7f8c8d',
-            marginBottom: '8px'
-          }}>
-            {title}
-          </div>
-          <div style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            color: '#2c3e50',
-            marginBottom: '4px'
-          }}>
-            {value}
-          </div>
-          <div style={{
-            fontSize: '13px',
-            color: '#95a5a6',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
+    <div className={styles.kpiCard} style={cardStyle}>
+      <div className={styles.colorBar} />
+      <div className={styles.cardContent}>
+        <div className={styles.textWrapper}>
+          <div className={styles.title}>{title}</div>
+          <div className={styles.value}>{value}</div>
+          <div className={styles.subtitle}>
             {trend && (
-              <i className={`bx ${getTrendIcon()}`} style={{ 
+              <i className={clsx('bx', getTrendIcon(), styles.trendIcon)} style={{ 
                 color: getTrendColor(),
-                fontSize: '16px'
               }}></i>
             )}
             {subtitle}
           </div>
         </div>
-        <div style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '12px',
-          background: `${color}15`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <i className={`bx ${icon}`} style={{ 
-            fontSize: '24px', 
-            color: color 
-          }}></i>
+        <div className={styles.iconWrapper}>
+          <i className={clsx('bx', icon, styles.icon)}></i>
         </div>
       </div>
     </div>
@@ -422,68 +473,45 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
     return sortDirection === 'asc' ? 'bx-sort-up' : 'bx-sort-down';
   };
 
+  const tableColumns = [
+    { key: 'marketCapRank', label: '순위', width: '60px' },
+    { key: 'companyName', label: '기업명', width: '140px' },
+    { key: 'country', label: '국가', width: '80px' },
+    { key: 'currentPrice', label: '현재가', width: '100px' },
+    { key: 'changeRate', label: '등락률(%)', width: '100px' },
+    { key: 'marketCap', label: '시가총액(억)', width: '120px' },
+    { key: 'weekHigh', label: '주간고가', width: '100px' },
+    { key: 'weekLow', label: '주간저가', width: '100px' },
+    { key: 'lastWeek', label: '전주종가', width: '100px' },
+    { key: 'disclosures', label: '금주 공시', width: '200px' },
+    { key: 'issues', label: '금주 이슈', width: '200px' }
+  ];
+
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: '16px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-      overflow: 'hidden',
-      border: '1px solid #f1f3f4'
-    }}>
+    <div className={styles.tableContainer}>
       {/* 테이블 헤더 - 검색 및 필터 */}
-      <div style={{
-        padding: '24px',
-        borderBottom: '1px solid #f1f3f4',
-        background: '#fafbfc'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <h3 style={{ 
-            margin: 0, 
-            color: '#2c3e50', 
-            fontSize: '20px', 
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <i className='bx bxs-dashboard' style={{ color: '#3498db' }}></i>
+      <div className={styles.tableHeader}>
+        <div className={styles.tableControls}>
+          <h3 className={styles.tableTitle}>
+            <i className='bx bxs-dashboard'></i>
             통합 기업 분석 대시보드 ({filteredAndSortedData.length}개 기업)
           </h3>
           
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className={styles.filterControls}>
             {/* 검색 */}
             <input
               type="text"
               placeholder="기업명 또는 종목코드 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: '10px 16px',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                fontSize: '14px',
-                minWidth: '220px',
-                background: 'white'
-              }}
+              className={styles.searchInput}
             />
             
             {/* 국가 필터 */}
             <select
               value={filterCountry}
               onChange={(e) => setFilterCountry(e.target.value)}
-              style={{
-                padding: '10px 16px',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                fontSize: '14px',
-                background: 'white'
-              }}
+              className={styles.countrySelect}
             >
               {countryOptions.map(country => (
                 <option key={country} value={country}>
@@ -495,22 +523,7 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
             {/* 다운로드 버튼 */}
             <button
               onClick={() => onExportExcel(selectedItems.size > 0 ? getSelectedData() : undefined)}
-              style={{
-                background: '#27ae60',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#219a52'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#27ae60'}
+              className={clsx(styles.exportButton, styles.excel)}
             >
               <i className='bx bxs-file-export'></i>
               Excel {selectedItems.size > 0 && `(${selectedItems.size}개)`}
@@ -518,22 +531,7 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
             
             <button
               onClick={() => onExportPDF(selectedItems.size > 0 ? getSelectedData() : undefined)}
-              style={{
-                background: '#e74c3c',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#c0392b'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#e74c3c'}
+              className={clsx(styles.exportButton, styles.pdf)}
             >
               <i className='bx bxs-file-pdf'></i>
               PDF {selectedItems.size > 0 && `(${selectedItems.size}개)`}
@@ -543,318 +541,159 @@ const IntegratedTable: React.FC<IntegratedTableProps> = ({
       </div>
 
       {/* 테이블 */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: '14px'
-        }}>
+      <div className={styles.tableWrapper}>
+        <table className={styles.integratedTable}>
           <thead>
-            <tr style={{ background: '#f8f9fa' }}>
-              <th style={{
-                padding: '16px 12px',
-                textAlign: 'center',
-                borderBottom: '2px solid #dee2e6',
-                width: '50px'
-              }}>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAll}
-                  checked={selectedItems.size === filteredAndSortedData.length && filteredAndSortedData.length > 0}
-                  style={{ cursor: 'pointer' }}
-                />
+            <tr>
+              <th style={{ width: '3%' }}>
+                <input type="checkbox" onChange={handleSelectAll} checked={selectedItems.size === filteredAndSortedData.length && filteredAndSortedData.length > 0} />
               </th>
-              {[
-                { key: 'marketCapRank', label: '순위', width: '60px' },
-                { key: 'companyName', label: '기업명', width: '140px' },
-                { key: 'symbol', label: '종목코드', width: '80px' },
-                { key: 'country', label: '국가', width: '80px' },
-                { key: 'market', label: '시장', width: '80px' },
-                { key: 'currentPrice', label: '현재가', width: '100px' },
-                { key: 'changeRate', label: '등락률(%)', width: '100px' },
-                { key: 'marketCap', label: '시가총액(억)', width: '120px' },
-                { key: 'weekHigh', label: '주간고가', width: '100px' },
-                { key: 'weekLow', label: '주간저가', width: '100px' },
-                { key: 'lastWeek', label: '전주종가', width: '100px' },
-                { key: 'disclosures', label: '금주 공시', width: '200px' },
-                { key: 'issues', label: '금주 이슈', width: '200px' }
-              ].map(column => (
-                <th
-                  key={column.key}
-                  onClick={() => handleSort(column.key as keyof IntegratedCompanyData)}
-                  style={{
-                    padding: '16px 12px',
-                    textAlign: 'left',
-                    fontWeight: 'bold',
-                    color: '#2c3e50',
-                    cursor: 'pointer',
-                    borderBottom: '2px solid #dee2e6',
-                    whiteSpace: 'nowrap',
-                    width: column.width,
-                    background: '#f8f9fa'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {column.label}
-                    <i className={`bx ${getSortIcon(column.key as keyof IntegratedCompanyData)}`} 
-                       style={{ fontSize: '14px', opacity: 0.7 }}></i>
-                  </div>
-                </th>
-              ))}
+              <th style={{ width: '3%' }} onClick={() => handleSort('marketCapRank')}>순위 <i className={clsx('bx', getSortIcon('marketCapRank'))}></i></th>
+              <th style={{ width: '14%' }} onClick={() => handleSort('companyName')}>기업명 <i className={clsx('bx', getSortIcon('companyName'))}></i></th>
+              <th style={{ width: '4%' }} onClick={() => handleSort('country')}>국가 <i className={clsx('bx', getSortIcon('country'))}></i></th>
+              <th style={{ width: '8%' }} onClick={() => handleSort('currentPrice')}>현재가 <i className={clsx('bx', getSortIcon('currentPrice'))}></i></th>
+              <th style={{ width: '6%' }} onClick={() => handleSort('changeRate')}>등락률(%) <i className={clsx('bx', getSortIcon('changeRate'))}></i></th>
+              <th style={{ width: '8%' }} onClick={() => handleSort('marketCap')}>시가총액(억) <i className={clsx('bx', getSortIcon('marketCap'))}></i></th>
+              <th style={{ width: '8%' }} onClick={() => handleSort('weekHigh')}>주간고가 <i className={clsx('bx', getSortIcon('weekHigh'))}></i></th>
+              <th style={{ width: '8%' }} onClick={() => handleSort('weekLow')}>주간저가 <i className={clsx('bx', getSortIcon('weekLow'))}></i></th>
+              <th style={{ width: '8%' }} onClick={() => handleSort('lastWeek')}>전주종가 <i className={clsx('bx', getSortIcon('lastWeek'))}></i></th>
+              <th style={{ width: '16%' }}>금주 공시</th>
+              <th style={{ width: '15%' }}>금주 이슈</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedData.map((company, index) => (
-              <tr 
-                key={`${company.symbol}-${index}`}
-                style={{
-                  borderBottom: '1px solid #f1f3f4',
-                  background: selectedItems.has(company.symbol) 
-                    ? '#e8f4fd' 
-                    : index % 2 === 0 ? 'white' : '#fafbfc',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedItems.has(company.symbol)) {
-                    e.currentTarget.style.backgroundColor = '#f0f8ff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedItems.has(company.symbol)) {
-                    e.currentTarget.style.backgroundColor = index % 2 === 0 ? 'white' : '#fafbfc';
-                  }
-                }}
-              >
-                {/* 선택 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  textAlign: 'center',
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.has(company.symbol)}
-                    onChange={() => handleSelectItem(company.symbol)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
+            {filteredAndSortedData.map((company) => {
+              // 이름 앞 숫자 제거 (e.g., "1시프트업" -> "시프트업")
+              const cleanedCompanyName = company.companyName.replace(/^[0-9]+\s*/, '');
 
-                {/* 순위 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  fontWeight: 'bold', 
-                  color: '#2c3e50',
-                  textAlign: 'center'
-                }}>
-                  {company.marketCapRank || '-'}
-                </td>
-
-                {/* 기업명 (클릭 가능) */}
-                <td 
-                  style={{ 
-                    padding: '16px 12px', 
-                    fontWeight: 'bold', 
-                    color: '#2c3e50',
-                    cursor: 'pointer',
-                    borderLeft: '3px solid transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderLeft = '3px solid #3498db';
-                    e.currentTarget.style.color = '#3498db';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderLeft = '3px solid transparent';
-                    e.currentTarget.style.color = '#2c3e50';
-                  }}
-                  title="클릭하면 상세 정보를 확인할 수 있습니다"
-                  onClick={(e) => handleCellClick(company, e)}
+              return (
+                <tr 
+                  key={company.symbol}
+                  className={clsx({ [styles.selected]: selectedItems.has(company.symbol) })}
                 >
-                  {company.companyName}
-                </td>
+                  {/* 선택 */}
+                  <td data-label="선택" className={styles.centerAlign}>
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(company.symbol)}
+                      onChange={() => handleSelectItem(company.symbol)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
 
-                {/* 종목코드 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  fontFamily: 'monospace'
-                }}>
-                  {company.symbol}
-                </td>
+                  {/* 순위 */}
+                  <td data-label="순위" className={clsx(styles.bold, styles.centerAlign)}>
+                    {company.marketCapRank || '-'}
+                  </td>
 
-                {/* 국가 */}
-                <td style={{ padding: '16px 12px', textAlign: 'center' }}>
-                  <span style={{
-                    ...getCountryStyle(company.country),
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}>
-                    {company.country}
-                  </span>
-                </td>
-
-                {/* 시장 */}
-                <td style={{ padding: '16px 12px', textAlign: 'center' }}>
-                   <span style={{
-                    background: company.market === 'KOSPI' ? '#e74c3c' : company.market === 'KOSDAQ' ? '#3498db' : '#7f8c8d',
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}>
-                    {company.market}
-                  </span>
-                </td>
-
-                {/* 현재가 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  fontWeight: 'bold', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontFamily: 'monospace'
-                }}>
-                  {company.currentPrice ? `${formatNumber(company.currentPrice)}원` : 'N/A'}
-                </td>
-
-                {/* 등락률 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  fontWeight: 'bold', 
-                  textAlign: 'right',
-                  color: company.changeRate === null ? '#7f8c8d' : 
-                         company.changeRate > 0 ? '#e74c3c' : 
-                         company.changeRate < 0 ? '#3498db' : '#7f8c8d',
-                  fontFamily: 'monospace'
-                }}>
-                  {company.changeRate !== null ? 
-                    `${company.changeRate > 0 ? '+' : ''}${company.changeRate.toFixed(2)}%` : 'N/A'}
-                </td>
-
-                {/* 시가총액 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  fontWeight: 'bold', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontFamily: 'monospace'
-                }}>
-                  {company.marketCap ? `${formatNumber(company.marketCap)}억` : 'N/A'}
-                </td>
-
-                {/* 주간고가 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  fontFamily: 'monospace'
-                }}>
-                  {formatNumber(company.weekHigh)}원
-                </td>
-
-                {/* 주간저가 */}
-                 <td style={{ 
-                  padding: '16px 12px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  fontFamily: 'monospace'
-                }}>
-                  {formatNumber(company.weekLow)}원
-                </td>
-
-                {/* 전주종가 */}
-                <td style={{ 
-                  padding: '16px 12px', 
-                  textAlign: 'right',
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  fontFamily: 'monospace'
-                }}>
-                  {formatNumber(company.lastWeek)}원
-                </td>
-
-                {/* 금주 공시 */}
-                <td style={{ padding: '16px 12px' }}>
-                  {company.disclosures.length > 0 ? (
-                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
-                      {company.disclosures.slice(0, 2).map((disclosure, idx) => (
-                        <div key={idx} style={{ 
-                          marginBottom: '6px',
-                          padding: '6px 10px',
-                          background: '#f8f9fa',
-                          borderRadius: '6px',
-                          fontSize: '12px'
-                        }}>
-                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
-                            {disclosure.title.length > 30 ? 
-                              `${disclosure.title.substring(0, 30)}...` : 
-                              disclosure.title}
-                          </div>
-                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
-                            {disclosure.date} · {disclosure.category}
-                          </div>
-                        </div>
-                      ))}
-                      {company.disclosures.length > 2 && (
-                        <div style={{ 
-                          fontSize: '11px', 
-                          color: '#7f8c8d', 
-                          textAlign: 'center',
-                          marginTop: '4px'
-                        }}>
-                          +{company.disclosures.length - 2}개 더
-                        </div>
-                      )}
+                  {/* 기업명 (클릭 가능) */}
+                  <td data-label="기업명" className={styles.companyName} onClick={(e) => handleCellClick(company, e)}>
+                    <div className={styles.companyInfo}>
+                      <span className={styles.rank}>{company.marketCapRank}</span>
+                      <span className={styles.name}>{cleanedCompanyName}</span>
                     </div>
-                  ) : (
-                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>공시 없음</span>
-                  )}
-                </td>
+                  </td>
 
-                {/* 금주 이슈 */}
-                <td style={{ padding: '16px 12px' }}>
-                  {company.issues.length > 0 ? (
-                    <div style={{ maxHeight: '80px', overflowY: 'auto' }}>
-                      {company.issues.slice(0, 2).map((issue, idx) => (
-                        <div key={idx} style={{ 
-                          marginBottom: '6px',
-                          padding: '6px 10px',
-                          background: issue.sentiment === 'positive' ? '#e8f5e8' :
-                                     issue.sentiment === 'negative' ? '#ffeaea' : '#f8f9fa',
-                          borderRadius: '6px',
-                          fontSize: '12px'
-                        }}>
-                          <div style={{ fontWeight: '600', color: '#2c3e50', marginBottom: '2px' }}>
-                            {issue.title.length > 30 ? 
-                              `${issue.title.substring(0, 30)}...` : 
-                              issue.title}
+                  {/* 국가 */}
+                  <td data-label="국가" className={styles.centerAlign}>
+                    <span className={clsx(styles.countryBadge, getCountryClass(company.country))}>
+                      {company.country}
+                    </span>
+                  </td>
+
+                  {/* 현재가 */}
+                  <td data-label="현재가" className={styles.monospace}>{formatNumber(company.currentPrice)}원</td>
+
+                  {/* 등락률 */}
+                  <td 
+                    data-label="등락률(%)" 
+                    className={clsx(
+                      styles.monospace,
+                      styles.bold,
+                      styles.rightAlign,
+                      company.changeRate === null ? styles.textNeutral :
+                      company.changeRate > 0 ? styles.textPositive :
+                      styles.textNegative
+                    )}
+                  >
+                    {company.changeRate !== null ? 
+                      `${company.changeRate > 0 ? '+' : ''}${company.changeRate.toFixed(2)}%` : 'N/A'}
+                  </td>
+
+                  {/* 시가총액 */}
+                  <td data-label="시가총액(억)" className={clsx(styles.monospace, styles.bold, styles.rightAlign)}>
+                    {company.marketCap ? `${formatNumber(company.marketCap)}억` : 'N/A'}
+                  </td>
+
+                  {/* 주간고가 */}
+                  <td data-label="주간고가" className={clsx(styles.monospace, styles.bold, styles.rightAlign)}>
+                    {formatNumber(company.weekHigh)}원
+                  </td>
+
+                  {/* 주간저가 */}
+                   <td data-label="주간저가" className={clsx(styles.monospace, styles.bold, styles.rightAlign)}>
+                    {formatNumber(company.weekLow)}원
+                  </td>
+
+                  {/* 전주종가 */}
+                  <td data-label="전주종가" className={clsx(styles.monospace, styles.bold, styles.rightAlign)}>
+                    {formatNumber(company.lastWeek)}원
+                  </td>
+
+                  {/* 금주 공시 */}
+                  <td data-label="금주 공시" className={styles.disclosureCell}>
+                    {company.disclosures.length > 0 ? (
+                      <div className={styles.disclosureList}>
+                        {company.disclosures.slice(0, 3).map((disclosure, index) => (
+                          <div key={index} className={styles.disclosureItem}>
+                            <span className={styles.title}>{disclosure.disclosure_title}</span>
+                            <span className={styles.date}>{disclosure.disclosure_date}</span>
                           </div>
-                          <div style={{ color: '#7f8c8d', fontSize: '11px' }}>
-                            {issue.date} · {issue.source}
+                        ))}
+                        {company.disclosures.length > 3 && (
+                          <div className={styles.moreItems}>
+                            +{company.disclosures.length - 3}개 더 보기
                           </div>
-                        </div>
-                      ))}
-                      {company.issues.length > 2 && (
-                        <div style={{ 
-                          fontSize: '11px', 
-                          color: '#7f8c8d', 
-                          textAlign: 'center',
-                          marginTop: '4px'
-                        }}>
-                          +{company.issues.length - 2}개 더
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span style={{ color: '#bdc3c7', fontSize: '12px' }}>이슈 없음</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                        )}
+                      </div>
+                    ) : (
+                      <span className={styles.noItems}>공시 없음</span>
+                    )}
+                  </td>
+
+                  {/* 금주 이슈 */}
+                  <td data-label="금주 이슈" className={styles.issueCell}>
+                    {company.issues.length > 0 ? (
+                      <div>
+                        {company.issues.slice(0, 2).map((issue, idx) => (
+                          <div key={idx} className={clsx(styles.item, {
+                            [styles.positive]: issue.sentiment === 'positive',
+                            [styles.negative]: issue.sentiment === 'negative',
+                            [styles.default]: issue.sentiment === 'neutral'
+                          })}>
+                            <div className={styles.itemTitle}>
+                              {issue.original_title.length > 30 ? 
+                                `${issue.original_title.substring(0, 30)}...` : 
+                                issue.original_title}
+                            </div>
+                            <div className={styles.itemMeta}>
+                              {issue.published_date} · {issue.category}
+                            </div>
+                          </div>
+                        ))}
+                        {company.issues.length > 2 && (
+                          <div className={styles.moreItems}>
+                            +{company.issues.length - 2}개 더
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className={styles.noItems}>이슈 없음</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -886,44 +725,93 @@ const DigestPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // 모든 API에서 데이터 가져오기
-      const [stockResponse, companiesResponse, disclosuresResponse, issuesResponse] = 
+      // 공시+기업 정보를 한 번에 가져오기 (이슈 API는 일시적으로 비활성화)
+      const [stockResponse, disclosuresWithCompaniesResponse] = 
         await Promise.all([
           apiClient.getAllStocks().catch(() => ({ data: [] })),
-          apiClient.getGameCompanies().catch(() => ({ companies: [] })),
-          apiClient.getWeeklyDisclosures().catch(() => ({ data: [] })),
-          apiClient.getWeeklyIssues().catch(() => ({ data: [] }))
+          apiClient.getDisclosuresWithCompanies().catch(() => ({ disclosures: [], companies: [] }))
+          // apiClient.getWeeklyIssues().catch(() => ({ data: [] })) // 일시적으로 비활성화
         ]);
+      
+      // 이슈 데이터는 빈 배열로 설정
+      const issuesResponse = { data: [] };
 
       const stockData: WeeklyStockPrice[] = stockResponse.data || [];
-      const companies: GameCompany[] = companiesResponse.companies || [];
-      const disclosures: WeeklyDisclosure[] = disclosuresResponse.data || [];
+      const companies: GameCompany[] = disclosuresWithCompaniesResponse.companies || [];
+      const disclosures: WeeklyDisclosure[] = disclosuresWithCompaniesResponse.disclosures || [];
       const issues: WeeklyIssue[] = issuesResponse.data || [];
+
+      console.log('📊 API 응답 데이터 확인:');
+      console.log('Stock data:', stockData.length, '개');
+      console.log('Companies:', companies.length, '개'); 
+      console.log('Disclosures:', disclosures.length, '개');
+      console.log('Issues:', issues.length, '개');
+      
+      if (disclosures.length > 0) {
+        console.log('공시 데이터 샘플:', disclosures[0]);
+      }
+
+      // 기업 정보가 없으면 공시 데이터에서 추출해서 생성
+      let enhancedCompanies = [...companies];
+      if (companies.length === 0 && disclosures.length > 0) {
+        console.log('🔧 기업 정보가 없어서 공시 데이터에서 생성합니다.');
+        const companyMap = new Map<string, { name: string; stock_code: string }>();
+        
+        disclosures.forEach(disclosure => {
+          if (!companyMap.has(disclosure.stock_code)) {
+            companyMap.set(disclosure.stock_code, {
+              name: disclosure.company_name,
+              stock_code: disclosure.stock_code
+            });
+          }
+        });
+        
+        enhancedCompanies = Array.from(companyMap.values()).map(comp => ({
+          symbol: comp.stock_code,
+          name: comp.name,
+          country: 'KR' // 한국 기업으로 가정
+        }));
+        
+        console.log('🔧 생성된 기업 정보:', enhancedCompanies.length, '개');
+        console.log('🔧 생성된 기업 목록:', enhancedCompanies);
+      }
 
       // symbol 기준 중복 제거
       const seen = new Set<string>();
       const integrated: IntegratedCompanyData[] = stockData
         .map(stock => {
-          const company = companies.find(c => c.symbol === stock.symbol);
-          const companyDisclosures = disclosures.filter(d => d.symbol === stock.symbol);
-          const companyIssues = issues.filter(i => i.symbol === stock.symbol);
+          // stock.symbol이 이름으로 오고 있으므로, 이를 종목 코드로 변환
+          const stockSymbolFromName = GAME_COMPANIES_MAP[stock.symbol] || stock.symbol;
+          const normalizedStockSymbol = String(stockSymbolFromName).trim().replace(/^0+/, '');
+
+          const company = enhancedCompanies.find(c => String(c.symbol).trim().replace(/^0+/, '') === normalizedStockSymbol);
+          
+          const companyDisclosures = disclosures.filter(d => 
+            String(d.stock_code).trim().replace(/^0+/, '') === normalizedStockSymbol
+          );
+          
+          const companyIssues = issues.filter(i => i.corp === stock.symbol);
+          
+          console.log(`[매칭] Stock(이름): ${stock.symbol} -> Symbol: ${normalizedStockSymbol} | Disclosures: ${companyDisclosures.length}`);
+          
           return {
-            symbol: stock.symbol,
-            companyName: company?.name || stock.symbol,
-            country: company?.country || 'Unknown',
+            symbol: normalizedStockSymbol, // 이제 진짜 심볼(종목코드)을 사용
+            companyName: stock.symbol, // 이름은 stock.symbol에서 가져옴
+            country: company?.country || 'KR',
             marketCap: stock.marketCap,
             currentPrice: stock.today,
             changeRate: stock.changeRate,
             weekHigh: stock.weekHigh,
             weekLow: stock.weekLow,
             lastWeek: stock.lastWeek,
-            market: STOCK_MARKET_MAPPING[stock.symbol] || 'Unknown',
+            market: STOCK_MARKET_MAPPING[normalizedStockSymbol] || 'Unknown',
             disclosures: companyDisclosures,
             issues: companyIssues
           };
         })
         .filter(item => {
-          if (item.marketCap === null) return false;
+          // 시가총액이 있거나 공시가 있으면 포함
+          if (item.marketCap === null && item.disclosures.length === 0) return false;
           if (seen.has(item.symbol)) return false;
           seen.add(item.symbol);
           return true;
@@ -934,9 +822,13 @@ const DigestPage: React.FC = () => {
           marketCapRank: index + 1
         }));
 
+      console.log('📈 통합된 데이터:', integrated.length, '개');
+      console.log('공시가 있는 기업:', integrated.filter(item => item.disclosures.length > 0).length, '개');
+
       setIntegratedData(integrated);
       setLastUpdated(new Date().toLocaleString('ko-KR'));
     } catch (err) {
+      console.error('❌ 데이터 통합 에러:', err);
       setError(err instanceof Error ? err.message : '데이터 로딩 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
@@ -1011,15 +903,9 @@ const DigestPage: React.FC = () => {
             </button>
           }
         />
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          minHeight: '60vh',
-          flexDirection: 'column'
-        }}>
-          <i className='bx bx-loader-alt bx-spin' style={{ fontSize: '3rem', color: '#3498db', marginBottom: '20px' }}></i>
-          <p style={{ color: '#666', fontSize: '18px' }}>통합 대시보드 데이터를 불러오는 중...</p>
+        <div className={styles.stateContainer}>
+          <i className={clsx('bx bx-loader-alt bx-spin', styles.stateIcon)} style={{ color: '#3498db' }}></i>
+          <p className={styles.stateText}>통합 대시보드 데이터를 불러오는 중...</p>
         </div>
       </Layout>
     );
@@ -1038,25 +924,11 @@ const DigestPage: React.FC = () => {
             </button>
           }
         />
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          minHeight: '60vh',
-          flexDirection: 'column'
-        }}>
-          <i className='bx bxs-error' style={{ fontSize: '3rem', color: '#e74c3c', marginBottom: '20px' }}></i>
-          <h3 style={{ color: '#e74c3c', marginBottom: '10px' }}>데이터 로딩 오류</h3>
-          <p style={{ color: '#666', textAlign: 'center', marginBottom: '20px' }}>{error}</p>
-          <button onClick={handleRefresh} style={{
-            background: '#3498db',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}>
+        <div className={styles.stateContainer}>
+          <i className={clsx('bx bxs-error', styles.stateIcon)} style={{ color: '#e74c3c' }}></i>
+          <h3 className={styles.errorTitle}>데이터 로딩 오류</h3>
+          <p className={styles.stateText}>{error}</p>
+          <button onClick={handleRefresh} className={styles.retryButton}>
             다시 시도
           </button>
         </div>
@@ -1070,7 +942,7 @@ const DigestPage: React.FC = () => {
         title="Weekly Digest" 
         breadcrumbs={breadcrumbs}
         actions={
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className={styles.headerActions}>
             <button className="btn-download" onClick={() => handleExportExcel()}>
               <i className='bx bxs-file-export'></i>
               <span className="text">Excel 다운로드</span>
@@ -1083,53 +955,26 @@ const DigestPage: React.FC = () => {
         }
       />
 
-      <div style={{ padding: '24px', background: '#f8f9fa', minHeight: '100vh' }}>
+      <div className={styles.pageContainer}>
         {/* 요약 정보 헤더 */}
-        <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-          borderRadius: '20px',
-          padding: '32px',
-          marginBottom: '32px',
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '-50%',
-            right: '-20%',
-            width: '400px',
-            height: '400px',
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '50%'
-          }} />
+        <div className={styles.summaryHeader}>
+          <div className={styles.backgroundCircle} />
           
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-              <div>
-                <h1 style={{ margin: 0, fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-                  게임산업 주간 통합 리포트
-                </h1>
-                <p style={{ margin: 0, fontSize: '16px', opacity: 0.9 }}>
-                  총 {integratedData.length}개 게임기업의 주가·공시·이슈 통합 분석
-                </p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '4px' }}>최종 업데이트</div>
-                <div style={{ fontSize: '16px', fontWeight: '600' }}>{lastUpdated}</div>
-              </div>
+          <div className={styles.content}>
+            <div className={styles.titleSection}>
+              <h1>게임산업 주간 통합 리포트</h1>
+              <p>총 {integratedData.length}개 게임기업의 주가·공시·이슈 통합 분석</p>
+            </div>
+            <div className={styles.updateSection}>
+              <div className={styles.label}>최종 업데이트</div>
+              <div className={styles.timestamp}>{lastUpdated}</div>
             </div>
           </div>
         </div>
 
         {/* KPI 카드들 */}
         {kpiData && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '20px',
-            marginBottom: '32px'
-          }}>
+          <div className={styles.kpiGrid}>
             <KPICard
               title="주간 최고 수익률"
               value={`${kpiData.topGainer.changeRate?.toFixed(2)}%`}

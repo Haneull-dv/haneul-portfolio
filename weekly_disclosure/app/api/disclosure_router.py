@@ -33,6 +33,49 @@ async def fetch_disclosures(db: AsyncSession = Depends(get_db_session)):
 
 # ========== DB 조회 전용 엔드포인트 ==========
 
+@router.get("/recent-with-companies")
+async def get_recent_disclosures_with_companies(
+    days: int = Query(7, description="조회할 일수"),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """📋 DB에서 최근 N일간의 공시 정보 + 기업 정보 조회 (프론트엔드용)"""
+    print(f"🚀1 DB 조회 라우터 진입 (기업정보 포함) - 최근 {days}일")
+    
+    try:
+        controller = DisclosureController()
+        disclosures_result = await controller.get_recent_disclosures_from_db(days=days, db_session=db)
+        
+        # 공시 데이터에서 기업 정보 추출
+        companies_set = set()
+        for disclosure in disclosures_result.data:
+            if disclosure.company_name and disclosure.stock_code:
+                companies_set.add((disclosure.stock_code, disclosure.company_name))
+        
+        # 기업 정보 목록 생성
+        companies = [
+            {
+                "symbol": stock_code,
+                "name": company_name,
+                "country": "KR"  # 기본값으로 한국 설정
+            }
+            for stock_code, company_name in companies_set
+        ]
+        
+        print(f"🚀2 DB 조회 라우터 (기업정보 포함) - 공시: {len(disclosures_result.data)}개, 기업: {len(companies)}개")
+        
+        return {
+            "status": "success",
+            "message": f"공시 정보 및 기업 정보 조회 완료",
+            "disclosures": disclosures_result.data,
+            "companies": companies,
+            "total_disclosures": len(disclosures_result.data),
+            "total_companies": len(companies)
+        }
+        
+    except Exception as e:
+        print(f"❌ DB 조회 라우터 (기업정보 포함) 에러: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"DB 조회 중 오류 발생: {str(e)}")
+
 @router.get("/recent", response_model=DisclosureListResponse)
 async def get_recent_disclosures(
     days: int = Query(7, description="조회할 일수"),
