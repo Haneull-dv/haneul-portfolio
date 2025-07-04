@@ -27,7 +27,7 @@ const ProjectsPage: React.FC = () => {
   const projects = [
     {
       title: 'Conan AI',
-      description: "IR 및 재무팀의 반복적인 수작업 업무를 자동화하여 핵심 업무에 집중할 수 있는 환경을 만들고자 했습니다. 문제 해결을 위한 아이디어를 구체화하여 업무 자동화 플랫폼 'Conan AI'를 기획하였고, 스타트업 경진대회 본선에 진출하며 아이디어의 사업성과 실현 가능성을 인정받았습니다. 이 과정을 통해 기획력과 비즈니스 실행 능력을 길렀습니다.",
+      description: "IR 및 재무팀의 반복적인 수작업 업무를 자동화하여 핵심 업무에 집중할 수 있는 환경을 만들고자 했습니다. 문제 해결을 위한 아이디어를 구체화하여 업무 자동화 플랫폼 'Conan AI'를 기획하였고, 스타트업 경진대회 본선에 진출하며 아이디어의 사업성과 실현 가능성을 인정받았습니다.",
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
       status: 'In Progress',
       image: '/projects/conanai.png',
@@ -49,7 +49,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '미래정치연구소 연구보조원',
-      description: '동유럽 5개국의 시민-정당 관계 동향을 추적, 분석하여 월간 보고서를 작성했습니다. 핵심 이슈를 구조화하고 데이터 기반의 인사이트를 도출했으며, 이를 월례 발표회에서 효과적으로 전달했습니다.',
+      description: '동유럽 5개국의 시민-정당 관계 동향을 추적, 분석하여 월간 보고서를 작성했습니다. 핵심 이슈를 구조화하고 데이터 기반의 인사이트를 도출했으며 이를 월례 발표회에서 전달했습니다.',
       technologies: ['Research', 'Excel', 'Word', 'Policy Analysis'],
       status: 'Completed',
       image: '/projects/미래정치연구소.png',
@@ -58,8 +58,8 @@ const ProjectsPage: React.FC = () => {
       hasModal: false,
     },
     {
-      title: '파스타집 사업계획서',
-      description: '단순한 아르바이트 경험에 그치지 않고, 매장의 성장을 위해 사업 개선안을 기획 및 제안했습니다.',
+      title: '파스타집 사업 개선 제안서',
+      description: '단순한 아르바이트 경험에 그치지 않고 매장의 성장을 위해 사업 개선안을 기획 및 제안했습니다. 마케팅 전략, 운영 효율화 방안, 주변 상권 및 경쟁사 분석을 포함한 자료를 통해 문제점을 진단하고 해결책을 제시했습니다.',
       technologies: ['Business Plan', 'Marketing', 'Analysis'],
       status: 'Completed',
       image: '/projects/쏘어_사업계획서.png',
