@@ -122,6 +122,9 @@ class XlsxJsonConverter:
         # 시트 데이터 전처리
         df = XlsxJsonConverter.clean_sheet_data(df, sheet_name)
         
+        # 'Unnamed' 컬럼 최종 제거
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        
         # 데이터프레임을 레코드 형식의 JSON으로 변환
         return df.to_dict(orient="records")
     
