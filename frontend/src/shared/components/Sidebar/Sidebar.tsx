@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
 import styles from './Sidebar.module.scss';
 
@@ -9,49 +8,43 @@ interface SidebarProps {
   isHidden: boolean;
 }
 
-interface SubMenuItem {
-  id: string;
-  text: string;
-  href: string;
-}
-
 interface MenuItem {
   id: string;
   icon: string;
   text: string;
   href: string;
-  subItems?: SubMenuItem[];
 }
 
-const menuItems: MenuItem[] = [
-  { 
-    id: 'dashboard', 
-    icon: 'bxs-dashboard', 
-    text: 'Dashboard', 
-    href: '/dashboard',
-    subItems: [
-      { id: 'validation', text: 'Validation', href: '/dashboard/validation' },
-      { id: 'dsd', text: 'DSD', href: '/dashboard/dsd' },
-      { id: 'trends', text: 'Trends', href: '/dashboard/trends' },
-      { id: 'digest', text: 'Digest', href: '/dashboard/digest' },
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const menuGroups: MenuGroup[] = [
+  {
+    title: 'Workspace',
+    items: [
+      { id: 'dashboard', icon: 'bx-grid-alt', text: 'Dashboard', href: '/dashboard' },
+      { id: 'digest', icon: 'bx-line-chart', text: 'Market Digest', href: '/dashboard/digest' },
+      { id: 'trends', icon: 'bx-trending-up', text: 'KPI Trends', href: '/dashboard/trends' },
+      { id: 'validation', icon: 'bx-check-shield', text: 'Data Validation', href: '/dashboard/validation' },
+      { id: 'dsd', icon: 'bx-transfer', text: 'DART Converter', href: '/dashboard/dsd' },
     ]
   },
-  { id: 'about', icon: 'bxs-shopping-bag-alt', text: 'About Me', href: '/about' },
-  { id: 'skills', icon: 'bxs-doughnut-chart', text: 'Skills', href: '/skills' },
-  { id: 'projects', icon: 'bxs-message-dots', text: 'Projects', href: '/projects' },
-  { id: 'contact', icon: 'bxs-group', text: 'Contact', href: '/contact' },
-];
-
-const bottomMenuItems = [
-  { id: 'settings', icon: 'bxs-cog', text: 'Settings', href: '#', extraClass: 'bx-spin-hover' },
-  { id: 'logout', icon: 'bx-power-off', text: 'Logout', href: '#', extraClass: 'bx-burst-hover', isLogout: true },
+  {
+    title: 'Profile',
+    items: [
+      { id: 'about', icon: 'bx-user', text: 'About & Skills', href: '/about' },
+      { id: 'projects', icon: 'bx-briefcase', text: 'Projects', href: '/projects' },
+      { id: 'contact', icon: 'bx-envelope', text: 'Contact', href: '/contact' },
+    ]
+  }
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { setActive } = useActiveMenu();
-  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
   const handleMenuClick = (menuId: string, href: string) => {
     if (href !== '#') {
@@ -60,131 +53,60 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
     setActive(menuId);
   };
 
-  const toggleSubmenu = (menuId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setExpandedMenus(prev => 
-      prev.includes(menuId) 
-        ? prev.filter(id => id !== menuId)
-        : [...prev, menuId]
-    );
-  };
-
-
-
-  const isSubItemActive = (subItem: SubMenuItem) => {
-    return pathname === subItem.href;
-  };
-
-  const isParentActive = (item: MenuItem) => {
-    if (item.subItems) {
-      return item.subItems.some(subItem => pathname === subItem.href) || pathname === item.href;
-    }
+  const isMenuActive = (item: MenuItem) => {
     return pathname === item.href;
   };
 
   return (
     <section id="sidebar" className={`${styles.sidebar} ${isHidden ? styles.hide : ''}`}>
-      <a href="#" className={styles.brand}>
-        <span className={styles.text}>Haneul Kim</span>
-      </a>
+      <div className={styles.brand}>
+        <span className={styles.text}>Financial Workspace</span>
+      </div>
       
-      <ul className={`${styles.sideMenu} ${styles.top}`}>
-        {menuItems.map((item) => (
-          <li key={item.id}>
-            <div className={isParentActive(item) ? styles.active : ''}>
-              <a 
-                href={item.href} 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleMenuClick(item.id, item.href);
-                }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                  <i className={`bx ${item.icon} bx-sm`}></i>
+      {menuGroups.map((group, groupIndex) => (
+        <div key={group.title} className={styles.menuGroup}>
+          <div className={styles.groupHeader}>
+            <span className={styles.groupTitle}>{group.title}</span>
+          </div>
+          
+          <ul className={styles.sideMenu}>
+            {group.items.map((item) => (
+              <li key={item.id} className={isMenuActive(item) ? styles.active : ''}>
+                <a 
+                  href={item.href} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick(item.id, item.href);
+                  }}
+                  className={styles.menuItem}
+                >
+                  <i className={`bx ${item.icon}`}></i>
                   <span className={styles.text}>{item.text}</span>
-                </div>
-                {item.subItems && (
-                  <div
-                    onClick={(e) => toggleSubmenu(item.id, e)}
-                    style={{ 
-                      padding: '4px 8px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <i 
-                      className={`bx ${expandedMenus.includes(item.id) ? 'bx-chevron-down' : 'bx-chevron-right'}`}
-                      style={{ 
-                        fontSize: '14px',
-                        transition: 'transform 0.3s ease'
-                      }}
-                    ></i>
-                  </div>
-                )}
-              </a>
-            </div>
-            
-            {item.subItems && expandedMenus.includes(item.id) && (
-              <ul style={{ 
-                paddingLeft: '20px', 
-                marginTop: '4px',
-                marginBottom: '8px'
-              }}>
-                {item.subItems.map((subItem) => (
-                  <li 
-                    key={subItem.id}
-                    style={{ 
-                      height: '36px',
-                      margin: '2px 0',
-                      background: 'transparent'
-                    }}
-                    className={isSubItemActive(subItem) ? styles.active : ''}
-                  >
-                    <a
-                      href={subItem.href}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleMenuClick(subItem.id, subItem.href);
-                      }}
-                      style={{
-                        fontSize: '13px',
-                        paddingLeft: '16px',
-                        height: '36px',
-                        borderRadius: '18px'
-                      }}
-                    >
-                      <i className="bx bx-circle" style={{ fontSize: '8px' }}></i>
-                      <span className={styles.text}>{subItem.text}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
+                </a>
+              </li>
+            ))}
+          </ul>
+          
+          {groupIndex < menuGroups.length - 1 && (
+            <div className={styles.divider}></div>
+          )}
+        </div>
+      ))}
       
-      <ul className={`${styles.sideMenu} ${styles.bottom}`}>
-        {bottomMenuItems.map((item) => (
-          <li key={item.id}>
-            <a 
-              href={item.href} 
-              className={item.isLogout ? styles.logout : ''}
-              onClick={(e) => {
-                e.preventDefault();
-                handleMenuClick(item.id, item.href);
-              }}
-            >
-              <i className={`bx ${item.icon} bx-sm ${item.extraClass || ''}`}></i>
-              <span className={styles.text}>{item.text}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div className={styles.userProfile}>
+        <div className={styles.profileInfo}>
+          <div className={styles.profileAvatar}>
+            <i className="bx bx-user"></i>
+          </div>
+          <div className={styles.profileText}>
+            <span className={styles.profileName}>Haneul Kim</span>
+            <span className={styles.profileRole}>Developer</span>
+          </div>
+        </div>
+        <button className={styles.settingsButton}>
+          <i className="bx bx-cog"></i>
+        </button>
+      </div>
     </section>
   );
 };

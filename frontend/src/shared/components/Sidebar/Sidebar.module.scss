@@ -1,318 +1,660 @@
-/* SIDEBAR */
+/* SIDEBAR - Professional SaaS Design */
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 220px;
+  width: 260px;
   height: 100vh;
-  background: var(--light); // 카드와 동일한 배경색
+  background: #fafafa;
+  border-right: 1px solid #e5e5e5;
   z-index: 2000;
-  font-family: var(--lato, 'Lato', sans-serif);
+  font-family: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   transition: transform 0.3s ease;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  border-top-right-radius: 20px; // 오른쪽 상단만 둥글게
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
   &.hide {
     transform: translateX(-100%);
   }
 }
 
+/* Brand/Logo Section */
 .brand {
-  font-size: 18px;
-  font-weight: 700;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  color: var(--blue);
-  position: sticky;
-  top: 0;
-  left: 0;
-  background: var(--light);
-  z-index: 500;
-  padding: 0 16px;
-  text-decoration: none;
-  border-top-right-radius: 20px; // 브랜드 영역도 둥글게
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #ffffff;
+  flex-shrink: 0;
 
-  .bx {
-    min-width: 40px;
-    display: flex;
-    justify-content: center;
-    font-size: 20px;
-    margin-right: 8px;
-  }
-  
   .text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
     white-space: nowrap;
     overflow: hidden;
-    opacity: 1;
-    visibility: visible;
+    text-overflow: ellipsis;
   }
 }
 
-.sideMenu {
-  width: 100%;
-
-  &.top {
+/* Menu Group Container */
+.menuGroup {
+  padding: 0 16px;
+  margin-bottom: 24px;
+  
+  &:first-of-type {
     margin-top: 24px;
   }
+}
 
+/* Group Header */
+.groupHeader {
+  margin-bottom: 8px;
+  padding: 0 8px;
+  
+  .groupTitle {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Menu List */
+.sideMenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
   li {
-    background: transparent;
-    margin-left: 6px;
-    margin-right: 6px;
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 4px;
-
-    // Main menu item
-    > div {
-      height: 44px;
-      border-radius: 12px;
-      
-      &.active {
-        // 단순한 배경색만 적용, 복잡한 곡선 효과 제거
-        background: transparent;
-
-        a {
-          color: var(--blue) !important;
+    margin: 0;
+    padding: 0;
+    
+    &.active {
+      .menuItem {
+        background: #f0f9ff;
+        color: #0369a1;
+        
+        i {
+          color: #0369a1;
         }
       }
     }
-
-    // Submenu items
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      
-      li {
-        margin-left: 0;
-        margin-right: 0;
-        padding: 0;
-        border-radius: 12px;
-        
-        &.active {
-          background: transparent;
-          
-          a {
-            color: var(--blue) !important;
-          }
-        }
-        
-        a {
-          color: var(--dark) !important; // About Me와 동일한 색상
-          font-size: 13px;
-          border-radius: 12px;
-          
-          &:hover {
-            color: var(--blue) !important;
-          }
-          
-          .bx {
-            min-width: 20px;
-            margin-right: 8px;
-          }
-        }
-      }
-    }
-
-    a {
-      width: 100%;
-      height: 100%;
-      background: var(--light);
+    
+    .menuItem {
       display: flex;
       align-items: center;
-      border-radius: 12px;
+      gap: 12px;
+      padding: 8px 12px;
+      margin: 1px 0;
+      border-radius: 8px;
       font-size: 14px;
-      color: var(--dark);
-      white-space: nowrap;
-      overflow-x: hidden;
+      font-weight: 500;
+      color: #374151;
       text-decoration: none;
-      transition: color 0.3s ease;
-
-      &.logout {
-        color: var(--red);
-      }
-
+      transition: all 0.2s ease;
+      cursor: pointer;
+      
       &:hover {
-        color: var(--blue);
+        background: #f3f4f6;
+        color: #111827;
       }
-
-      .bx {
-        min-width: calc(40px - ((4px + 6px) * 2));
-        display: flex;
-        justify-content: center;
-        font-size: 16px;
+      
+      i {
+        font-size: 18px;
+        color: #6b7280;
+        transition: color 0.2s ease;
+        min-width: 18px;
+        text-align: center;
       }
-    }
-  }
-
-  &.bottom {
-    li:nth-last-of-type(-n+2) {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      text-align: center;
-    }
-
-    li:nth-last-of-type(2) {
-      bottom: 40px;
+      
+      .text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 }
 
-// When sidebar is hidden, it's completely off-screen
-// No need for collapsed state styles
-
-.text {
-  // This will be hidden when sidebar is collapsed
+/* Divider */
+.divider {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 16px 0;
 }
 
-// Dark mode support
+/* User Profile Section */
+.userProfile {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e5e5;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  
+  .profileInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    
+    .profileAvatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      i {
+        font-size: 18px;
+        color: #6b7280;
+      }
+    }
+    
+    .profileText {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      
+      .profileName {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .profileRole {
+        font-size: 12px;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+  
+  .settingsButton {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+    
+    &:hover {
+      background: #f3f4f6;
+    }
+    
+    i {
+      font-size: 16px;
+      color: #6b7280;
+    }
+  }
+}
+
+/* Dark Mode Support */
 [data-theme="dark"] {
   .sidebar {
-    background: var(--dark-grey);
-    border-top-right-radius: 20px; // 오른쪽 상단만 둥글게
+    background: #1a1a1a;
+    border-right: 1px solid #333333;
   }
   
   .brand {
-    background: var(--dark-grey);
-    border-top-right-radius: 20px; // 브랜드 영역도 둥글게
+    background: #111111;
+    border-bottom: 1px solid #333333;
+    
+    .text {
+      color: #ffffff;
+    }
+  }
+  
+  .groupHeader {
+    .groupTitle {
+      color: #9ca3af;
+    }
   }
   
   .sideMenu li {
-    > div.active {
-      background: transparent;
+    &.active {
+      .menuItem {
+        background: #1e3a8a;
+        color: #60a5fa;
+        
+        i {
+          color: #60a5fa;
+        }
+      }
     }
     
-    a {
-      background: var(--dark-grey);
-      color: var(--light);
+    .menuItem {
+      color: #d1d5db;
       
       &:hover {
-        color: var(--blue);
+        background: #2d2d2d;
+        color: #ffffff;
+      }
+      
+      i {
+        color: #9ca3af;
       }
     }
+  }
+  
+  .divider {
+    background: #333333;
+  }
+  
+  .userProfile {
+    background: #111111;
+    border-top: 1px solid #333333;
     
-    ul li {
-      &.active {
-        background: transparent;
+    .profileInfo {
+      .profileAvatar {
+        background: #2d2d2d;
         
-        a {
-          color: var(--blue) !important;
+        i {
+          color: #9ca3af;
         }
       }
       
-      a {
-        color: var(--light) !important;
-        
-        &:hover {
-          color: var(--blue) !important;
+      .profileText {
+        .profileName {
+          color: #ffffff;
         }
+        
+        .profileRole {
+          color: #9ca3af;
+        }
+      }
+    }
+    
+    .settingsButton {
+      &:hover {
+        background: #2d2d2d;
+      }
+      
+      i {
+        color: #9ca3af;
       }
     }
   }
 }
 
-// Responsive design
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
+  }
+}
+
 @media screen and (max-width: 1024px) {
   .sidebar {
-    width: 120px;
-    
-    &.hide {
-      width: 80px;
-    }
+    width: 220px;
   }
   
   .brand {
-    font-size: 16px;
-    padding: 0 12px;
+    padding: 16px 20px;
     
     .text {
-      display: none;
+      font-size: 16px;
     }
   }
   
-  .sideMenu li {
-    height: 40px;
+  .menuGroup {
+    padding: 0 12px;
+    margin-bottom: 20px;
+  }
+  
+  .sideMenu li .menuItem {
+    padding: 6px 10px;
+    font-size: 13px;
     
-    a {
-      font-size: 12px;
-      
-      .bx {
-        font-size: 14px;
-      }
+    i {
+      font-size: 16px;
     }
+  }
+  
+  .userProfile {
+    padding: 12px 20px;
   }
 }
 
+/* Tablet Design */
 @media screen and (max-width: 768px) {
   .sidebar {
+    width: 280px;
     z-index: 3000;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-right: none;
     
-    // On mobile, sidebar starts hidden by default
-    // but can be toggled with hamburger button
-  }
-  
-  .brand {
-    font-size: 18px;
-    padding: 0 16px;
-    
-    .text {
-      display: block;
+    &.hide {
+      transform: translateX(-100%);
     }
   }
   
-  .sideMenu li {
-    height: 44px;
+  .brand {
+    padding: 20px 24px;
+    height: 70px;
     
-    a {
-      font-size: 14px;
+    .text {
+      font-size: 18px;
+    }
+  }
+  
+  .menuGroup {
+    padding: 0 20px;
+    margin-bottom: 24px;
+  }
+  
+  .groupHeader {
+    padding: 0 12px;
+    margin-bottom: 10px;
+    
+    .groupTitle {
+      font-size: 12px;
+    }
+  }
+  
+  .sideMenu li .menuItem {
+    padding: 12px 16px;
+    font-size: 15px;
+    gap: 14px;
+    border-radius: 10px;
+    
+    i {
+      font-size: 20px;
+      min-width: 20px;
+    }
+  }
+  
+  .divider {
+    margin: 20px 0;
+  }
+  
+  .userProfile {
+    padding: 20px 24px;
+    height: 80px;
+    
+    .profileInfo {
+      gap: 14px;
       
-      .bx {
-        font-size: 16px;
+      .profileAvatar {
+        width: 40px;
+        height: 40px;
+        
+        i {
+          font-size: 20px;
+        }
+      }
+      
+      .profileText {
+        .profileName {
+          font-size: 15px;
+        }
+        
+        .profileRole {
+          font-size: 13px;
+        }
+      }
+    }
+    
+    .settingsButton {
+      width: 36px;
+      height: 36px;
+      
+      i {
+        font-size: 18px;
       }
     }
   }
 }
 
+/* Mobile Design */
 @media screen and (max-width: 480px) {
   .sidebar {
-    width: 280px;
+    width: 100vw;
+    max-width: 320px;
+    box-shadow: none;
+    border-right: none;
     
     &.hide {
-      width: 280px;
+      transform: translateX(-100%);
     }
   }
   
   .brand {
-    height: 56px;
-    font-size: 16px;
+    padding: 16px 20px;
+    height: 60px;
+    border-bottom: 1px solid #e5e5e5;
+    
+    .text {
+      font-size: 16px;
+      font-weight: 700;
+    }
   }
   
-  .sideMenu {
-    &.top {
-      margin-top: 16px;
+  .menuGroup {
+    padding: 0 16px;
+    margin-bottom: 20px;
+    
+    &:first-of-type {
+      margin-top: 20px;
+    }
+  }
+  
+  .groupHeader {
+    padding: 0 8px;
+    margin-bottom: 8px;
+    
+    .groupTitle {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6b7280;
+    }
+  }
+  
+  .sideMenu li .menuItem {
+    padding: 14px 12px;
+    font-size: 16px;
+    gap: 16px;
+    border-radius: 12px;
+    min-height: 48px;
+    
+    i {
+      font-size: 22px;
+      min-width: 22px;
     }
     
-    li {
-      height: 48px;
-      margin-left: 8px;
+    .text {
+      font-weight: 500;
+    }
+  }
+  
+  .divider {
+    margin: 16px 0;
+    height: 1px;
+  }
+  
+  .userProfile {
+    padding: 16px 20px;
+    height: 70px;
+    border-top: 1px solid #e5e5e5;
+    
+    .profileInfo {
+      gap: 12px;
       
-      a {
-        font-size: 15px;
-        padding: 0 8px;
+      .profileAvatar {
+        width: 42px;
+        height: 42px;
         
-        .bx {
-          font-size: 18px;
-          min-width: 36px;
+        i {
+          font-size: 22px;
         }
+      }
+      
+      .profileText {
+        .profileName {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        
+        .profileRole {
+          font-size: 14px;
+        }
+      }
+    }
+    
+    .settingsButton {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      
+      i {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+/* Extra Small Mobile */
+@media screen and (max-width: 375px) {
+  .sidebar {
+    width: 100vw;
+  }
+  
+  .brand {
+    padding: 14px 16px;
+    height: 56px;
+    
+    .text {
+      font-size: 15px;
+    }
+  }
+  
+  .menuGroup {
+    padding: 0 12px;
+    margin-bottom: 16px;
+    
+    &:first-of-type {
+      margin-top: 16px;
+    }
+  }
+  
+  .sideMenu li .menuItem {
+    padding: 12px 10px;
+    font-size: 15px;
+    gap: 14px;
+    min-height: 44px;
+    
+    i {
+      font-size: 20px;
+      min-width: 20px;
+    }
+  }
+  
+  .userProfile {
+    padding: 14px 16px;
+    height: 64px;
+    
+    .profileInfo {
+      gap: 10px;
+      
+      .profileAvatar {
+        width: 38px;
+        height: 38px;
+        
+        i {
+          font-size: 20px;
+        }
+      }
+      
+      .profileText {
+        .profileName {
+          font-size: 15px;
+        }
+        
+        .profileRole {
+          font-size: 13px;
+        }
+      }
+    }
+    
+    .settingsButton {
+      width: 36px;
+      height: 36px;
+      
+      i {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+/* Dark Mode Mobile Adjustments */
+[data-theme="dark"] {
+  @media screen and (max-width: 768px) {
+    .sidebar {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .brand {
+      border-bottom: 1px solid #333333;
+    }
+    
+    .userProfile {
+      border-top: 1px solid #333333;
+    }
+  }
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  .sideMenu li .menuItem {
+    padding: 16px 14px;
+    min-height: 52px;
+    
+    &:active {
+      background: #e5e7eb;
+      transform: scale(0.98);
+    }
+  }
+  
+  .userProfile .settingsButton {
+    min-width: 44px;
+    min-height: 44px;
+    
+    &:active {
+      background: #e5e7eb;
+      transform: scale(0.95);
+    }
+  }
+  
+  [data-theme="dark"] {
+    .sideMenu li .menuItem {
+      &:active {
+        background: #374151;
+      }
+    }
+    
+    .userProfile .settingsButton {
+      &:active {
+        background: #374151;
       }
     }
   }
