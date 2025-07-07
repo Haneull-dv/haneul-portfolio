@@ -11,7 +11,7 @@ export { default as Sidebar } from './Sidebar/Sidebar';
 // export { default as Header } from './Header/Header';
 
 // Menu Components
-export { default as NotificationMenu } from './NotificationMenu/NotificationMenu';
+// export { default as NotificationMenu } from './NotificationMenu/NotificationMenu';
 export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
 
 // UI Components

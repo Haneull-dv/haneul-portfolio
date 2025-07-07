@@ -101,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden, toggleSidebar }) => {
           </div>
           <div className={styles.profileText}>
             <span className={styles.profileName}>Haneul Kim</span>
-            <span className={styles.profileRole}>AI-driven Financial Analyst</span>
+            <span className={styles.profileRole}>Financial Technologist</span>
           </div>
         </div>
         <button className={styles.settingsButton}>
