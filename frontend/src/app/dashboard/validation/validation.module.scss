@@ -7,23 +7,31 @@
 }
 
 .card {
-  background: var(--light);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 0;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(16,24,40,0.06);
+  padding: 24px 24px 16px 24px;
+  margin-bottom: 0;
 
   h3 {
-    margin: 0 0 20px 0;
-    color: var(--dark);
-    font-size: 1.25rem;
-    font-weight: 600;
+    margin: 0 0 16px 0;
+    color: #173e92;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   h4 {
     margin: 0 0 8px 0;
-    color: var(--dark);
-    font-size: 1.1rem;
+    color: #173e92;
+    font-size: 16px;
     font-weight: 600;
+  }
+  p {
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 12px 0;
   }
 }
 
@@ -64,18 +72,18 @@
 
 /* ⭐️ FIX: 이전 파일 업로드 스타일 복원 */
 .uploadArea {
-    position: relative;
-    border: 2px dashed var(--grey);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-
-    &:hover {
-        border-color: var(--blue);
-        background-color: var(--light-blue);
-    }
+  position: relative;
+  border: 2px dashed #e9ecef;
+  border-radius: 0;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  background: #fafbfc;
+  transition: all 0.2s;
+  &:hover {
+    border-color: #173e92;
+    background-color: #f0f8ff;
+  }
 }
 
 .fileInput {
@@ -83,33 +91,35 @@
 }
 
 .uploadLabel {
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: var(--blue);
-
-    i {
-        font-size: 2rem;
-        color: var(--blue);
-    }
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #173e92;
+  i {
+    font-size: 32px;
+    color: #173e92;
+  }
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
 .fileInfo {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: #303030;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-
-    i {
-        color: #207245; // Excel icon color
-        font-size: 1.2rem;
-    }
+  margin-top: 12px;
+  font-size: 13px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  i {
+    color: #207245;
+    font-size: 15px;
+  }
 }
 
 .actionContainer {
@@ -154,43 +164,32 @@
 }
 
 .actionButton {
-  width: 200px;
-  padding: 12px 20px;
+  width: 100%;
+  padding: 12px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 0;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: 16px;
+  background: #173e92;
+  color: #fff;
+  &:hover:not(:disabled) {
+    background: #0369a1;
+    box-shadow: 0 4px 12px rgba(23,62,146,0.08);
+  }
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    box-shadow: none;
   }
   i {
-    font-size: 1.2rem;
-  }
-  &.primary {
-    background: var(--blue);
-    color: white;
-    &:hover:not(:disabled) {
-      background: #2980d9;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(60, 145, 230, 0.3);
-    }
-  }
-  &.orange {
-    background: #f39c12; // Orange color
-    color: white;
-    &:hover:not(:disabled) {
-      background: #e67e22;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
-    }
+    font-size: 16px;
   }
 }
 
@@ -401,4 +400,142 @@
   i {
     font-size: 16px;
   }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    padding: 0 8px;
+  }
+  .card {
+    padding: 18px 8px 12px 8px;
+  }
+  .actionContainer {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding: 0 4px;
+  }
+  .card {
+    padding: 12px 4px 8px 4px;
+  }
+  .actionContainer {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .gridContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 2px;
+  }
+  .card {
+    padding: 8px 2px 6px 2px;
+  }
+  .actionContainer {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* 사이드바와 겹침 방지: 좌측 여백 확보 (데스크탑 기준 260px, 모바일 0) */
+@media (min-width: 900px) {
+  .container {
+    padding-left: 284px; /* sidebar(260px) + 24px */
+    min-width: 0;
+  }
+}
+
+.pageWrapper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 40px 40px 40px 284px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.pageWrapper > .card:first-child {
+  margin-top: 32px;
+}
+
+.validationGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 1200px) {
+  .pageWrapper {
+    padding: 20px;
+    gap: 20px;
+  }
+  .validationGrid {
+    gap: 16px;
+  }
+}
+@media (max-width: 900px), (max-width: 768px) {
+  .pageWrapper {
+    padding: 16px;
+    gap: 16px;
+  }
+  .validationGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .pageWrapper {
+    padding: 8px;
+    gap: 10px;
+  }
+  .validationGrid {
+    gap: 10px;
+  }
+}
+
+.breadcrumbs {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.breadcrumbLink {
+  color: #173e92;
+  font-weight: 600;
+  cursor: pointer;
+}
+.breadcrumbSeparator {
+  color: #d1d5db;
+  margin: 0 2px;
+  font-size: 13px;
+}
+.breadcrumbCurrent {
+  color: #173e92;
+  font-weight: 600;
+}
+.cardTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 10px 0;
+  line-height: 1.2;
 }

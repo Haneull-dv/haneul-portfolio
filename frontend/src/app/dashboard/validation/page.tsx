@@ -4,7 +4,6 @@
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
-import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './validation.module.scss';
 import { useDropzone } from 'react-dropzone';
 import Modal from '@/shared/components/Modal/Modal';
@@ -272,49 +271,59 @@ const ValidationPage: React.FC = () => {
         <p>{modal.message}</p>
       </Modal>
       <Layout>
-        <PageHeader title="재무제표 검증" breadcrumbs={breadcrumbs} />
-        <div className={styles.container}>
+        <div className={styles.pageWrapper}>
           <div className={styles.card}>
-            <h3>엑셀 파일 업로드</h3>
-            <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileUpload}
-                className={styles.fileInput}
-              />
-              <label className={styles.uploadLabel}>
-                <i className='bx bx-cloud-upload'></i>
-                <span>엑셀 파일을 선택하거나 드래그하세요</span>
-              </label>
-              {file && <div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>}
+            <div className={styles.breadcrumbs}>
+              <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+              <span className={styles.breadcrumbSeparator}>/</span>
+              <span className={styles.breadcrumbCurrent}>Data Validation</span>
             </div>
+            <h2 className={styles.cardTitle}>Data Validation</h2>
+            <p>엑셀 파일의 계정과목 주당 검증을 통해 데이터 정확성을 확인하세요.</p>
           </div>
-          <div className={styles.card}>
-            <h3>검증 실행</h3>
-            <div className={styles.actionContainer}>
-              <div className={styles.actionItem}>
-                <h4>합계검증</h4>
-                <p>계정 간 합계를 교차 검증하여 데이터의 수치적 오류를 찾아냅니다.</p>
-                <button onClick={handleFootingValidation} disabled={loading || !file} className={`${styles.actionButton} ${styles.primary}`}>
-                  {loading ? '검증 중...' : '검증 시작하기'}
-                </button>
+          <div className={styles.validationGrid}>
+            <div className={styles.card}>
+              <h3>엑셀 파일 업로드</h3>
+              <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileUpload}
+                  className={styles.fileInput}
+                />
+                <label className={styles.uploadLabel}>
+                  <i className='bx bx-cloud-upload'></i>
+                  <span>엑셀 파일을 선택하거나 드래그하세요</span>
+                </label>
+                {file && (<div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>)}
               </div>
-              <div className={styles.actionItem}>
-                <h4>전기보고서 대사</h4>
-                <p>DART 공시자료와 엑셀 데이터를 비교하여 일치여부를 검증합니다.</p>
-                <div className={styles.inputGroup}>
-                  <input type="text" placeholder="기업명 (예: 네오위즈)" value={corpName} onChange={e => setCorpName(e.target.value)} className={styles.formInput} />
-                  <input type="number" placeholder="사업연도 (예: 2023)" value={year} onChange={e => setYear(e.target.value)} className={styles.formInput} />
+            </div>
+            <div className={styles.card}>
+              <h3>검증 실행</h3>
+              <div className={styles.actionContainer}>
+                <div className={styles.actionItem}>
+                  <h4>합계검증</h4>
+                  <p>계정 간 합계를 교차 검증하여 데이터의 수치적 오류를 찾아냅니다.</p>
+                  <button onClick={handleFootingValidation} disabled={loading || !file} className={`${styles.actionButton} ${styles.primary}`}>
+                    {loading ? '검증 중...' : '검증 시작하기'}
+                  </button>
                 </div>
-                <button onClick={handleDartComparison} disabled={!file || !corpName || !year || loading} className={`${styles.actionButton} ${styles.orange}`}>
-                  대사 시작하기
-                </button>
+                <div className={styles.actionItem}>
+                  <h4>전기보고서 대사</h4>
+                  <p>DART 공시자료와 엑셀 데이터를 비교하여 일치여부를 검증합니다.</p>
+                  <div className={styles.inputGroup}>
+                    <input type="text" placeholder="기업명 (예: 네오위즈)" value={corpName} onChange={e => setCorpName(e.target.value)} className={styles.formInput} />
+                    <input type="number" placeholder="사업연도 (예: 2023)" value={year} onChange={e => setYear(e.target.value)} className={styles.formInput} />
+                  </div>
+                  <button onClick={handleDartComparison} disabled={!file || !corpName || !year || loading} className={`${styles.actionButton} ${styles.orange}`}>
+                    대사 시작하기
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
+          {/* Results Section */}
           {footingResponse && processedData && (
             <div className={`${styles.card} ${styles.resultsSection}`}>
               <div className={styles.resultHeader}>
@@ -373,7 +382,7 @@ const ValidationPage: React.FC = () => {
               ))}
             </div>
           )}
-
+          {/* DART Comparison Section */}
           {comparisonResult && (
             <div className={`${styles.card} ${styles.resultsSection}`}>
               <div className={styles.resultHeader}>

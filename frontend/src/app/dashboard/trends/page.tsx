@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -259,7 +259,10 @@ const AutoCompleteSearch: React.FC<{
             <div
               key={company.corp_code}
               className={styles.searchItem}
-              onClick={() => handleCompanySelect(company)}
+              onClick={() => {
+                handleCompanySelect(company);
+                setIsOpen(false);
+              }}
             >
               <div className={styles.companyDetails}>
                 <span className={styles.companyName}>{company.corp_name}</span>
@@ -475,7 +478,8 @@ const RadarChartAnalysis: React.FC<{
 const KpiTable: React.FC<{
   analysisData: CompanyAnalysisData[];
   activeCategory: string;
-}> = ({ analysisData, activeCategory }) => {
+  selectedEntries: SelectedInfo[];
+}> = ({ analysisData, activeCategory, selectedEntries }) => {
   
   const exportToExcel = () => {
     const companiesWithData = analysisData.filter(item => item.kpiData);
@@ -517,61 +521,78 @@ const KpiTable: React.FC<{
   const kpiItems = companiesWithData[0].kpiData?.categories[activeCategory] || [];
 
   return (
-    <div className={styles.card}>
-      <div className={styles.sectionHeader}>
-        <h3>
-          <i className='bx bxs-report'></i>
-          {activeCategory} KPI 상세 분석
-        </h3>
-        <button onClick={exportToExcel} className={styles.exportButton}>
-          <i className='bx bxs-download'></i>
+    <div className={styles.card} style={{ marginTop: 32, padding: '28px 32px', border: '1px solid #e9ecef', borderRadius: 0, boxShadow: '0 2px 8px rgba(16,24,40,0.06)', background: '#fff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92' }}>KPI 상세 분석</div>
+        <button
+          onClick={exportToExcel}
+          style={{ background: '#173e92', color: '#fff', fontWeight: 700, fontSize: 16, padding: '10px 32px', border: 'none', borderRadius: 0, boxShadow: '0 2px 8px rgba(16,24,40,0.10)', cursor: 'pointer', letterSpacing: 0.5, transition: 'background 0.2s', outline: 'none' }}
+          onMouseOver={e => (e.currentTarget.style.background = '#102a5c')}
+          onMouseOut={e => (e.currentTarget.style.background = '#173e92')}
+        >
           엑셀 저장
         </button>
       </div>
-
-      <div className={styles.tableWrapper}>
-        <table className={styles.kpiTable}>
-          <thead>
-            <tr>
-              <th>재무지표</th>
-              {companiesWithData.map(({ company }) => (
-                <th key={company.corp_code}>{company.corp_name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {kpiItems.map((kpiItem, index) => (
-              <tr key={index}>
-                <td className={styles.kpiName}>
-                  <div className={styles.kpiInfo}>
-                    <span>{kpiItem.kpi_name}</span>
-                    <span className={styles.kpiUnit}>{kpiItem.unit}</span>
-                  </div>
-                </td>
-                {companiesWithData.map(({ company, kpiData }) => {
-                  const companyKpi = kpiData?.categories[activeCategory]?.find(k => k.kpi_name === kpiItem.kpi_name);
-                  const value = companyKpi ? formatKpiValue(companyKpi.value, companyKpi.unit) : 'N/A';
-                  const isValid = !value.includes('N/A') && !value.includes('데이터');
-                  
-                  return (
-                    <td key={company.corp_code} className={`${styles.kpiValue} ${isValid ? styles.valid : styles.invalid}`}>
-                      {value}
-                    </td>
-                  );
-                })}
-              </tr>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15, color: '#374151' }}>
+        <thead>
+          <tr style={{ background: '#f3f4f6' }}>
+            <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 700, color: '#173e92', borderBottom: '1px solid #e9ecef' }}>카테고리</th>
+            <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 700, color: '#173e92', borderBottom: '1px solid #e9ecef' }}>재무지표</th>
+            {companiesWithData.map(entry => (
+              <th key={entry.company.corp_code} style={{ textAlign: 'center', padding: '10px 12px', fontWeight: 700, color: '#173e92', borderBottom: '1px solid #e9ecef' }}>{entry.company.corp_name}</th>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {['Growth', 'Profitability', 'Stability', 'Activity', 'Cashflow'].map(category => (
+            kpiCategoryRows(category, selectedEntries, analysisData)
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
+function kpiCategoryRows(
+  category: string,
+  selectedEntries: SelectedInfo[],
+  analysisData: CompanyAnalysisData[]
+) {
+  const categoryLabels: Record<string, string> = {
+    Growth: '성장성',
+    Profitability: '수익성',
+    Stability: '안정성',
+    Activity: '활동성',
+    Cashflow: '현금흐름',
+  };
+  const kpiNames: string[] = (analysisData[0]?.kpiData?.categories[category] || []).map((kpi: KpiItem) => kpi.kpi_name);
+  if (!kpiNames.length) return null;
+  return [
+    <tr key={category + '-header'} style={{ background: '#f9fafb' }}>
+      <td colSpan={2 + selectedEntries.length} style={{ fontWeight: 700, color: '#374151', padding: '10px 12px', borderBottom: '1px solid #e9ecef' }}>{categoryLabels[category]}</td>
+    </tr>,
+    ...kpiNames.map((kpiName: string, idx: number) => (
+      <tr key={category + '-' + kpiName}>
+        <td style={{ padding: '10px 12px', borderBottom: '1px solid #e9ecef' }}></td>
+        <td style={{ padding: '10px 12px', borderBottom: '1px solid #e9ecef', color: '#374151', fontWeight: 400 }}>{kpiName}</td>
+        {selectedEntries.map((entry: SelectedInfo) => {
+          const kpi = analysisData.find((d: CompanyAnalysisData) => d.company.corp_code === entry.company.corp_code)?.kpiData?.categories[category]?.find((k: KpiItem) => k.kpi_name === kpiName);
+          return (
+            <td key={entry.company.corp_code} style={{ textAlign: 'center', padding: '10px 12px', borderBottom: '1px solid #e9ecef', color: '#173e92', fontWeight: 600 }}>
+              {kpi ? formatKpiValue(kpi.value, kpi.unit) : '-'}
+            </td>
+          );
+        })}
+      </tr>
+    ))
+  ]; 
+}
+
 const AnalysisDashboard: React.FC<{
   analysisData: CompanyAnalysisData[];
-  onBack: () => void;
-}> = ({ analysisData, onBack }) => {
+  selectedEntries: SelectedInfo[];
+  setCurrentView: (view: 'selection' | 'analysis') => void;
+}> = ({ analysisData, selectedEntries, setCurrentView }) => {
   const categories = [
     { key: 'Growth', label: '성장성', icon: 'bx-trending-up' },
     { key: 'Profitability', label: '수익성', icon: 'bxs-coin' },
@@ -589,17 +610,40 @@ const AnalysisDashboard: React.FC<{
 
   return (
     <div className={styles.analysisContainer}>
-      <div className={styles.analysisHeader}>
-        <button onClick={onBack} className={styles.backButton}>
-          <i className='bx bx-arrow-back'></i>
-          기업 선택으로 돌아가기
-        </button>
-        <h2>
-          <i className='bx bxs-bar-chart-alt-2'></i>
-          게임업계 KPI 분석 결과
-        </h2>
-        <div className={styles.analysisSubject}>
-          {analysisSubjects} 비교분석
+      <div style={{
+        background: '#fff',
+        border: '1px solid #e9ecef',
+        boxShadow: '0 2px 8px rgba(16,24,40,0.06)',
+        borderRadius: 0,
+        padding: '22px 32px 18px 32px',
+        marginBottom: 0,
+        maxWidth: 900,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+          <button
+            onClick={() => setCurrentView('selection')}
+            aria-label="뒤로가기"
+            style={{ background: 'none', border: 'none', padding: 0, marginRight: 12, cursor: 'pointer', verticalAlign: 'middle', display: 'flex', alignItems: 'center' }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 20L8 12L16 4" stroke="#173e92" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <span style={{ fontSize: '1.7rem', fontWeight: 800, color: '#173e92', marginLeft: 2 }}>게임업계 KPI 분석 결과</span>
+        </div>
+        <div style={{ color: '#374151', fontSize: '1rem', fontWeight: 400, marginBottom: 0, marginLeft: 36 }}>
+          {selectedEntries.map((entry, idx) => {
+            const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
+            const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
+            return (
+              <span key={entry.company.corp_code}>
+                {entry.company.corp_name}{displayYear}{idx < selectedEntries.length - 1 ? ', ' : ''}
+              </span>
+            );
+          })} 비교분석
         </div>
       </div>
       
@@ -612,19 +656,7 @@ const AnalysisDashboard: React.FC<{
       ) : (
         <>
           <RadarChartAnalysis analysisData={analysisData} />
-          <div className={styles.categoryTabs}>
-            {categories.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                className={`${styles.categoryTab} ${activeCategory === key ? styles.active : ''}`}
-                onClick={() => setActiveCategory(key)}
-              >
-                <i className={`bx ${icon}`}></i>
-                {label}
-              </button>
-            ))}
-          </div>
-          <KpiTable analysisData={analysisData} activeCategory={activeCategory} />
+          <KpiTable analysisData={analysisData} activeCategory={activeCategory} selectedEntries={selectedEntries} />
         </>
       )}
     </div>
@@ -648,6 +680,146 @@ const TrendsPageContent: React.FC = () => {
     queryKey: ['companies'],
     queryFn: fetchCompanies,
   });
+
+  // State for search input and filtered companies
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Filter companies logic (from AutoCompleteSearch)
+  const filterCompanies = useCallback((searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setFilteredCompanies([]);
+      return;
+    }
+    const normalizedQuery = searchQuery.toLowerCase().trim();
+    const results = (companiesData?.companies || []).filter(company => {
+      const name = company.corp_name.toLowerCase();
+      if (name.includes(normalizedQuery)) return true;
+      if (normalizedQuery.length === 1) {
+        const queryInitial = normalizedQuery;
+        const nameInitials = company.corp_name.split('').map(getInitialConsonant).join('');
+        if (nameInitials.includes(queryInitial)) return true;
+      }
+      return false;
+    });
+    setFilteredCompanies(results.slice(0, 10));
+  }, [companiesData]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    filterCompanies(value);
+    setIsSearchOpen(true);
+  };
+
+  // Click outside to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Render search results inline
+  function renderSearchResults() {
+    if (!isSearchOpen || filteredCompanies.length === 0) return null;
+    return (
+      <div style={{
+        position: 'absolute',
+        top: 56,
+        left: 0,
+        right: 0,
+        background: '#fff',
+        border: '1px solid #e9ecef',
+        zIndex: 10,
+        boxShadow: '0 2px 8px rgba(16,24,40,0.06)',
+        borderRadius: 0,
+        maxHeight: 240,
+        overflowY: 'auto',
+      }}>
+        {filteredCompanies.map(company => (
+          <div
+            key={company.corp_code}
+            style={{ padding: '12px 16px', cursor: 'pointer', color: '#374151', fontSize: 15, borderBottom: '1px solid #f3f4f6' }}
+            onClick={() => {
+              handleCompanySelect(company);
+              setIsSearchOpen(false);
+              setSearchQuery(company.corp_name);
+            }}
+          >
+            {company.corp_name}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Render report selection inline
+  function renderReportSelection() {
+    if (selectedEntries.length === 0) return null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {selectedEntries.map(entry => (
+          <div key={entry.company.corp_code} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <span style={{ color: '#173e92', fontWeight: 600, fontSize: 15, minWidth: 80 }}>{entry.company.corp_name}</span>
+            {entry.isLoadingReports ? (
+              <span style={{ color: '#374151', fontSize: 15 }}>보고서 로딩중...</span>
+            ) : entry.error ? (
+              <span style={{ color: '#e74c3c', fontSize: 15 }}>{entry.error}</span>
+            ) : entry.reports.length > 0 ? (
+              <select
+                value={entry.selectedReport?.rcept_no || ''}
+                onChange={e => handleReportSelect(entry.company.corp_code, e.target.value)}
+                style={{ padding: '8px 12px', border: '1px solid #e9ecef', borderRadius: 0, fontSize: 15, color: '#374151', background: '#fff', minWidth: 180 }}
+              >
+                <option value="" disabled>사업보고서를 선택하세요</option>
+                {entry.reports.map(report => {
+                  const businessYearMatch = report.report_nm.match(/\((\d{4})/);
+                  const businessYear = businessYearMatch ? businessYearMatch[1] : 'N/A';
+                  const reportTitle = report.report_nm.split('(')[0].trim();
+                  return (
+                    <option key={report.rcept_no} value={report.rcept_no}>
+                      {`${reportTitle} (${businessYear}.12)`}
+                    </option>
+                  );
+                })}
+              </select>
+            ) : (
+              <span style={{ color: '#374151', fontSize: 15 }}>사용 가능한 사업보고서가 없습니다.</span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Render selected analysis inline
+  function renderSelectedAnalysis() {
+    if (selectedEntries.length === 0) return null;
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+        {selectedEntries.map(entry => {
+          const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
+          const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
+          return (
+            <span key={entry.company.corp_code} style={{ background: '#f3f4f6', color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              {entry.company.corp_name}{displayYear}
+              <button
+                onClick={() => handleCompanyRemove(entry.company)}
+                style={{ background: 'none', border: 'none', color: '#e74c3c', fontWeight: 700, fontSize: 15, marginLeft: 4, cursor: 'pointer', padding: 0 }}
+                title="제거"
+              >×</button>
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
 
   const handleCompanySelect = async (company: Company) => {
     const newEntry: SelectedInfo = {
@@ -820,76 +992,149 @@ const TrendsPageContent: React.FC = () => {
 
   return (
     <Layout>
-      <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
-
-      <div className={styles.container}>
+      <div className={styles.pageWrapper}>
         {currentView === 'selection' && (
           <>
-            <div className={styles.pageIntro}>
-              <div className={styles.card}>
-                <div className={styles.introContent}>
-                  <div className={styles.introText}>
-                    <h1>
-                      <i className='bx bxs-bar-chart-alt-2'></i>
-                      게임업계 재무 분석 플랫폼
-                    </h1>
-                    <p>
-                      DART 공시 데이터를 기반으로 게임업계 상장기업의 재무건전성을 종합 분석합니다.
-                      성장성, 수익성, 안정성 등 핵심 KPI를 통해 객관적인 재무 비교가 가능합니다.
-                    </p>
-                  </div>
-                  <div className={styles.introStats}>
-                    <div className={styles.statItem}>
-                      <span className={styles.statNumber}>{companiesData?.companies?.length || 0}</span>
-                      <span className={styles.statLabel}>분석 대상 기업</span>
-                    </div>
-                    <div className={styles.statItem}>
-                      <span className={styles.statNumber}>9</span>
-                      <span className={styles.statLabel}>핵심 재무지표</span>
-                    </div>
-                    <div className={styles.statItem}>
-                      <span className={styles.statNumber}>5</span>
-                      <span className={styles.statLabel}>분석 카테고리</span>
-                    </div>
-                  </div>
+            {/* Header Card with Breadcrumbs */}
+            <div className={styles.card} style={{ marginTop: 32, marginBottom: 32 }}>
+              <div className={styles.breadcrumbs}>
+                <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+                <span className={styles.breadcrumbSeparator}>/</span>
+                <span className={styles.breadcrumbCurrent}>KPI Trends</span>
+              </div>
+              <h2 className={styles.cardTitle} style={{ color: '#173e92' }}>KPI Trends</h2>
+              <p style={{ color: '#374151', fontSize: 16 }}>
+                게임업계 상장기업의 재무건전성을 종합 분석합니다. 성장성, 수익성, 안정성 등 핵심 KPI를 통해 객관적인 재무 비교가 가능합니다.
+              </p>
+              <div style={{ display: 'flex', gap: 32, marginTop: 24 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#173e92' }}>{companiesData?.companies?.length || 0}</span><br/>
+                  <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>분석 대상 기업</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#173e92' }}>9</span><br/>
+                  <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>핵심 재무지표</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#173e92' }}>5</span><br/>
+                  <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>분석 카테고리</span>
                 </div>
               </div>
             </div>
 
-            <div className={styles.card}>
-              <div className={styles.sectionHeader}>
-                <h3>
-                  <i className='bx bx-search'></i>
-                  기업 검색 및 선택
-                </h3>
-                <p>분석할 게임회사를 검색하고 선택하세요 (최대 5개)</p>
+            {/* 3-card vertical stack, all with unified design */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {/* 기업 검색 및 선택 */}
+              <div className={styles.card} style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
+                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>기업 검색 및 선택</h3>
+                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석할 게임회사를 검색하고 선택하세요 (최대 5개)</span>
+                </div>
+                <div style={{ position: 'relative' }} ref={searchRef}>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    placeholder="기업명 검색 (예: ㄴ, 네이버, 넥슨...)"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '1px solid #e9ecef',
+                      borderRadius: 0,
+                      fontSize: 15,
+                      color: '#374151',
+                      marginBottom: 0,
+                      outline: 'none',
+                      fontWeight: 400,
+                      background: '#fff',
+                      boxSizing: 'border-box',
+                      marginTop: 8
+                    }}
+                    onFocus={() => setIsSearchOpen(true)}
+                  />
+                  {/* 검색 결과 드롭다운 */}
+                  {isSearchOpen && filteredCompanies.length > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 4px)',
+                      left: 0,
+                      right: 0,
+                      background: '#fff',
+                      border: '1px solid #e9ecef',
+                      zIndex: 10,
+                      boxShadow: '0 2px 8px rgba(16,24,40,0.06)',
+                      borderRadius: 0,
+                      maxHeight: 240,
+                      overflowY: 'auto',
+                    }}>
+                      {filteredCompanies.map(company => (
+                        <div
+                          key={company.corp_code}
+                          style={{ padding: '12px 16px', cursor: 'pointer', color: '#374151', fontSize: 15, borderBottom: '1px solid #f3f4f6' }}
+                          onClick={() => {
+                            handleCompanySelect(company);
+                            setIsSearchOpen(false);
+                            setSearchQuery(company.corp_name);
+                          }}
+                        >
+                          {company.corp_name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <AutoCompleteSearch
-                onCompanySelect={handleCompanySelect}
-                selectedCompanies={selectedEntries.map(e => e.company)}
-                companies={companiesData?.companies || []}
-              />
+              {/* 사업보고서 선택 */}
+              <div className={styles.card}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
+                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>사업보고서 선택</h3>
+                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석을 원하는 기업별 사업보고서를 선택하세요.</span>
+                </div>
+                {renderReportSelection()}
+              </div>
+              {/* 선택된 분석 항목 */}
+              <div className={styles.card}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
+                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>선택된 분석 항목 ({selectedEntries.length}/5)</h3>
+                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석할 기업과 보고서를 확인하고 분석을 시작하세요</span>
+                </div>
+                {renderSelectedAnalysis()}
+                <button
+                  onClick={handleAnalyze}
+                  disabled={selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport)}
+                  style={{
+                    background: '#173e92',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 0,
+                    fontWeight: 600,
+                    fontSize: 15,
+                    padding: '12px 24px',
+                    marginTop: 16,
+                    cursor: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'not-allowed' : 'pointer',
+                    opacity: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 0.5 : 1,
+                    boxShadow: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'none' : '0 2px 8px rgba(16,24,40,0.06)'
+                  }}
+                >KPI 분석 시작</button>
+              </div>
             </div>
-
-            <ReportSelectionPanel 
-              selectedEntries={selectedEntries} 
-              onReportSelect={handleReportSelect} 
-            />
-
-            <SelectedCompaniesPanel
-              selectedEntries={selectedEntries}
-              onRemove={handleCompanyRemove}
-              onAnalyze={handleAnalyze}
-            />
           </>
         )}
-
         {currentView === 'analysis' && (
-          <AnalysisDashboard
-            analysisData={analysisData}
-            onBack={handleBack}
-          />
+          <div className={styles.card} style={{ marginTop: 32 }}>
+            <div className={styles.breadcrumbs}>
+              <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+              <span className={styles.breadcrumbSeparator}>/</span>
+              <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>KPI Trends</span>
+              <span className={styles.breadcrumbSeparator}>/</span>
+              <span className={styles.breadcrumbCurrent}>분석 결과</span>
+            </div>
+            <AnalysisDashboard
+              analysisData={analysisData}
+              selectedEntries={selectedEntries}
+              setCurrentView={setCurrentView}
+            />
+          </div>
         )}
       </div>
     </Layout>

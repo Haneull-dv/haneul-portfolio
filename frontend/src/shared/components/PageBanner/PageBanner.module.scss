@@ -1,0 +1,67 @@
+.pageBanner {
+    background: #fff;
+    border-radius: 0;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(16,24,40,0.06);
+    padding: 20px 24px 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin-left: 240px;
+    max-width: calc(100vw - 240px);
+    transition: margin-left 0.3s, max-width 0.3s;
+  }
+  
+  @media (max-width: 1200px) {
+    .pageBanner {
+      margin-left: 240px;
+      max-width: calc(100vw - 240px);
+    }
+  }
+  @media (max-width: 1024px) {
+    .pageBanner {
+      margin-left: 64px;
+      max-width: calc(100vw - 64px);
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+  @media (max-width: 768px) {
+    .pageBanner {
+      margin-left: 0;
+      max-width: 100vw;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+  @media (max-width: 480px) {
+    .pageBanner {
+      padding: 14px 6px 10px 6px;
+      margin-bottom: 12px;
+    }
+  }
+  
+  .bannerContent {
+    width: 100%;
+  }
+  
+  .bannerTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: #173e92;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+  }
+  
+  .bannerDescription {
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0 0 6px 0;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  
+  .bannerActions {
+    margin-top: 12px;
+  }

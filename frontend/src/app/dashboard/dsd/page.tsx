@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
-import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import * as XLSX from 'xlsx';
 import styles from '../validation/validation.module.scss';
 
@@ -297,13 +296,27 @@ const DSDPage: React.FC = () => {
     { label: 'DSD 데이터 생성', active: true }
   ];
 
+  // 반응형 및 사이드바 겹침/overflow 방지용 스타일 추가
+  const containerStyle: React.CSSProperties = {
+    padding: '40px 40px 40px 284px', // sidebar(260px) + 24px
+    background: '#f8f9fa',
+    minHeight: '100vh',
+    minWidth: 0,
+    overflowX: 'hidden',
+  };
+
   return (
     <Layout>
-      <PageHeader 
-        title="DSD 데이터 생성" 
-        breadcrumbs={breadcrumbs}
-      />
-      <div className={styles.container}>
+      <div className={styles.pageWrapper}>
+        <div className={styles.card}>
+          <div className={styles.breadcrumbs}>
+            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+            <span className={styles.breadcrumbSeparator}>/</span>
+            <span className={styles.breadcrumbCurrent}>DART Converter</span>
+          </div>
+          <h2 className={styles.cardTitle}>DART Converter</h2>
+          <p>엑셀 파일을 DART 공시 형식으로 변환하여 표준화된 데이터를 생성하세요.</p>
+        </div>
         {renderUploadCard()}
         {renderTable()}
       </div>
