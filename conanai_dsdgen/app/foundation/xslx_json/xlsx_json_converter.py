@@ -97,6 +97,13 @@ class XlsxJsonConverter:
         if df is None:
             df = pd.read_excel(xls, sheet_name=sheet_name)
         
+        # 시트에 '자본변동표'가 포함되어 있는지 확인하여 특별 처리
+        temp_df_for_check = pd.read_excel(xls, sheet_name=sheet_name, header=None)
+        is_equity_statement = temp_df_for_check.apply(lambda row: row.astype(str).str.contains('자본변동표').any(), axis=1).any()
+
+        if is_equity_statement:
+            return XlsxJsonConverter._process_equity_sheet(xls, sheet_name)
+            
         # NaN 값을 빈 문자열로 대체
         df = df.fillna("")
         
@@ -127,6 +134,53 @@ class XlsxJsonConverter:
         
         # 데이터프레임을 레코드 형식의 JSON으로 변환
         return df.to_dict(orient="records")
+    
+    @staticmethod
+    def _process_equity_sheet(xls: pd.ExcelFile, sheet_name: str) -> List[Dict[str, Any]]:
+        """
+        자본변동표 시트를 특별히 처리하는 함수
+        
+        Args:
+            xls: pandas ExcelFile 객체
+            sheet_name: 처리할 시트 이름
+            
+        Returns:
+            List[Dict]: 처리된 자본변동표 데이터
+        """
+        try:
+            temp_df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
+            header_row_index = -1
+            
+            # 헤더 행 찾기 (heuristic: '[구성요소]'가 포함된 셀이 2개 이상인 행)
+            for i, row in temp_df.iloc[2:].iterrows():
+                if row.astype(str).str.contains(r'\[구성요소\]').sum() >= 2:
+                    header_row_index = i
+                    break
+            
+            if header_row_index == -1:
+                return []
+
+            df = pd.read_excel(xls, sheet_name=sheet_name, header=header_row_index)
+
+            # 'Unnamed' 컬럼 제거
+            if any(isinstance(c, str) and 'Unnamed' in c for c in df.columns):
+                df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+
+            # 첫 번째 컬럼을 '계정과목'으로 변경
+            if df.columns.any():
+                df.rename(columns={df.columns[0]: '계정과목'}, inplace=True)
+            
+            if '계정과목' in df.columns:
+                df['계정과목'] = df['계정과목'].astype(str).str.strip()
+                df = df[~df['계정과목'].str.contains(r'(\d{4}-\d{2}-\d{2})|(\[항목\])|(자본변동표)')]
+                df = df[df['계정과목'] != '']
+            
+            df.dropna(how='all', inplace=True)
+            df = df.fillna(0) # 숫자 데이터의 NaN은 0으로 채움
+
+            return df.to_dict(orient="records")
+        except Exception:
+            return []
     
     @staticmethod
     def clean_sheet_data(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:

@@ -1,34 +1,348 @@
-.dashboardLayout {
+// Dashboard Layout
+.dashboardContainer {
+  padding: 24px;
+  background: #f8f9fa;
   min-height: 100vh;
-  display: flex;
-  background: var(--grey, #eee);
 }
 
-/* CONTENT */
-.content {
+.workspaceHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  color: white;
   position: relative;
-  width: calc(100% - 220px);
-  left: 220px;
-  transition: 0.3s ease;
-  min-height: 100vh;
+  overflow: hidden;
 
-  &.sidebarHidden {
-    width: calc(100% - 60px);
-    left: 60px;
+  .backgroundCircle {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 18px;
+    opacity: 0.9;
   }
 }
 
-// Responsive
+// Widget Grid Layout
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+// Widget Card Styles
+.widgetCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f1f3f4;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  .widgetHeader {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .widgetTitle {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    i {
+      color: #3498db;
+    }
+  }
+
+  .widgetDescription {
+    margin: 0;
+    font-size: 14px;
+    color: #7f8c8d;
+  }
+
+  .widgetContent {
+    min-height: 200px;
+    margin-bottom: 16px;
+  }
+
+  .widgetFooter {
+    padding-top: 16px;
+    border-top: 1px solid #f1f3f4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .widgetLink {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #2980b9;
+    }
+
+    i {
+      font-size: 12px;
+    }
+  }
+}
+
+// KPI Card Styles (for DigestWidget)
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kpiCard {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+  position: relative;
+  overflow: hidden;
+
+  .colorBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--card-color);
+  }
+
+  .cardContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .textWrapper {
+    flex: 1;
+  }
+
+  .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin-bottom: 6px;
+  }
+
+  .value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: #95a5a6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .trendIcon {
+    font-size: 12px;
+  }
+
+  .iconWrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-bg);
+    
+    .icon {
+      font-size: 16px;
+      color: var(--card-color);
+    }
+  }
+}
+
+// Upload Area Styles (for ValidationWidget and DSDWidget)
+.uploadArea {
+  position: relative;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: #fafbfc;
+
+  &:hover {
+    border-color: #3498db;
+    background-color: #f0f8ff;
+  }
+
+  .fileInput {
+    display: none;
+  }
+
+  .uploadLabel {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #3498db;
+
+    i {
+      font-size: 32px;
+      color: #3498db;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .fileInfo {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    i {
+      color: #27ae60;
+      font-size: 14px;
+    }
+  }
+}
+
+.actionButton {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  i {
+    font-size: 16px;
+  }
+
+  &.primary {
+    background: #3498db;
+    color: white;
+    &:hover:not(:disabled) {
+      background: #2980b9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+  }
+
+  &.orange {
+    background: #f39c12;
+    color: white;
+    &:hover:not(:disabled) {
+      background: #e67e22;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+  }
+}
+
+// Chart Container (for TrendsWidget)
+.chartContainer {
+  height: 200px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+// Responsive Design
+@media screen and (max-width: 1024px) {
+  .gridContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media screen and (max-width: 768px) {
-  .content {
-    width: calc(100% - 220px);
-    left: 220px;
+  .dashboardContainer {
+    padding: 16px;
   }
-}
 
-@media screen and (max-width: 576px) {
-  .content {
-    width: calc(100% - 60px);
-    left: 60px;
+  .workspaceHeader {
+    padding: 24px;
+    
+    h1 {
+      font-size: 28px;
+    }
+    
+    p {
+      font-size: 16px;
+    }
+  }
+
+  .widgetCard {
+    padding: 20px;
+  }
+
+  .kpiGrid {
+    grid-template-columns: 1fr;
   }
 } 
