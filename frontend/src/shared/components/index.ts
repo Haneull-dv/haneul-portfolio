@@ -12,7 +12,7 @@ export { default as Sidebar } from './Sidebar/Sidebar';
 
 // Menu Components
 // export { default as NotificationMenu } from './NotificationMenu/NotificationMenu';
-export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
+// export { default as ProfileMenu } from './ProfileMenu/ProfileMenu';
 
 // UI Components
 export { default as HoverButton } from './HoverButton/HoverButton';
