@@ -3,7 +3,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: 240px;
   height: 100vh;
   background: #fafafa;
   border-right: 1px solid #e5e5e5;
@@ -21,7 +21,7 @@
 
 /* Brand/Logo Section */
 .brand {
-  padding: 20px 24px;
+  padding: 20px 24px 20px 24px;
   border-bottom: 1px solid #e5e5e5;
   background: #ffffff;
   flex-shrink: 0;
@@ -39,17 +39,24 @@
 /* Menu Group Container */
 .menuGroup {
   padding: 0 16px;
-  margin-bottom: 24px;
-  
-  &:first-of-type {
-    margin-top: 24px;
-  }
+  margin-bottom: 2px;
+}
+
+/* Remove margin above first groupHeader, add margin to first divider */
+.menuGroup:first-of-type .groupHeader {
+  margin-top: 0;
+}
+
+.divider:first-of-type {
+  margin-top: 13px;
+  margin-bottom: 0;
 }
 
 /* Group Header */
 .groupHeader {
   margin-bottom: 8px;
   padding: 0 8px;
+  margin-top: 0;
   
   .groupTitle {
     font-size: 11px;
@@ -121,13 +128,17 @@
 .divider {
   height: 1px;
   background: #e5e5e5;
-  margin: 16px 0;
+  margin: 13px 0 0 0;
+}
+
+.divider:first-of-type {
+  margin-bottom: 13px;
 }
 
 /* User Profile Section */
 .userProfile {
   margin-top: auto;
-  padding: 16px 24px;
+  padding: 13px 24px;
   border-top: 1px solid #e5e5e5;
   background: #ffffff;
   display: flex;
@@ -303,7 +314,13 @@
 
 @media screen and (max-width: 1024px) {
   .sidebar {
-    width: 220px;
+    width: 64px;
+    min-width: 64px;
+    .brand .text { display: none; }
+    .menuGroup .groupHeader,
+    .menuGroup .groupTitle { display: none; }
+    .sideMenu .text { display: none; }
+    .userProfile .profileText { display: none; }
   }
   
   .brand {
@@ -658,4 +675,25 @@
       }
     }
   }
+}
+
+/* 반응형: 모바일에서 사이드바 오버레이 또는 숨김 */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+    box-shadow: none;
+    /* 필요시 display: none; 으로 완전 숨김 처리 가능 */
+  }
+}
+
+/* PROFILE 그룹(두 번째 menuGroup)만 위쪽 마진 최소화 */
+.menuGroup:last-of-type {
+  margin-top: 0;
+}
+
+/* WORKSPACE 그룹(첫 번째 menuGroup)만 위쪽 마진 조정 */
+.menuGroup:first-of-type {
+  margin-top: 0;
 } 

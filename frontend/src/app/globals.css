@@ -3,6 +3,35 @@
 @tailwind utilities;
 
 :root {
+  /* Design System Tokens */
+  /* Colors */
+  --primary-color: #4f46e5;
+  --primary-color-light: #e0e7ff;
+  --background-color: #f8fafc;
+  --widget-background: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --border-color: #e2e8f0;
+  --color-positive: #22c55e;
+  --color-negative: #ef4444;
+
+  /* Typography */
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  /* Spacing & Sizing */
+  --spacing-unit: 4px;
+
+  /* Borders & Shadows */
+  --border-radius-sm: 0.25rem; /* 4px */
+  --border-radius: 0.5rem; /* 8px */
+  --border-radius-lg: 1rem; /* 16px */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Original variables */
   --background: #ffffff;
   --foreground: #171717;
 }

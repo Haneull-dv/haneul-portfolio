@@ -1,653 +1,293 @@
-// General page layout
+/* 
+  파일: /src/app/dashboard/digest/digest.module.scss
+  설명: Market Digest 페이지의 레이아웃과 컴포넌트 스타일을 정의합니다.
+*/
+
+/* 
+  페이지 전체를 감싸는 컨테이너.
+  - 부모(.content)의 높이를 100% 채우고, flexbox를 이용해 내부 요소를 배치합니다.
+  - 이 컨테이너 자체는 스크롤되지 않습니다.
+*/
 .pageContainer {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: none;
+  padding: 0;
+}
+
+/* 
+  PageHeader에 위치할 검색창 스타일.
+  - PageHeader의 actions 프롭을 통해 전달될 때 이 스타일이 적용됩니다.
+*/
+.headerSearchInput {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  min-width: 250px;
+  background: #fff;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #0369a1; /* 사이드바 활성 메뉴와 동일한 포인트 컬러 */
+    box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.2);
+  }
+}
+
+/* 
+  PageHeader 아래의 실제 컨텐츠(KPI 카드, 테이블)를 감싸는 스크롤 영역.
+  - flex-grow: 1 -> PageHeader를 제외한 모든 남은 공간을 차지합니다.
+  - overflow-y: auto -> 내용이 길어지면 이 영역만 세로 스크롤이 생깁니다.
+*/
+.contentWrapper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 40px 40px 40px 284px; /* sidebar(260px) + 24px */
   background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+  border-left: 1px solid #e5e7eb;
   min-height: 100vh;
 }
 
-// Summary Header
-.summaryHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 32px;
-  margin-bottom: 32px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-
-  .backgroundCircle {
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-  }
-
-  .content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap; // For responsiveness
-    gap: 16px; // For responsiveness
-  }
-
-  .titleSection h1 {
-    margin: 0;
-    font-size: 32px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-
-  .titleSection p {
-    margin: 0;
-    font-size: 16px;
-    opacity: 0.9;
-  }
-
-  .updateSection {
-    text-align: right;
-    flex-shrink: 0; // Prevent shrinking
-  }
-
-  .updateSection .label {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-bottom: 4px;
-  }
-
-  .updateSection .timestamp {
-    font-size: 16px;
-    font-weight: 600;
-  }
+.pageHeaderArea {
+  margin-bottom: 18px;
 }
 
-// KPI Cards
+.breadcrumbs {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.breadcrumbs .current {
+  color: #173e92;
+  font-weight: 600;
+}
+.breadcrumbs .separator {
+  color: #d1d5db;
+  margin: 0 2px;
+  font-size: 13px;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 18px 0;
+  line-height: 1.2;
+}
+
+/* KPI 카드 그리드 */
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
-  margin-bottom: 32px;
+  margin: 0;
 }
 
+/* KPI 카드 개별 스타일 */
 .kpiCard {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f1f3f4;
-  position: relative;
-  overflow: hidden;
-
-  .colorBar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background-color: var(--card-color);
+  background: #fff;
+  border-radius: 0;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+  * {
+    border-radius: 0 !important;
   }
-
-  .cardContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  
-  .textWrapper {
-    flex: 1;
-  }
-
   .title {
     font-size: 14px;
-    font-weight: 600;
-    color: #7f8c8d;
+    color: #6b7280;
+    font-weight: 500;
     margin-bottom: 8px;
   }
-
+  .valueRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
   .value {
     font-size: 28px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 4px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1;
   }
-
+  .unit, .companyName {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-left: 8px;
+    line-height: 1;
+    word-break: keep-all;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
   .subtitle {
-    font-size: 13px;
-    color: #95a5a6;
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-
-  .trendIcon {
-    font-size: 16px;
-  }
-
-  .iconWrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--card-bg);
-    
-    .icon {
-      font-size: 24px;
-      color: var(--card-color);
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+    font-weight: 500;
+    i {
+      font-size: 16px;
     }
   }
 }
 
-// Integrated Table
+/* 테이블 컨테이너 */
 .tableContainer {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  border-radius: 0;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
   overflow: hidden;
-  border: 1px solid #f1f3f4;
+  margin-top: 0;
+  * {
+    border-radius: 0 !important;
+  }
 }
 
 .tableHeader {
-  padding: 24px;
-  border-bottom: 1px solid #f1f3f4;
-  background: #fafbfc;
-}
-
-.tableControls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 16px;
+  margin: 24px 0 0 0;
+  padding: 0 0 8px 0;
 }
 
 .tableTitle {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 20px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  i {
-    color: #3498db;
-  }
-}
-
-.filterControls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.searchInput, .countrySelect {
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-}
-
-.searchInput {
-  min-width: 220px;
-}
-
-.exportButton {
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
-
-  &.excel {
-    background: #27ae60;
-    &:hover { background: #219a52; }
-  }
-
-  &.pdf {
-    background: #e74c3c;
-    &:hover { background: #c0392b; }
-  }
+  color: #111827;
 }
 
 .tableWrapper {
-  overflow-x: auto;
+  overflow-x: auto; /* 테이블 내용이 길면 가로 스크롤 활성화 */
 }
 
 .integratedTable {
   width: 100%;
+  min-width: 1200px; /* 테이블의 최소 너비를 지정하여 레이아웃 깨짐 방지 */
   border-collapse: collapse;
-  font-size: 14px;
-  
+  table-layout: fixed; /* 컬럼 너비를 고정하여 안정적인 레이아웃 유지 */
+
   th, td {
-    padding: 16px 12px;
-    white-space: nowrap;
-  }
-  
-  thead tr {
-     background: #f8f9fa;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
   }
 
   th {
+    background: #f9fafb;
+    font-weight: 500;
+    color: #6b7280;
     text-align: left;
-    font-weight: bold;
-    color: #2c3e50;
+    font-size: 12px;
+    text-transform: uppercase;
     cursor: pointer;
-    border-bottom: 2px solid #dee2e6;
-    background: #f8f9fa;
-
-    .headerContent {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      
-      i {
-        font-size: 14px;
-        opacity: 0.7;
-      }
-    }
-  }
-
-  tbody tr {
-    border-bottom: 1px solid #f1f3f4;
-    transition: background-color 0.2s;
-
-    &:nth-child(even) {
-      background-color: white;
-    }
-    &:nth-child(odd) {
-      background-color: #fafbfc;
-    }
-    &:hover {
-      background-color: #f0f8ff !important;
-    }
-    &.selected {
-      background-color: #e8f4fd !important;
-      &:hover {
-        background-color: #d1e9fc !important;
-      }
-    }
+    white-space: nowrap;
   }
 
   td {
-    color: #2c3e50;
+    font-size: 14px;
+    color: #374151;
+  }
+
+  tbody tr:hover {
+    background-color: #f9fafb;
   }
   
+  /* 컬럼 너비 지정 */
+  .thCheckbox { width: 3%; }
+  .thRank     { width: 4%; text-align: center; }
+  .thCompany  { width: 12%; }
+  .thCountry  { width: 5%; text-align: center; }
+  .thNumber   { width: 8%; text-align: right; }
+  .thDisclosure { width: 30%; }
+  .thIssue    { width: 30%; }
+
   .centerAlign { text-align: center; }
   .rightAlign { text-align: right; }
-  .monospace { font-family: 'monospace', monospace; }
-  .bold { font-weight: bold; }
-  
-  .companyNameCell {
-    font-weight: bold;
-    cursor: pointer;
-    border-left: 3px solid transparent;
-    transition: all 0.2s;
-    
-    &:hover {
-      border-left: 3px solid #3498db;
-      color: #3498db;
-    }
+
+  /* 긴 텍스트 말줄임 처리 */
+  .disclosureCell div, .issueCell div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .disclosureCell, .issueCell {
-    div {
-      max-height: 80px;
-      overflow-y: auto;
-    }
-    .item {
-      margin-bottom: 6px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-    }
-    .itemTitle {
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 2px;
-      white-space: normal;
-    }
-    .itemMeta {
-      color: #7f8c8d;
-      font-size: 11px;
-    }
-    .moreItems {
-      font-size: 11px;
-      color: #7f8c8d;
-      text-align: center;
-      margin-top: 4px;
-    }
-    .noItems {
-      color: #bdc3c7;
-      font-size: 12px;
-    }
-    .item.default { background: #f8f9fa; }
-    .item.positive { background: #e8f5e8; }
-    .item.negative { background: #ffeaea; }
-  }
-}
-
-
-// Country and Market Badges
-.countryBadge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  display: inline-block;
-}
-
-.countryKR { background: #3498db; color: white; }
-.countryJP { background: #e74c3c; color: white; }
-.countryCN { background: #f1c40f; color: #2c3e50; }
-.countryUS { background: #2c3e50; color: white; }
-.countryEU { background: #9b59b6; color: white; }
-.countryDefault { background: #bdc3c7; color: #2c3e50; }
-
-.marketBadge {
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  display: inline-block;
-  
-  &.kospi { background: #e74c3c; }
-  &.kosdaq { background: #3498db; }
-  &.unknown { background: #7f8c8d; }
-}
-
-// Mini Popup
-.miniPopup {
-    position: fixed;
-    background: white;
-    border: 2px solid #e9ecef;
+  .countryBadge {
+    padding: 3px 10px;
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    z-index: 1000;
-    min-width: 300px;
-    max-width: 400px;
-
-    .popupHeader {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 15px;
-    }
-
-    h4 { margin: 0; color: #2c3e50; font-size: 18px; }
-
-    .closeButton {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #7f8c8d;
-    }
-    
-    .infoSection {
-      margin-bottom: 15px;
-    }
-
-    .metaInfo {
-      font-size: 14px;
-      color: #7f8c8d;
-      margin-bottom: 5px;
-    }
-    
-    .price {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2c3e50;
-    }
-
-    .changeRate {
-      font-size: 16px;
-      font-weight: bold;
-    }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      font-size: 13px;
-
-      .gridLabel { color: #7f8c8d; font-weight: 600; }
-      .gridValue { color: #2c3e50; font-weight: bold; }
-    }
+    font-size: 11px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+  
+  .noItems { color: #9ca3af; }
+  .textPositive { color: #dc2626; }
+  .textNegative { color: #2563eb; }
 }
 
-.textPositive { color: #e74c3c; }
-.textNegative { color: #3498db; }
-.textNeutral { color: #7f8c8d; }
-
-// Loading and Error States
+/* 로딩 및 에러 상태 */
 .stateContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  flex-direction: column;
-  text-align: center;
-  padding: 24px;
+  min-height: 100vh;
+  width: 100%;
+  background: #f8f9fa;
+  font-size: 20px;
+  color: #173e92;
+  font-weight: 600;
 }
 
-.stateIcon {
-  font-size: 3rem;
-  margin-bottom: 20px;
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  margin-right: 12px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.stateText {
-  color: #666;
-  font-size: 18px;
-  margin-bottom: 20px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.errorTitle {
-  color: #e74c3c;
-  margin-bottom: 10px;
-}
-
-.retryButton {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.2s;
-  
-  &:hover {
-    background: #2980b9;
-  }
-}
-
-.headerActions {
-  display: flex;
-  gap: 12px;
-}
-
-// Responsive Styles
-@media (max-width: 992px) {
-  .integratedTable {
-    th, td {
-      padding: 12px 8px;
-      font-size: 13px;
-    }
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .contentWrapper {
+    padding: 20px;
+    gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .pageContainer {
+  .contentWrapper {
     padding: 16px;
+    gap: 16px;
   }
-  
-  .summaryHeader {
-    padding: 24px;
-    .titleSection h1 {
-      font-size: 24px;
-    }
-    .titleSection p {
-      font-size: 14px;
-    }
-  }
-  
-  .tableHeader {
-    padding: 16px;
-  }
-  
-  .tableControls, .filterControls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .searchInput, .countrySelect, .exportButton {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-  }
-
-  .tableWrapper {
-    overflow-x: visible;
-  }
-
-  .integratedTable {
-    thead {
-      display: none; // hide table header on mobile
-    }
-    
-    tr {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-      background: white !important; // override hover/zebra
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid #dee2e6;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      padding: 1rem;
-
-      &.selected {
-        border-color: #3498db;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
-      }
-    }
-
-    tbody, td {
-      display: block;
-      width: 100% !important;
-      box-sizing: border-box;
-    }
-    
-    td {
-      text-align: right !important; // override alignment
-      padding: 0.75rem 0 !important;
-      padding-left: 50% !important;
-      position: relative;
-      border-bottom: 1px solid #f1f3f4;
-      white-space: normal;
-
-      &:first-child { // Checkbox
-        display: none; 
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 0;
-        width: 45%;
-        font-weight: bold;
-        text-align: left;
-        color: #2c3e50;
-        white-space: nowrap;
-      }
-    }
-    
-    .companyNameCell {
-      font-size: 1.2rem;
-      padding-top: 0 !important;
-      padding-bottom: 1rem !important;
-      padding-left: 0 !important;
-      text-align: left !important;
-      border-left: none !important;
-      border-bottom: 1px solid #dee2e6;
-      margin-bottom: 1rem;
-
-      &:hover {
-        color: #3498db !important;
-        background: transparent !important;
-      }
-
-      &::before {
-        display: none;
-      }
-    }
-
-    .disclosureCell, .issueCell {
-      div {
-        max-height: none;
-      }
-    }
-  }
-
-  .miniPopup {
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%);
-    width: 90vw;
-    max-width: 400px;
+  .kpiGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
-
-.disclosureCell {
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
-.disclosureList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 120px; /* 스크롤이 생길 수 있는 최대 높이 */
-  overflow-y: auto;
-  padding-right: 8px; /* 스크롤바 공간 */
-}
-
-.disclosureItem {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.5;
-  
-  .title {
-    font-weight: 500;
-    color: #34495e;
-  }
-  
-  .date {
-    font-size: 12px;
-    color: #7f8c8d;
-  }
-}
-
-.noItems {
-  color: #95a5a6;
-} 

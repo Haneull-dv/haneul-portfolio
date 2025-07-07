@@ -6,6 +6,7 @@ import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
   isHidden: boolean;
+  toggleSidebar: () => void;
 }
 
 interface MenuItem {
@@ -41,7 +42,7 @@ const menuGroups: MenuGroup[] = [
   }
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isHidden }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isHidden, toggleSidebar }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { setActive } = useActiveMenu();

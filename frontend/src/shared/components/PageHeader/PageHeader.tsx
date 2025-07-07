@@ -1,55 +1,48 @@
 import React from 'react';
 import styles from './PageHeader.module.scss';
 
+interface Breadcrumb {
+  label: string;
+  href?: string;
+  active?: boolean;
+}
+
 interface PageHeaderProps {
   title: string;
-  breadcrumbs?: Array<{
-    label: string;
-    href?: string;
-    active?: boolean;
-  }>;
+  breadcrumbs?: Breadcrumb[];
   actions?: React.ReactNode;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ 
-  title, 
-  breadcrumbs = [], 
-  actions 
+const PageHeader: React.FC<PageHeaderProps> = ({
+  title,
+  breadcrumbs = [],
+  actions
 }) => {
   return (
-    <div className={styles.pageHeader}>
-      <div className={styles.left}>
-        <h1 className={styles.title}>{title}</h1>
+    <header className={styles.pageHeader}>
+      <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
         {breadcrumbs.length > 0 && (
-          <ul className={styles.breadcrumb}>
-            {breadcrumbs.map((crumb, index) => (
-              <li key={index}>
-                {crumb.href ? (
-                  <a 
-                    href={crumb.href} 
-                    className={crumb.active ? styles.active : ''}
-                  >
-                    {crumb.label}
-                  </a>
+          <ol>
+            {breadcrumbs.map((crumb, idx) => (
+              <li key={idx}>
+                {crumb.href && !crumb.active ? (
+                  <a href={crumb.href}>{crumb.label}</a>
                 ) : (
-                  <span className={crumb.active ? styles.active : ''}>
-                    {crumb.label}
-                  </span>
+                  <span className={crumb.active ? styles.active : ''}>{crumb.label}</span>
                 )}
-                {index < breadcrumbs.length - 1 && (
-                  <i className='bx bx-chevron-right'></i>
+                {idx < breadcrumbs.length - 1 && (
+                  <span className={styles.separator}>/</span>
                 )}
               </li>
             ))}
-          </ul>
+          </ol>
         )}
+      </nav>
+      <div className={styles.headerMain}>
+        <h1 className={styles.title}>{title}</h1>
+        {actions && <div className={styles.actions}>{actions}</div>}
       </div>
-      {actions && (
-        <div className={styles.actions}>
-          {actions}
-        </div>
-      )}
-    </div>
+    </header>
   );
 };
 
