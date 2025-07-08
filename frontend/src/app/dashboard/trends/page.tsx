@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './trends.module.scss';
+import PrimaryButton from '@/shared/components/PrimaryButton';
 
 // Types
 interface Company {
@@ -295,8 +296,8 @@ const ReportSelectionPanel: React.FC<{
         <p>분석을 원하는 기업별 사업보고서를 선택하세요.</p>
       </div>
       <div className={styles.reportSelectionList}>
-        {selectedEntries.map(entry => (
-          <div key={entry.company.corp_code} className={styles.reportSelectionItem}>
+        {selectedEntries.map((entry, idx) => (
+          <div key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} className={styles.reportSelectionItem}>
             <span className={styles.reportSelectionCompany}>{entry.company.corp_name}</span>
             <div className={styles.reportSelectionDropdown}>
               {entry.isLoadingReports ? (
@@ -311,6 +312,7 @@ const ReportSelectionPanel: React.FC<{
                   value={entry.selectedReport?.rcept_no || ''}
                   onChange={(e) => onReportSelect(entry.company.corp_code, e.target.value)}
                   className={styles.reportSelect}
+                  style={{ width: 220, minWidth: 220, maxWidth: 220 }}
                 >
                   <option value="" disabled>사업보고서를 선택하세요</option>
                   {entry.reports.map(report => {
@@ -338,7 +340,7 @@ const ReportSelectionPanel: React.FC<{
 
 const SelectedCompaniesPanel: React.FC<{
   selectedEntries: SelectedInfo[];
-  onRemove: (company: Company) => void;
+  onRemove: (idx: number) => void;
   onAnalyze: () => void;
 }> = ({ selectedEntries, onRemove, onAnalyze }) => {
   return (
@@ -353,18 +355,18 @@ const SelectedCompaniesPanel: React.FC<{
 
       {selectedEntries.length > 0 && (
         <div className={styles.selectedCompanies}>
-          {selectedEntries.map((entry) => {
+          {selectedEntries.map((entry, idx) => {
             const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
             const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
 
             return (
-              <div key={entry.company.corp_code} className={styles.selectedCompany}>
+              <div key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} className={styles.selectedCompany}>
                 <span className={styles.companyName}>
                   {entry.company.corp_name}
                   {displayYear}
                 </span>
                 <button
-                  onClick={() => onRemove(entry.company)}
+                  onClick={() => onRemove(idx)}
                   className={styles.removeButton}
                   title="제거"
                 >
@@ -413,7 +415,13 @@ const RadarChartAnalysis: React.FC<{
     });
   }, [analysisData]);
 
-  const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
+  const colors = [
+    '#173e92', // Navy
+    '#c0392b', // Deep Red
+    '#218c5a', // Deep Green
+    '#b9770e', // Deep Orange
+    '#5e548e', // Deep Purple
+  ];
 
   const tooltipContent = (
     <>
@@ -462,8 +470,8 @@ const RadarChartAnalysis: React.FC<{
                 dataKey={company.corp_name}
                 stroke={colors[index % colors.length]}
                 fill={colors[index % colors.length]}
-                fillOpacity={0.1}
-                strokeWidth={2}
+                fillOpacity={0.2}
+                strokeWidth={2.5}
               />
             ))}
             <RechartsTooltip />
@@ -521,17 +529,10 @@ const KpiTable: React.FC<{
   const kpiItems = companiesWithData[0].kpiData?.categories[activeCategory] || [];
 
   return (
-    <div className={styles.card} style={{ marginTop: 32, padding: '28px 32px', border: '1px solid #e9ecef', borderRadius: 0, boxShadow: '0 2px 8px rgba(16,24,40,0.06)', background: '#fff' }}>
+    <div className={styles.card} style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92' }}>KPI 상세 분석</div>
-        <button
-          onClick={exportToExcel}
-          style={{ background: '#173e92', color: '#fff', fontWeight: 700, fontSize: 16, padding: '10px 32px', border: 'none', borderRadius: 0, boxShadow: '0 2px 8px rgba(16,24,40,0.10)', cursor: 'pointer', letterSpacing: 0.5, transition: 'background 0.2s', outline: 'none' }}
-          onMouseOver={e => (e.currentTarget.style.background = '#102a5c')}
-          onMouseOut={e => (e.currentTarget.style.background = '#173e92')}
-        >
-          엑셀 저장
-        </button>
+        <PrimaryButton small onClick={exportToExcel}>엑셀 저장</PrimaryButton>
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15, color: '#374151' }}>
         <thead>
@@ -578,7 +579,7 @@ function kpiCategoryRows(
         {selectedEntries.map((entry: SelectedInfo) => {
           const kpi = analysisData.find((d: CompanyAnalysisData) => d.company.corp_code === entry.company.corp_code)?.kpiData?.categories[category]?.find((k: KpiItem) => k.kpi_name === kpiName);
           return (
-            <td key={entry.company.corp_code} style={{ textAlign: 'center', padding: '10px 12px', borderBottom: '1px solid #e9ecef', color: '#173e92', fontWeight: 600 }}>
+            <td key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ textAlign: 'center', padding: '10px 12px', borderBottom: '1px solid #e9ecef', color: '#173e92', fontWeight: 600 }}>
               {kpi ? formatKpiValue(kpi.value, kpi.unit) : '-'}
             </td>
           );
@@ -632,18 +633,18 @@ const AnalysisDashboard: React.FC<{
               <path d="M16 20L8 12L16 4" stroke="#173e92" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <span style={{ fontSize: '1.7rem', fontWeight: 800, color: '#173e92', marginLeft: 2 }}>게임업계 KPI 분석 결과</span>
+          <span style={{ fontSize: '1.7rem', fontWeight: 800, color: '#222', marginLeft: 2 }}>KPI Trends</span>
         </div>
         <div style={{ color: '#374151', fontSize: '1rem', fontWeight: 400, marginBottom: 0, marginLeft: 36 }}>
           {selectedEntries.map((entry, idx) => {
             const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
             const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
             return (
-              <span key={entry.company.corp_code}>
-                {entry.company.corp_name}{displayYear}{idx < selectedEntries.length - 1 ? ', ' : ''}
+              <span key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                {entry.company.corp_name}{displayYear}
               </span>
             );
-          })} 비교분석
+          })}
         </div>
       </div>
       
@@ -669,6 +670,8 @@ const TrendsPageContent: React.FC = () => {
   const [selectedEntries, setSelectedEntries] = useState<SelectedInfo[]>([]);
   const [analysisData, setAnalysisData] = useState<CompanyAnalysisData[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -764,8 +767,8 @@ const TrendsPageContent: React.FC = () => {
     if (selectedEntries.length === 0) return null;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {selectedEntries.map(entry => (
-          <div key={entry.company.corp_code} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        {selectedEntries.map((entry, idx) => (
+          <div key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span style={{ color: '#173e92', fontWeight: 600, fontSize: 15, minWidth: 80 }}>{entry.company.corp_name}</span>
             {entry.isLoadingReports ? (
               <span style={{ color: '#374151', fontSize: 15 }}>보고서 로딩중...</span>
@@ -774,8 +777,8 @@ const TrendsPageContent: React.FC = () => {
             ) : entry.reports.length > 0 ? (
               <select
                 value={entry.selectedReport?.rcept_no || ''}
-                onChange={e => handleReportSelect(entry.company.corp_code, e.target.value)}
-                style={{ padding: '8px 12px', border: '1px solid #e9ecef', borderRadius: 0, fontSize: 15, color: '#374151', background: '#fff', minWidth: 180 }}
+                onChange={(e) => handleReportSelect(idx, e.target.value)}
+                style={{ padding: '8px 12px', border: '1px solid #e9ecef', borderRadius: 0, fontSize: 15, color: '#374151', background: '#fff', width: 220, minWidth: 220, maxWidth: 220 }}
               >
                 <option value="" disabled>사업보고서를 선택하세요</option>
                 {entry.reports.map(report => {
@@ -803,17 +806,12 @@ const TrendsPageContent: React.FC = () => {
     if (selectedEntries.length === 0) return null;
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-        {selectedEntries.map(entry => {
+        {selectedEntries.map((entry, idx) => {
           const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
           const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
           return (
-            <span key={entry.company.corp_code} style={{ background: '#f3f4f6', color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ background: '#f3f4f6', color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
               {entry.company.corp_name}{displayYear}
-              <button
-                onClick={() => handleCompanyRemove(entry.company)}
-                style={{ background: 'none', border: 'none', color: '#e74c3c', fontWeight: 700, fontSize: 15, marginLeft: 4, cursor: 'pointer', padding: 0 }}
-                title="제거"
-              >×</button>
             </span>
           );
         })}
@@ -822,59 +820,77 @@ const TrendsPageContent: React.FC = () => {
   }
 
   const handleCompanySelect = async (company: Company) => {
-    const newEntry: SelectedInfo = {
-      company,
-      reports: [],
-      selectedReport: null,
-      isLoadingReports: true,
-    };
-    setSelectedEntries(prev => [...prev, newEntry]);
-
-    try {
-      const reports = await fetchReports(company.corp_code);
-      
-      const businessReports = reports.filter(r => {
-        if (!r.report_nm.includes('사업보고서')) {
-          return false;
-        }
-        // "사업보고서 (2023.12.31)" 형태에서 연도 추출
-        const match = r.report_nm.match(/\((\d{4})/);
-        if (!match) return false;
-        
-        const businessYear = parseInt(match[1], 10);
-        const currentYear = new Date().getFullYear();
-
-        // 사업연도가 현재 연도보다 같거나 큰 경우는 제외 (예: 2024년 사업보고서는 2025년에 나옴)
-        return businessYear < currentYear;
-      });
-      
-      setSelectedEntries(prev => prev.map(entry => 
-        entry.company.corp_code === company.corp_code 
-          ? { ...entry, reports: businessReports, isLoadingReports: false, selectedReport: businessReports[0] || null }
-          : entry
-      ));
-    } catch (error) {
-      console.error(`보고서 로딩 실패: ${company.corp_name}`, error);
-      setSelectedEntries(prev => prev.map(entry => 
-        entry.company.corp_code === company.corp_code 
-          ? { ...entry, isLoadingReports: false, error: '보고서를 불러올 수 없습니다.' }
-          : entry
-      ));
+    if (selectedEntries.length >= 5) {
+      setShowLimitModal(true);
+      return;
     }
+    // prevent duplicate null entry for same company
+    if (selectedEntries.some(e => e.company.corp_code === company.corp_code && !e.selectedReport)) {
+      setShowDuplicateModal(true);
+      return;
+    }
+    let reports: Report[] = [];
+    try {
+      reports = await fetchReports(company.corp_code);
+    } catch (error) {
+      setSelectedEntries(prev => [...prev, {
+        company,
+        reports: [],
+        selectedReport: null,
+        isLoadingReports: false,
+        error: '보고서를 불러올 수 없습니다.'
+      }]);
+      return;
+    }
+    const businessReports = reports.filter(r => {
+      if (!r.report_nm.includes('사업보고서')) return false;
+      const match = r.report_nm.match(/\((\d{4})/);
+      if (!match) return false;
+      const businessYear = parseInt(match[1], 10);
+      const currentYear = new Date().getFullYear();
+      return businessYear < currentYear;
+    });
+    if (businessReports.length === 0) {
+      setSelectedEntries(prev => [...prev, {
+        company,
+        reports: [],
+        selectedReport: null,
+        isLoadingReports: false,
+        error: '사업보고서가 없습니다.'
+      }]);
+      return;
+    }
+    const defaultReport = businessReports[0];
+    const key = company.corp_code + '_' + defaultReport.rcept_no;
+    if (selectedEntries.some(e => e.company.corp_code + '_' + (e.selectedReport?.rcept_no || 'none') === key)) {
+      setShowDuplicateModal(true);
+      return;
+    }
+    setSelectedEntries(prev => [...prev, {
+      company,
+      reports: businessReports,
+      selectedReport: defaultReport,
+      isLoadingReports: false
+    }]);
   };
 
-  const handleCompanyRemove = (company: Company) => {
-    setSelectedEntries(prev => prev.filter(e => e.company.corp_code !== company.corp_code));
+  const handleCompanyRemove = (idx: number) => {
+    setSelectedEntries(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const handleReportSelect = (corpCode: string, rceptNo: string) => {
-    setSelectedEntries(prev => prev.map(entry => {
-      if (entry.company.corp_code === corpCode) {
-        const selectedReport = entry.reports.find(r => r.rcept_no === rceptNo) || null;
-        return { ...entry, selectedReport };
+  const handleReportSelect = (entryIdx: number, rceptNo: string) => {
+    setSelectedEntries(prev => {
+      const entry = prev[entryIdx];
+      const selectedReport = entry.reports.find(r => r.rcept_no === rceptNo) || null;
+      const newKey = entry.company.corp_code + '_' + (selectedReport?.rcept_no || 'none');
+      // 중복 체크
+      if (prev.some((e, idx) => idx !== entryIdx && e.company.corp_code + '_' + (e.selectedReport?.rcept_no || 'none') === newKey)) {
+        setShowDuplicateModal(true);
+        return prev;
       }
-      return entry;
-    }));
+      // update only this entry
+      return prev.map((e, idx) => idx === entryIdx ? { ...e, selectedReport } : e);
+    });
   };
 
   const handleAnalyze = async () => {
@@ -882,10 +898,8 @@ const TrendsPageContent: React.FC = () => {
       alert('모든 기업의 분석할 사업보고서를 선택해주세요.');
       return;
     }
-    
     setIsAnalyzing(true);
     setCurrentView('analysis');
-    
     try {
       const analysisResults: CompanyAnalysisData[] = await Promise.all(
         selectedEntries.map(async (entry) => {
@@ -898,11 +912,9 @@ const TrendsPageContent: React.FC = () => {
               error: `보고서가 선택되지 않았습니다.`
             };
           }
-
           try {
             const businessYearMatch = entry.selectedReport.report_nm.match(/\((\d{4})/);
             const businessYear = businessYearMatch ? businessYearMatch[1] : entry.selectedReport.rcept_dt.substring(0, 4);
-
             const kpiData = await fetchKpi(
               entry.company.corp_code, 
               entry.selectedReport.rcept_no, 
@@ -925,7 +937,6 @@ const TrendsPageContent: React.FC = () => {
           }
         })
       );
-      
       setAnalysisData(analysisResults);
     } catch (error) {
       console.error('분석 중 오류 발생:', error);
@@ -996,13 +1007,13 @@ const TrendsPageContent: React.FC = () => {
         {currentView === 'selection' && (
           <>
             {/* Header Card with Breadcrumbs */}
-            <div className={styles.card} style={{ marginTop: 32, marginBottom: 32 }}>
+            <div className={styles.card} style={{ marginTop: 8 }}>
               <div className={styles.breadcrumbs}>
                 <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
                 <span className={styles.breadcrumbSeparator}>/</span>
                 <span className={styles.breadcrumbCurrent}>KPI Trends</span>
               </div>
-              <h2 className={styles.cardTitle} style={{ color: '#173e92' }}>KPI Trends</h2>
+              <h2 className={styles.cardTitle} style={{ color: '#222' }}>KPI Trends</h2>
               <p style={{ color: '#374151', fontSize: 16 }}>
                 게임업계 상장기업의 재무건전성을 종합 분석합니다. 성장성, 수익성, 안정성 등 핵심 KPI를 통해 객관적인 재무 비교가 가능합니다.
               </p>
@@ -1023,7 +1034,7 @@ const TrendsPageContent: React.FC = () => {
             </div>
 
             {/* 3-card vertical stack, all with unified design */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 0 }}>
               {/* 기업 검색 및 선택 */}
               <div className={styles.card} style={{ position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
@@ -1134,6 +1145,40 @@ const TrendsPageContent: React.FC = () => {
               selectedEntries={selectedEntries}
               setCurrentView={setCurrentView}
             />
+          </div>
+        )}
+        {showLimitModal && (
+          <div style={{
+            position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
+              <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92', marginBottom: 12 }}>기업 선택 안내</div>
+              <div style={{ color: '#374151', fontSize: 16, marginBottom: 24 }}>
+                기업은 최대 5개까지 선택 가능합니다.<br/>
+                추가로 선택하시려면 기존 선택 중 일부를 해제해 주세요.<br/>
+                항상 관심을 가져주셔서 감사드립니다.
+              </div>
+              <button onClick={() => setShowLimitModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
+                확인
+              </button>
+            </div>
+          </div>
+        )}
+        {showDuplicateModal && (
+          <div style={{
+            position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
+              <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92', marginBottom: 12 }}>중복 선택 안내</div>
+              <div style={{ color: '#374151', fontSize: 16, marginBottom: 24 }}>
+                동일한 기업과 사업연도 조합은 한 번만 선택할 수 있습니다.<br/>
+                다른 연도의 사업보고서를 선택하거나 기존 선택을 해제해 주세요.<br/>
+                감사합니다.
+              </div>
+              <button onClick={() => setShowDuplicateModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
+                확인
+              </button>
+            </div>
           </div>
         )}
       </div>

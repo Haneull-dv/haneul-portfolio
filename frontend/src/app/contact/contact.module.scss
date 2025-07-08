@@ -1,0 +1,101 @@
+@import '../dashboard/validation/validation.module.scss';
+
+// 추가적인 contact 전용 스타일은 여기에 작성
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .contactGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.contactCard {
+  @extend .card;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.contactInfoList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.contactInfoItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  color: #374151;
+}
+
+.contactIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f8ff;
+  border-radius: 50%;
+  color: #173e92;
+  font-size: 20px;
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contactInput, .contactTextarea {
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+  transition: border 0.2s;
+  resize: none;
+}
+.contactInput:focus, .contactTextarea:focus {
+  border: 1.5px solid #173e92;
+  outline: none;
+}
+
+.contactButton {
+  @extend .actionButton;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.contactSocial {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.contactSocialIcon {
+  font-size: 22px;
+  color: #222;
+  background: #f3f4f6;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.contactSocialIcon:hover {
+  background: #173e92;
+  color: #fff;
+}

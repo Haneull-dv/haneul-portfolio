@@ -5,6 +5,7 @@ import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
+import styles from './skills.module.scss';
 
 const SkillsPage: React.FC = () => {
   const breadcrumbs = [
@@ -13,19 +14,13 @@ const SkillsPage: React.FC = () => {
   ];
 
   const LanguageBar = ({ label, filled }: { label: string; filled: number }) => (
-    <div style={{ marginBottom: '16px' }}>
-      <div style={{ marginBottom: '8px', fontWeight: '500' }}>{label}</div>
-      <div style={{ display: 'flex', gap: '6px' }}>
+    <div className={styles.languageBar}>
+      <div className={styles.languageLabel}>{label}</div>
+      <div className={styles.languageBarBlocks}>
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            style={{
-              width: '20px',
-              height: '20px',
-              backgroundColor: i < filled ? 'var(--blue)' : 'var(--grey)',
-              borderRadius: '4px',
-              transition: 'background-color 0.3s ease'
-            }}
+            className={i < filled ? styles.filledBlock : styles.emptyBlock}
           />
         ))}
       </div>
@@ -46,57 +41,58 @@ const SkillsPage: React.FC = () => {
     Tools: ['Cursor AI', 'AWS', 'Kubernetes', 'Docker','Git', 'JIRA', 'Slack', 'Notion']
   };
 
-
   return (
     <Layout>
-      <PageHeader
-        title="Skills"
-        breadcrumbs={breadcrumbs}
-        actions={
-          <a href="#" className="btn-download">
-            <i className="bx bxs-download bx-fade-down-hover"></i>
-            <span className="text">Export Skills</span>
-          </a>
-        }
-      />
+      <div className={styles.pageWrapper}>
+        <PageHeader
+          title="Skills"
+          breadcrumbs={breadcrumbs}
+          actions={
+            <a href="#" className="btn-download">
+              <i className="bx bxs-download bx-fade-down-hover"></i>
+              <span className="text">Export Skills</span>
+            </a>
+          }
+        />
 
-      <CardContainer columns={2} gap="large">
-        <Card title="Language Proficiency" style={{ minHeight: '280px' }}>
-          <LanguageBar label="한국어 (Native)" filled={5} />
-          <LanguageBar label="영어 (TOEIC Speaking AL(170)/ TOEIC 875)" filled={4} />
-          <LanguageBar label="일본어 (JLPT N4)" filled={3} />
-        </Card>
+        <CardContainer columns={2} gap="large">
+          <Card title="Language Proficiency" style={{ minHeight: '280px' }}>
+            <LanguageBar label="한국어 (Native)" filled={5} />
+            <LanguageBar label="영어 (TOEIC Speaking AL(170)/ TOEIC 875)" filled={4} />
+            <LanguageBar label="일본어 (JLPT N4)" filled={3} />
+          </Card>
 
-        <Card title="Certifications" style={{ minHeight: '280px' }}>
-          <ul style={{ paddingLeft: '1rem', lineHeight: '1.8em' }}>
-            {certifications.map((cert, idx) => (
-              <li key={idx} style={{ listStyleType: 'disc' }}>{cert}</li>
-            ))}
-          </ul>
-        </Card>
-      </CardContainer>
-
-      <div style={{ marginTop: '32px' }}>
-        <CardContainer columns={1}>
-          <Card title="Technical Skills" style={{ minHeight: '280px' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: '16px'
-            }}>
-              {Object.entries(techSkills).map(([category, items]) => (
-                <div key={category}>
-                  <h4 style={{ marginBottom: '8px', fontWeight: '600' }}>{category}</h4>
-                  <ul style={{ paddingLeft: '1rem' }}>
-                    {items.map((item, idx) => (
-                      <li key={idx} style={{ lineHeight: '1.6em' }}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
+          <Card title="Certifications" style={{ minHeight: '280px' }}>
+            <ul style={{ paddingLeft: '1rem', lineHeight: '1.8em' }}>
+              {certifications.map((cert, idx) => (
+                <li key={idx} style={{ listStyleType: 'disc' }}>{cert}</li>
               ))}
-            </div>
+            </ul>
           </Card>
         </CardContainer>
+
+        <div style={{ marginTop: '32px' }}>
+          <CardContainer columns={1}>
+            <Card title="Technical Skills" style={{ minHeight: '280px' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                gap: '16px'
+              }}>
+                {Object.entries(techSkills).map(([category, items]) => (
+                  <div key={category}>
+                    <h4 style={{ marginBottom: '8px', fontWeight: '600' }}>{category}</h4>
+                    <ul style={{ paddingLeft: '1rem' }}>
+                      {items.map((item, idx) => (
+                        <li key={idx} style={{ lineHeight: '1.6em' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </CardContainer>
+        </div>
       </div>
     </Layout>
   );

@@ -42,22 +42,24 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal} ref={modalRef}>
-        <div className={styles.header}>
-          <h2>{title}</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            <i className='bx bx-x'></i>
-          </button>
-        </div>
-        <div className={styles.content}>
-          <video controls autoPlay muted loop playsInline className={styles.video}>
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+    isOpen ? (
+      <div className={styles.overlay}>
+        <div className={styles.modal} ref={modalRef}>
+          <div className={styles.header}>
+            <h2>{title}</h2>
+            <button onClick={onClose} className={styles.closeButton} title="닫기">
+              <i className='bx bx-x'></i>
+            </button>
+          </div>
+          <div className={styles.content}>
+            <video controls autoPlay muted loop playsInline className={styles.video}>
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       </div>
-    </div>
+    ) : null
   );
 };
 

@@ -1,0 +1,37 @@
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #173e92;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 220px;
+  min-height: 44px;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(16,24,40,0.06);
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  outline: none;
+  &:hover {
+    background: #102a5c;
+    box-shadow: 0 4px 16px rgba(16,24,40,0.10);
+  }
+  &:disabled {
+    background: #e9ecef;
+    color: #b0b8c1;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+.fullWidth {
+  width: 100%;
+}
+.small {
+  min-width: 0;
+  min-height: 0;
+  font-size: 15px;
+  padding: 6px 18px;
+}

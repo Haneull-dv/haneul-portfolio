@@ -7,6 +7,7 @@ import Layout from '@/shared/components/Layout/Layout';
 import styles from './validation.module.scss';
 import { useDropzone } from 'react-dropzone';
 import Modal from '@/shared/components/Modal/Modal';
+import PrimaryButton from '@/shared/components/PrimaryButton';
 
 // --- Interface Definitions ---
 interface FootingResultItem {
@@ -305,7 +306,7 @@ const ValidationPage: React.FC = () => {
                 <div className={styles.actionItem}>
                   <h4>합계검증</h4>
                   <p>계정 간 합계를 교차 검증하여 데이터의 수치적 오류를 찾아냅니다.</p>
-                  <button onClick={handleFootingValidation} disabled={loading || !file} className={`${styles.actionButton} ${styles.primary}`}>
+                  <button onClick={handleFootingValidation} disabled={loading || !file} className={styles.actionButton}>
                     {loading ? '검증 중...' : '검증 시작하기'}
                   </button>
                 </div>

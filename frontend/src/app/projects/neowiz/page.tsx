@@ -4,9 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
-import CardContainer from '@/shared/components/CardContainer/CardContainer';
-import Card from '@/shared/components/Card/Card';
 import PDFModal from '@/shared/components/PDFModal/PDFModal';
+import styles from '../projects.module.scss';
 
 const researchCards = [
   {
@@ -60,11 +59,8 @@ const researchCards = [
 ];
 
 const NeowizProjectsPage: React.FC = () => {
-  const [openedIdx, setOpenedIdx] = useState<null | number>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPDF, setSelectedPDF] = useState<{url: string, title: string} | null>(null);
-
-
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -72,12 +68,10 @@ const NeowizProjectsPage: React.FC = () => {
     { label: '네오위즈 IR팀 인턴', active: true }
   ];
 
-  const handleCardClick = (card: typeof researchCards[0], idx: number) => {
+  const handleCardClick = (card: typeof researchCards[0]) => {
     if (card.hasModal) {
       setSelectedPDF({ url: card.pdf, title: card.title });
       setModalOpen(true);
-    } else {
-      setOpenedIdx(openedIdx === idx ? null : idx);
     }
   };
 
@@ -88,86 +82,50 @@ const NeowizProjectsPage: React.FC = () => {
 
   return (
     <Layout>
-      <PageHeader 
-        title="네오위즈 IR팀 인턴 리서치/보고서"
-        breadcrumbs={breadcrumbs}
-      />
-      <CardContainer columns={2} gap="large">
-        {researchCards.map((card, idx) => (
-          <div key={idx}>
-            <Card
-              title={card.title}
-              onClick={() => handleCardClick(card, idx)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className={styles.pageWrapper}>
+        <div className={styles.card}>
+          <div className={styles.breadcrumbs}>
+            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+            <span className={styles.breadcrumbSeparator}>/</span>
+            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Projects</span>
+            <span className={styles.breadcrumbSeparator}>/</span>
+            <span className={styles.breadcrumbCurrent}>네오위즈 IR팀 인턴</span>
+          </div>
+          <h2 className={styles.cardTitle}>네오위즈 IR팀 인턴 리서치/보고서</h2>
+        </div>
+        <div className={styles.projectGrid}>
+          {researchCards.map((card, idx) => (
+            <div key={idx} className={styles.projectCard} onClick={() => handleCardClick(card)}>
+              <div className={styles.projectImageWrapper}>
                 <Image 
                   src={card.image}
                   alt={card.title}
                   width={400}
                   height={180}
-                  style={{
-                    width: '100%',
-                    height: '180px',
-                    objectFit: 'cover',
-                    borderRadius: '8px'
-                  }}
+                  className={styles.projectImage}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span 
-                    style={{
-                      padding: '4px 12px',
-                      backgroundColor: card.type === '리서치' ? '#2196f3' : '#ffc107',
-                      color: 'white',
-                      borderRadius: '16px',
-                      fontSize: '12px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {card.type}
-                  </span>
-                  {card.hasModal && (
-                    <span 
-                      style={{
-                        padding: '4px 12px',
-                        backgroundColor: '#4caf50',
-                        color: 'white',
-                        borderRadius: '16px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      PDF 뷰어
-                    </span>
-                  )}
+              </div>
+              <div className={styles.projectInfo}>
+                <h3 className={styles.projectTitle}>{card.title}</h3>
+                <div className={styles.projectBadges}>
+                  <span className={styles.badge + ' ' + (card.type === '리서치' ? styles.badgeBlue : styles.badgeYellow)}>{card.type}</span>
+                  {card.hasModal && <span className={styles.badge + ' ' + styles.badgeGreen}>PDF 뷰어</span>}
                 </div>
-                <p style={{ color: 'var(--dark-grey)', lineHeight: '1.6', margin: 0 }}>{card.description}</p>
+                <p className={styles.projectDesc}>{card.description}</p>
               </div>
-            </Card>
-            {!card.hasModal && openedIdx === idx && (
-              <div style={{ marginTop: 16, width: '100%' }}>
-                <iframe
-                  src={card.pdf}
-                  title={card.title + ' PDF'}
-                  width="100%"
-                  height="600px"
-                  style={{ border: '1px solid #ddd', borderRadius: 8, background: 'white' }}
-                />
-              </div>
-            )}
-          </div>
-        ))}
-      </CardContainer>
-
-      {/* PDF 모달 */}
-      {modalOpen && selectedPDF && (
-        <PDFModal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          pdfUrl={selectedPDF.url}
-          title={selectedPDF.title}
-        />
-      )}
+            </div>
+          ))}
+        </div>
+        {/* PDF 모달 */}
+        {modalOpen && selectedPDF && (
+          <PDFModal
+            isOpen={modalOpen}
+            onClose={closeModal}
+            pdfUrl={selectedPDF.url}
+            title={selectedPDF.title}
+          />
+        )}
+      </div>
     </Layout>
   );
 };

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import * as XLSX from 'xlsx';
 import styles from '../validation/validation.module.scss';
+import PrimaryButton from '@/shared/components/PrimaryButton';
 
 const DSDPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -14,6 +15,9 @@ const DSDPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [unit, setUnit] = useState<'원' | '백만원'>('원');
   const [copyMsg, setCopyMsg] = useState<string | null>(null);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const handleUploadAreaClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -83,34 +87,10 @@ const DSDPage: React.FC = () => {
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-start', gap: 16 }}>
         <span style={{ fontWeight: 500, fontSize: 16, marginRight: 8 }}>단위</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => setUnit('원')}
-            style={{
-              ...buttonStyle,
-              background: unit === '원' ? '#1976d2' : '#e3eaf5',
-              color: unit === '원' ? '#fff' : '#1976d2',
-              outline: unit === '원' ? '2px solid #1976d2' : 'none',
-              boxShadow: unit === '원' ? buttonStyle.boxShadow : 'none',
-            }}
-            onMouseOver={e => { if (unit !== '원') e.currentTarget.style.background = '#d0e3fa'; }}
-            onMouseOut={e => { if (unit !== '원') e.currentTarget.style.background = '#e3eaf5'; }}
-          >
+          <button type="button" onClick={() => setUnit('원')} disabled={unit === '원'} className={styles.actionButton} style={{ minWidth: 80, marginRight: 8 }}>
             ₩ 원
           </button>
-          <button
-            type="button"
-            onClick={() => setUnit('백만원')}
-            style={{
-              ...buttonStyle,
-              background: unit === '백만원' ? '#1976d2' : '#e3eaf5',
-              color: unit === '백만원' ? '#fff' : '#1976d2',
-              outline: unit === '백만원' ? '2px solid #1976d2' : 'none',
-              boxShadow: unit === '백만원' ? buttonStyle.boxShadow : 'none',
-            }}
-            onMouseOver={e => { if (unit !== '백만원') e.currentTarget.style.background = '#d0e3fa'; }}
-            onMouseOut={e => { if (unit !== '백만원') e.currentTarget.style.background = '#e3eaf5'; }}
-          >
+          <button type="button" onClick={() => setUnit('백만원')} disabled={unit === '백만원'} className={styles.actionButton} style={{ minWidth: 100 }}>
             ₩ 백만원
           </button>
         </div>
@@ -134,12 +114,7 @@ const DSDPage: React.FC = () => {
             boxShadow: '0 2px 8px rgba(56,142,60,0.08)'
           }}>{copyMsg}</span>
         ) : (
-          <button
-            onClick={handleCopyTable}
-            style={buttonStyle}
-            onMouseOver={e => (e.currentTarget.style.background = '#1251a3')}
-            onMouseOut={e => (e.currentTarget.style.background = '#1976d2')}
-          >복사하기</button>
+          <button onClick={handleCopyTable} className={styles.actionButton} style={{ minWidth: 100 }}>복사하기</button>
         )}
       </div>
     </div>
@@ -197,15 +172,17 @@ const DSDPage: React.FC = () => {
     <div className={styles.uploadSection}>
       <div className={styles.card}>
         <h3 style={{ marginBottom: 24 }}>엑셀 파일 업로드</h3>
-        <div className={styles.uploadArea} style={{ marginBottom: 24 }}>
+        <div className={styles.uploadArea} style={{ marginBottom: 24 }} onClick={handleUploadAreaClick}>
           <input
             type="file"
             accept=".xlsx,.xls"
             onChange={handleFileChange}
             className={styles.fileInput}
             id="file-upload"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
           />
-          <label htmlFor="file-upload" className={styles.uploadLabel}>
+          <label htmlFor="file-upload" className={styles.uploadLabel} style={{ pointerEvents: 'none' }}>
             <i className='bx bx-cloud-upload'></i>
             <span>엑셀 파일을 선택하거나 드래그하세요.</span>
           </label>
@@ -221,7 +198,7 @@ const DSDPage: React.FC = () => {
             <select
               value={sheetName}
               onChange={e => setSheetName(e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' }}
+              style={{ width: '100%', padding: '10px', borderRadius: 0, border: '1px solid #222', fontSize: '16px', background: '#fff', color: '#222' }}
             >
               {sheetNames.map(name => (
                 <option key={name} value={name}>{name}</option>
@@ -229,11 +206,7 @@ const DSDPage: React.FC = () => {
             </select>
           </div>
         )}
-        <button
-          onClick={handleUpload}
-          disabled={loading}
-          style={{ ...buttonStyle, background: loading ? '#90caf9' : '#1976d2', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : buttonStyle.boxShadow }}
-        >
+        <button onClick={handleUpload} disabled={loading} className={styles.actionButton}>
           {loading ? '업로드 중...' : '업로드 및 변환'}
         </button>
         {error && <div style={{ color: '#e74c3c', marginTop: 18, fontWeight: 500 }}>{error}</div>}

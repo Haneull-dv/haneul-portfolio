@@ -8,6 +8,7 @@ import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
 import PDFModal from '@/shared/components/PDFModal/PDFModal';
 import VideoModal from '@/shared/components/VideoModal/VideoModal';
+import styles from './projects.module.scss';
 
 const pdfMap: Record<string, string> = {
   '파스타집 사업계획서': '/projects/pdfs/soar.pdf',
@@ -105,168 +106,73 @@ const ProjectsPage: React.FC = () => {
 
   return (
     <Layout>
-      <PageHeader 
-        title="Projects" 
-        breadcrumbs={breadcrumbs}
-        actions={
-          <a href="#" className="btn-download">
-            <i className='bx bx-plus bx-fade-down-hover'></i>
-            <span className="text">New Project</span>
-          </a>
-        }
-      />
-
-      <CardContainer columns={2} gap="large">
-        {projects.map((project, index) => (
-          <div key={index}>
-            <Card 
-              title={project.title}
-              headerActions={
-                <>
-                  <i 
-                    className='bx bx-link-external'
-                    onClick={() => window.open('https://conan.ai.kr', '_blank')}
-                    style={{ cursor: 'pointer' }}
-                  ></i>
-                  <i className='bx bx-dots-vertical-rounded'></i>
-                </>
-              }
-              onClick={() => handleCardClick(project)}
-              style={{ minHeight: 420, display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
+      <div className={styles.pageWrapper}>
+        <div className={styles.card}>
+          <div className={styles.breadcrumbs}>
+            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+            <span className={styles.breadcrumbSeparator}>/</span>
+            <span className={styles.breadcrumbCurrent}>Projects</span>
+          </div>
+          <h2 className={styles.cardTitle}>Projects</h2>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+            <a href="#" className={styles.actionButton} style={{ width: 'auto', maxWidth: 180 }}>
+              <i className='bx bx-plus bx-fade-down-hover'></i>
+              <span>New Project</span>
+            </a>
+          </div>
+        </div>
+        <div className={styles.projectGrid}>
+          {projects.map((project, index) => (
+            <div key={index} className={styles.projectCard} onClick={() => handleCardClick(project)}>
+              <div className={styles.projectImageWrapper}>
                 <Image 
                   src={project.image} 
                   alt={project.title}
                   width={400}
                   height={200}
-                  style={{
-                    width: '100%',
-                    height: '200px',
-                    objectFit: 'cover',
-                    borderRadius: '8px'
-                  }}
+                  className={styles.projectImage}
                 />
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span 
-                    style={{
-                      padding: '4px 12px',
-                      backgroundColor: getStatusColor(project.status),
-                      color: 'white',
-                      borderRadius: '16px',
-                      fontSize: '12px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {project.status}
-                  </span>
-                  {project.hasModal && (
-                    <span 
-                      style={{
-                        padding: '4px 12px',
-                        backgroundColor: '#4caf50',
-                        color: 'white',
-                        borderRadius: '16px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      PDF 뷰어
-                    </span>
-                  )}
+              </div>
+              <div className={styles.projectInfo}>
+                <h3 className={styles.projectTitle}>{project.title}</h3>
+                <div className={styles.projectBadges}>
+                  <span className={styles.badge + ' ' + (project.status === 'Completed' ? styles.badgeGreen : styles.badgeYellow)}>{project.status}</span>
+                  {project.hasModal && <span className={styles.badge + ' ' + styles.badgeBlue}>PDF 뷰어</span>}
                 </div>
-
-                <p style={{ 
-                  color: 'var(--dark-grey)', 
-                  lineHeight: '1.6',
-                  margin: 0,
-                  flex: 1
-                }}>
-                  {project.description}
-                </p>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <p className={styles.projectDesc}>{project.description}</p>
+                <div className={styles.projectTechList}>
                   {project.technologies.map((tech, techIndex) => (
-                    <span 
-                      key={techIndex}
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: 'var(--grey)',
-                        color: 'var(--dark)',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {tech}
-                    </span>
+                    <span key={techIndex} className={styles.projectTech}>{tech}</span>
                   ))}
                 </div>
-
-                <div style={{ 
-                  display: 'flex', 
-                  gap: '12px', 
-                  marginTop: '8px',
-                  paddingTop: '16px',
-                  borderTop: '1px solid var(--grey)'
-                }}>
-                  <a 
-                    href={project.github}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      color: 'var(--blue)',
-                      textDecoration: 'none',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <i className='bx bxl-github'></i>
-                    GitHub
-                  </a>
-                  <a 
-                    href={project.demo}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      color: 'var(--blue)',
-                      textDecoration: 'none',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <i className='bx bx-link-external'></i>
-                    Live Demo
-                  </a>
+                <div className={styles.projectLinks}>
+                  <a href={project.github} className={styles.projectLink}><i className='bx bxl-github'></i>GitHub</a>
+                  <a href={project.demo} className={styles.projectLink}><i className='bx bx-link-external'></i>Live Demo</a>
                 </div>
               </div>
-            </Card>
-          </div>
-        ))}
-      </CardContainer>
+            </div>
+          ))}
+        </div>
+        {/* PDF 모달 */}
+        {pdfModalOpen && selectedPDF && (
+          <PDFModal
+            isOpen={pdfModalOpen}
+            onClose={closePdfModal}
+            pdfUrl={selectedPDF.url}
+            title={selectedPDF.title}
+          />
+        )}
 
-      {/* PDF 모달 */}
-      {pdfModalOpen && selectedPDF && (
-        <PDFModal
-          isOpen={pdfModalOpen}
-          onClose={closePdfModal}
-          pdfUrl={selectedPDF.url}
-          title={selectedPDF.title}
-        />
-      )}
-
-      {/* Video 모달 */}
-      {videoModalOpen && selectedVideo && (
-        <VideoModal
-          isOpen={videoModalOpen}
-          onClose={closeVideoModal}
-          videoUrl={selectedVideo.url}
-          title={selectedVideo.title}
-        />
-      )}
+        {/* Video 모달 */}
+        {videoModalOpen && selectedVideo && (
+          <VideoModal
+            isOpen={videoModalOpen}
+            onClose={closeVideoModal}
+            videoUrl={selectedVideo.url}
+            title={selectedVideo.title}
+          />
+        )}
+      </div>
     </Layout>
   );
 };
