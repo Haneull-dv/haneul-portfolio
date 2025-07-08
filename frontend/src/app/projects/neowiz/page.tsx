@@ -69,6 +69,12 @@ const NeowizProjectsPage: React.FC = () => {
   ];
 
   const handleCardClick = (card: typeof researchCards[0]) => {
+    if (
+      card.title === '국내외 게임업체 주요 공시 및 실적 보고서' ||
+      card.title === '애널리스트 리포트 요약'
+    ) {
+      return;
+    }
     if (card.hasModal) {
       setSelectedPDF({ url: card.pdf, title: card.title });
       setModalOpen(true);

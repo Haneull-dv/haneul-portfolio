@@ -106,15 +106,19 @@ const PDFModal: React.FC<PDFModalProps> = ({ isOpen, onClose, pdfUrl, title }) =
         {/* PDF 컨텐츠 */}
         <div className={styles.content}>
           <div className={styles.pdfDocument} style={{ width: containerWidth }}>
-            {loading ? (
-              <div className={styles.loading}>PDF 문서를 불러오는 중...</div>
-            ) : (
-              Array.from(new Array(numPages), (el, index) => (
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={<div className={styles.loading}>PDF 문서를 불러오는 중...</div>}
+              error={<div className={styles.loading}>PDF를 불러올 수 없습니다.</div>}
+            >
+              {Array.from(new Array(numPages), (el, index) => (
                 <div key={`page_${index + 1}`} className={styles.pdfPage}>
                   <Page pageNumber={index + 1} scale={scale} />
                 </div>
-              ))
-            )}
+              ))}
+            </Document>
           </div>
         </div>
       </div>
