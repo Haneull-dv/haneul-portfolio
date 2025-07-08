@@ -12,17 +12,17 @@
       "build": { "builder": "DOCKERFILE" }
     },
     {
-      "name": "gateway",
+      "name": "weekly_db",
       "rootDir": "./weekly_db",
       "build": { "builder": "DOCKERFILE" }
     },
     {
-      "name": "gateway",
+      "name": "weekly_disclosure",
       "rootDir": "./weekly_disclosure",
       "build": { "builder": "DOCKERFILE" }
     },
     {
-      "name": "gateway",
+      "name": "kpi_compare",
       "rootDir": "./kpi_compare",
       "build": { "builder": "DOCKERFILE" }
     },
@@ -32,12 +32,12 @@
       "build": { "builder": "DOCKERFILE" }
     },
     {
-      "name": "gateway",
+      "name": "conanai_dsdgen",
       "rootDir": "./conanai_dsdgen",
       "build": { "builder": "DOCKERFILE" }
     },
     {
-      "name": "gateway",
+      "name": "conanai_dsdcheck",
       "rootDir": "./conanai_dsdcheck",
       "build": { "builder": "DOCKERFILE" }
     }

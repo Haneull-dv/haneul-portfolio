@@ -334,6 +334,21 @@
     z-index: 3000;
     box-shadow: 2px 0 24px rgba(0,0,0,0.16);
   }
+  .menuItem {
+    min-height: 44px;
+    font-size: 15px;
+    padding: 12px 14px;
+  }
+  .profileAvatar {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+  .settingsButton {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
 }
 
 /* Tablet Design */

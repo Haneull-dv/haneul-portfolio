@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/shared/components/Layout/Layout';
 import * as XLSX from 'xlsx';
 import styles from '../validation/validation.module.scss';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+
+const DEFAULT_EXCEL_FILE_NAME = '[주식회사네오위즈]사업보고서_재무제표(2025.03.19)_ko.xlsx';
 
 const DSDPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -277,6 +279,32 @@ const DSDPage: React.FC = () => {
     minWidth: 0,
     overflowX: 'hidden',
   };
+
+  useEffect(() => {
+    // 페이지 로드 시 기본 엑셀 파일을 불러옴
+    const loadDefaultFile = async () => {
+      try {
+        const response = await fetch(`/${DEFAULT_EXCEL_FILE_NAME}`);
+        if (!response.ok) return;
+        const blob = await response.blob();
+        const defaultFile = new File([blob], DEFAULT_EXCEL_FILE_NAME, { type: blob.type });
+        setFile(defaultFile);
+        setResult(null);
+        setError(null);
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const data = evt.target?.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          setSheetNames(workbook.SheetNames);
+          setSheetName(workbook.SheetNames[0] || '');
+        };
+        reader.readAsBinaryString(defaultFile);
+      } catch (e) {
+        // 무시: 파일 없으면 아무것도 안 함
+      }
+    };
+    loadDefaultFile();
+  }, []);
 
   return (
     <Layout>

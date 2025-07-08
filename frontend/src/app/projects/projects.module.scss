@@ -26,8 +26,9 @@
 .projectGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 24px;
+  gap: 32px;
+  max-height: 900px;
+  overflow: hidden;
 }
 
 .projectCard {
@@ -211,15 +212,16 @@
 }
 
 @media (max-width: 1200px) {
-  .pageWrapper {
-    padding: 20px;
-    gap: 20px;
-  }
   .projectGrid {
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
   }
 }
-@media (max-width: 900px), (max-width: 768px) {
+@media (max-width: 900px) {
+  .projectGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
   .pageWrapper {
     padding: 16px;
     gap: 16px;
