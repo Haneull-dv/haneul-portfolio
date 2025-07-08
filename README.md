@@ -141,6 +141,4 @@ portfolio/
 - **Weekly Data Pipeline**: A master workflow triggered every Friday that orchestrates `weekly_disclosure`, `weekly_issue`, and `weekly_stockprice` services to collect, process, and store the week's data.
 - **Report Analysis Pipeline**: An n8n workflow that listens for file uploads (e.g., analyst reports), sends them to the `irsummary` service for analysis, and then notifies users via Slack or email with the summary.
 
-## 📄 License
 
-This project is licensed under the MIT License.
