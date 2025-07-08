@@ -314,39 +314,25 @@
 
 @media screen and (max-width: 1024px) {
   .sidebar {
-    width: 64px;
-    min-width: 64px;
-    .brand .text { display: none; }
-    .menuGroup .groupHeader,
-    .menuGroup .groupTitle { display: none; }
-    .sideMenu .text { display: none; }
-    .userProfile .profileText { display: none; }
+    width: 72vw;
+    min-width: 180px;
+    max-width: 320px;
+    z-index: 3000;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.10);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
   }
-  
-  .brand {
-    padding: 16px 20px;
-    
-    .text {
-      font-size: 16px;
-    }
+  .sidebar.hide {
+    transform: translateX(-100%);
   }
-  
-  .menuGroup {
-    padding: 0 12px;
-    margin-bottom: 20px;
-  }
-  
-  .sideMenu li .menuItem {
-    padding: 6px 10px;
-    font-size: 13px;
-    
-    i {
-      font-size: 16px;
-    }
-  }
-  
-  .userProfile {
-    padding: 12px 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 88vw;
+    min-width: 120px;
+    max-width: 96vw;
+    z-index: 3000;
+    box-shadow: 2px 0 24px rgba(0,0,0,0.16);
   }
 }
 
@@ -696,4 +682,18 @@
 /* WORKSPACE 그룹(첫 번째 menuGroup)만 위쪽 마진 조정 */
 .menuGroup:first-of-type {
   margin-top: 0;
+}
+
+.sidebarOverlay {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .sidebarOverlay {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.18);
+    z-index: 2999;
+    transition: opacity 0.2s;
+  }
 } 

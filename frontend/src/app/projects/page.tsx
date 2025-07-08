@@ -124,13 +124,14 @@ const ProjectsPage: React.FC = () => {
         <div className={styles.projectGrid}>
           {projects.map((project, index) => (
             <div key={index} className={styles.projectCard} onClick={() => handleCardClick(project)}>
-              <div className={styles.projectImageWrapper}>
+              <div className={styles.projectImageWrapper} style={{ height: 200, overflow: 'hidden' }}>
                 <Image 
                   src={project.image} 
                   alt={project.title}
                   width={400}
                   height={200}
                   className={styles.projectImage}
+                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                 />
               </div>
               <div className={styles.projectInfo}>
