@@ -47,7 +47,7 @@ const TrendsWidget: React.FC = () => {
       </div>
 
       <div className={styles.widgetContent}>
-        <div className={styles.chartContainer} style={{ marginTop: -10 }}>
+        <div className={styles.chartContainer} style={{ marginTop: -15 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={mockAnalysisData}>
               <PolarGrid />
@@ -77,13 +77,13 @@ const TrendsWidget: React.FC = () => {
                 strokeWidth={2}
               />
               <Legend 
-                wrapperStyle={{ fontSize: '12px', paddingTop: '30px' }}
+                wrapperStyle={{ fontSize: '12px', marginTop: '-50px' }}
               />
             </RadarChart>
           </ResponsiveContainer>
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 15}}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 0}}>
           <Link href="/dashboard/trends" className={styles.widgetLink} style={{ width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', background: '#173e92', color: '#fff', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
             상세 분석 리포트
             <i className="bx bx-right-arrow-alt"></i>

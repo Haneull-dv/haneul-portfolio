@@ -128,4 +128,3 @@ make stock-services-up
 3. **N8N 워크플로우** 변경 시 백업 및 버전 관리
 4. **환경변수 추가** 시 docker-compose.yml과 README 업데이트
 
-깔깔

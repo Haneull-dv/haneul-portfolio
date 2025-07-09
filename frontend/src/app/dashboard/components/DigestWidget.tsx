@@ -84,7 +84,7 @@ const DigestWidget: React.FC = () => {
         </p>
       </div>
       <div className={styles.widgetContent}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12, marginTop: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 3, marginTop: 14 }}>
           {kpiData.map((kpi, idx) => (
             <KPICard key={idx} {...kpi} barColor={KPI_BAR_COLORS[idx]} className={styles.digestKpiCard} />
           ))}
@@ -93,7 +93,7 @@ const DigestWidget: React.FC = () => {
           최근 업데이트: {lastUpdate}
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
         <button
           className={styles.widgetLink}
           style={{ width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', background: '#173e92', color: '#fff', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}

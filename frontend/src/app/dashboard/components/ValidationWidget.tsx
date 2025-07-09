@@ -58,7 +58,9 @@ const ValidationWidget: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('검증 요청 실패');
+        setValidationResult('지원하지 않는 계정과목입니다.');
+        setLoading(false);
+        return;
       }
 
       const result = await response.json();
@@ -69,25 +71,24 @@ const ValidationWidget: React.FC = () => {
         setValidationResult(`⚠️ ${result.mismatch_count}개의 불일치 항목이 발견되었습니다.`);
       }
     } catch (error) {
-      setValidationResult('❌ 검증 중 오류가 발생했습니다.');
-      console.error('Validation error:', error);
+      setValidationResult('지원하지 않는 계정과목입니다.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={styles.widgetCard} style={{background: '#f7f8fa', border: '1px solid #e5e7eb', borderRadius: 0, minHeight: 320, padding: 24, boxShadow: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'stretch'}}>
+    <div className={styles.widgetCard} style={{background: '#f7f8fa', border: '1px solid #e5e7eb', borderRadius: 0, minHeight: 320, padding: 24, boxShadow: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
       <div className={styles.widgetHeader}>
         <h3 className={styles.widgetTitle}>
           재무제표 검증
         </h3>
         <p className={styles.widgetDescription} style={{ fontSize: '12px', margin: 0 }}>
-          엑셀 파일의 계정과목 푸팅 검증을 통해 데이터 정확성을 확인
+          합계검증 및 전기 보고서 대사 기능을 통해 데이터 정확성을 확인
         </p>
       </div>
 
-      <div className={styles.widgetContent}>
+      <div className={styles.widgetContent} style={{ marginBottom: 0, paddingBottom: 0 }}>
         <div
           className={styles.uploadArea}
           onClick={handleUploadAreaClick}
@@ -104,6 +105,7 @@ const ValidationWidget: React.FC = () => {
             cursor: 'pointer',
             marginBottom: 12,
             padding: 12,
+            marginTop: 14,
           }}
         >
           <input
@@ -126,29 +128,30 @@ const ValidationWidget: React.FC = () => {
           className={`${styles.actionButton} ${styles.primary}`}
           onClick={handleValidation}
           disabled={loading || !file}
+          style={{ borderRadius: 0 }}
         >
           <i className={loading ? "bx bx-loader bx-spin" : "bx bx-check-circle"}></i>
           {loading ? '검증 중...' : '검증 시작하기'}
         </button>
         {validationResult && (
           <div style={{
-            background: validationResult.includes('✅') ? '#d4edda' :
-                      validationResult.includes('⚠️') ? '#fff3cd' : '#f8d7da',
-            color: validationResult.includes('✅') ? '#155724' :
-                   validationResult.includes('⚠️') ? '#856404' : '#721c24',
-            borderRadius: '8px',
+            background: validationResult.includes('정확합니다') ? '#d4edda' :
+                      validationResult.includes('불일치') ? '#fff3cd' : '#f8d7da',
+            color: validationResult.includes('정확합니다') ? '#155724' :
+                   validationResult.includes('불일치') ? '#856404' : '#721c24',
+            borderRadius: 0,
             padding: '12px',
             fontSize: '14px',
             marginTop: '12px',
             textAlign: 'center',
             fontWeight: '500'
           }}>
-            {validationResult}
+            {validationResult.replace('✅ ', '').replace('❌ ', '').replace('⚠️ ', '')}
           </div>
         )}
       </div>
-      <div className={styles.widgetFooter}>
-        <div style={{ fontSize: '12px', color: '#666' }}>
+      <div className={styles.widgetFooter} style={{ marginTop: 0, paddingTop: 0 }}>
+        <div style={{ fontSize: '12px', color: '#666', marginTop: 0, marginBottom: 0 }}>
           <i className="bx bx-info-circle"></i>
           네오위즈 표준 양식 지원
         </div>

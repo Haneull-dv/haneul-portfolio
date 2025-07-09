@@ -32,14 +32,16 @@ services:
   stockprice:
     container_name: stockprice
     build:
-      context: .
-      dockerfile: ./weekly_stockprice/Dockerfile
+      context: ./weekly_stockprice
+      dockerfile: Dockerfile
     ports:
       - "9006:9006"
     volumes:
-      - .:/app
+      - ./weekly_stockprice:/app
     env_file:
       - ./weekly_stockprice/.env
+    environment:
+      - ENV=${ENV}
     depends_on:
       - postgres
     networks:

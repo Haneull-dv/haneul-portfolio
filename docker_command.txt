@@ -144,12 +144,12 @@ FROM weekly_stock_prices
 WHERE DATE(created_at AT TIME ZONE 'Asia/Seoul') = '2025-06-30';
 
 -- 최신 10개 데이터 (시간 순서대로)
-SELECT * FROM weekly_stock_prices 
+SELECT * FROM weekly_data 
 ORDER BY created_at DESC 
 LIMIT 10;
 
 -- 오늘 저장된 최신 데이터만
-SELECT * FROM disclosures 
+SELECT * FROM weekly_stock_prices 
 WHERE DATE(created_at) = CURRENT_DATE
 ORDER BY created_at DESC 
 LIMIT 10;
@@ -165,3 +165,8 @@ FROM
 ORDER BY
     created_at DESC
 LIMIT 10;
+
+#본격 배포 시작! 배포/ 운영 명령어
+[stockprice]
+$env:ENV="development"
+docker compose up -d --build stockprice
