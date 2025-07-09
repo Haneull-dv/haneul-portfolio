@@ -39,16 +39,15 @@ const TrendsWidget: React.FC = () => {
     <div className={styles.widgetCard}>
       <div className={styles.widgetHeader}>
         <h3 className={styles.widgetTitle}>
-          <i className="bx bx-line-chart"></i>
           기업 분석 차트
         </h3>
-        <p className={styles.widgetDescription}>
-          주요 게임 기업의 성과 지표를 레이더 차트로 비교 분석
+        <p className={styles.widgetDescription} style={{ fontSize: '12px', margin: 0 }}>
+          게임 기업의 성과 지표를 레이더 차트로 비교 분석
         </p>
       </div>
 
       <div className={styles.widgetContent}>
-        <div className={styles.chartContainer}>
+        <div className={styles.chartContainer} style={{ marginTop: -10 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={mockAnalysisData}>
               <PolarGrid />
@@ -78,46 +77,18 @@ const TrendsWidget: React.FC = () => {
                 strokeWidth={2}
               />
               <Legend 
-                wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                wrapperStyle={{ fontSize: '12px', paddingTop: '30px' }}
               />
             </RadarChart>
           </ResponsiveContainer>
         </div>
-
-        <div style={{ 
-          background: '#f8f9fa', 
-          borderRadius: '8px', 
-          padding: '12px', 
-          fontSize: '12px',
-          color: '#666',
-          textAlign: 'center'
-        }}>
-          <i className="bx bx-info-circle"></i>
-          2024년 연간 보고서 기준 분석 데이터
-        </div>
-      </div>
-
-      <div className={styles.widgetFooter}>
-        <div style={{ 
-          display: 'flex', 
-          gap: '12px', 
-          fontSize: '12px',
-          color: '#666'
-        }}>
-          <span>
-            <i className="bx bx-circle" style={{ color: '#3498db' }}></i>
-            네오위즈
-          </span>
-          <span>
-            <i className="bx bx-circle" style={{ color: '#e74c3c' }}></i>
-            펄어비스
-          </span>
-        </div>
         
-        <Link href="/dashboard/trends" className={styles.widgetLink}>
-          상세 분석 리포트
-          <i className="bx bx-right-arrow-alt"></i>
-        </Link>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 15}}>
+          <Link href="/dashboard/trends" className={styles.widgetLink} style={{ width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', background: '#173e92', color: '#fff', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            상세 분석 리포트
+            <i className="bx bx-right-arrow-alt"></i>
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -15,10 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. 필요한 소스코드 복사
 # 공통 모듈인 weekly_db를 상위 폴더에서 가져옵니다.
-COPY ../weekly_db /app/weekly_db
+# COPY ../weekly_db /app/weekly_db
 
 # 현재 서비스의 소스 코드를 복사합니다.
-COPY . .
+COPY . /app
 
 # 6. 최종 작업 디렉토리 변경 (불필요)
 # WORKDIR /app/weekly_issue -> 이미 필요한 모든 파일이 /app 에 복사되었으므로 이 라인은 필요 없습니다.

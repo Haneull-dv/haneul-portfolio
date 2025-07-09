@@ -141,15 +141,7 @@ const ProjectsPage: React.FC = () => {
                   {project.hasModal && <span className={styles.badge + ' ' + styles.badgeBlue}>PDF 뷰어</span>}
                 </div>
                 <p className={styles.projectDesc}>{project.description}</p>
-                <div className={styles.projectTechList}>
-                  {project.technologies.map((tech, techIndex) => (
-                    <span key={techIndex} className={styles.projectTech}>{tech}</span>
-                  ))}
-                </div>
-                <div className={styles.projectLinks}>
-                  <a href={project.github} className={styles.projectLink}><i className='bx bxl-github'></i>GitHub</a>
-                  <a href={project.demo} className={styles.projectLink}><i className='bx bx-link-external'></i>Live Demo</a>
-                </div>
+                {/* Removed projectTechList and projectLinks for a cleaner card */}
               </div>
             </div>
           ))}

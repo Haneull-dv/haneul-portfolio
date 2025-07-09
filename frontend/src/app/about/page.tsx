@@ -10,7 +10,7 @@ import styles from './about.module.scss';
 
 const LanguageBar = ({ label, filled }: { label: string; filled: number }) => (
   <div style={{ marginBottom: '3px' }}>
-    <div style={{ marginBottom: '8px', fontWeight: '500', color: '#111827' }}>{label}</div>
+    <div style={{ marginBottom: '8px', fontWeight: 400, color: 'var(--dark)', fontFamily: 'inherit', fontSize: 16 }}>{label}</div>
     <div style={{ display: 'flex', gap: '4px' }}>
       {[...Array(5)].map((_, i) => (
         <div
@@ -82,37 +82,30 @@ const AboutPage: React.FC = () => {
           <div className={styles.card}>
             <h3>About</h3>
             <CardBox>
-              <div style={{ lineHeight: 1.6, color: 'var(--dark)', fontSize: 16, fontWeight: 400, fontFamily: 'inherit' }}>
-                <p>
-                  안녕하세요! 저는 <strong>김하늘</strong>입니다. 
-                  재무 도메인에 대한 이해와 AI활용·코딩 역량을 갖추고자 꾸준히 노력해왔습니다.
-                </p>
-                <p>
-                IR팀 인턴으로 근무하며 반복되는 업무에서 개선점을 발견하고, 이를 자동화하는 솔루션을 직접 기획하고 구현해 스타트업 경진대회 본선에 진출했습니다.
-                아이디어를 현실로 만드는 과정에서는 최신 기술과 AI 기반의 개발 도구를 적극적으로 활용하여, 핵심 로직 구현에 집중하고 개발 속도를 높입니다.
-                </p>
+              <div style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, lineHeight: 1.6, color: 'var(--dark)', height: 140, display: 'flex', alignItems: 'center', margin: '-6px' }}>
+                <div>
+                  <p style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}>
+                    안녕하세요! 저는 <strong>김하늘</strong>입니다. 
+                    재무 도메인에 대한 이해와 AI활용·코딩 역량을 갖추고자 꾸준히 노력해왔습니다.
+                  </p>
+                  <p style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}>
+                  IR팀 인턴으로 근무하며 반복되는 업무에서 개선점을 발견하고, 이를 자동화하는 솔루션을 직접 기획하고 구현해 스타트업 경진대회 본선에 진출했습니다.
+                  </p>
+                </div>
               </div>
             </CardBox>
           </div>
           <div className={styles.card}>
             <h3>Profile</h3>
             <CardBox>
-              <div className={styles.profileImageWrapper}>
-                <Image 
-                  src="https://placehold.co/120x120/4285f4/ffffff?text=HK" 
-                  alt="Profile" 
-                  width={120}
-                  height={120}
-                  className={styles.profileImage}
-                />
-              </div>
-              <div className={styles.profileInfoList} style={{ color: 'var(--dark)', fontSize: 16, fontWeight: 400, fontFamily: 'inherit' }}>
-                <div className={styles.profileInfoRow}><span>이름:</span><span>김하늘 (Haneul Kim)</span></div>
-                <div className={styles.profileInfoRow}><span>학교:</span><span>명지대학교</span></div>
-                <div className={styles.profileInfoRow}><span>전공:</span><span>정치외교학과</span></div>
-                <div className={styles.profileInfoRow}><span>경력:</span><span>네오위즈 IR팀 인턴 (2022.12 - 2023.06)</span></div>
-                <div className={styles.profileInfoRow}><span>위치:</span><span>대한민국, 경기도 용인시</span></div>
-                <div className={styles.profileInfoRow}><span>이메일:</span><span>haneull.dv@gmail.com</span></div>
+              <div className={styles.profileInfoList} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, color: 'var(--dark)', height: 140, display: 'flex', alignItems: 'center', margin: '-6px' }}>
+                <div>
+                  <div className={styles.profileInfoRow} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}><span>김하늘 (Haneul Kim)</span></div>
+                  <div className={styles.profileInfoRow} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}><span>명지대학교 정치외교학과</span></div>
+                  <div className={styles.profileInfoRow} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}><span>네오위즈 IR팀 인턴 (2022.12 - 2023.06)</span></div>
+                  <div className={styles.profileInfoRow} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}><span>대한민국, 경기도 용인시</span></div>
+                  <div className={styles.profileInfoRow} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}><span>haneull.dv@gmail.com</span></div>
+                </div>
               </div>
             </CardBox>
           </div>
@@ -121,21 +114,25 @@ const AboutPage: React.FC = () => {
           <div className={styles.card}>
             <h3>Language Proficiency</h3>
             <CardBox>
-              <div style={{ fontSize: 16, color: 'var(--dark)', fontWeight: 400, fontFamily: 'inherit' }}>
-                <LanguageBar label="한국어 (Native)" filled={5} />
-                <LanguageBar label="영어 (TOEIC Speaking AL(170)/ TOEIC 875)" filled={4} />
-                <LanguageBar label="일본어 (JLPT N4)" filled={3} />
+              <div style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, color: 'var(--dark)', height: 140, display: 'flex', alignItems: 'center', margin: '-6px' }}>
+                <div>
+                  <LanguageBar label="한국어 (Native)" filled={5} />
+                  <LanguageBar label="영어 (TOEIC Speaking AL(170)/ TOEIC 875)" filled={4} />
+                  <LanguageBar label="일본어 (JLPT N4)" filled={3} />
+                </div>
               </div>
             </CardBox>
           </div>
           <div className={styles.card}>
             <h3>Certifications</h3>
             <CardBox>
-              <ul style={{ paddingLeft: '1rem', lineHeight: 1.6, color: 'var(--dark)', fontSize: 16, fontWeight: 400, fontFamily: 'inherit' }}>
-                {certifications.map((cert, idx) => (
-                  <li key={idx} style={{ listStyleType: 'disc' }}>{cert}</li>
-                ))}
-              </ul>
+              <div style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, height: 140, display: 'flex', alignItems: 'center', margin: '-6px' }}>
+                <div style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, lineHeight: 1.6, color: 'var(--dark)' }}>
+                  {certifications.map((cert, idx) => (
+                    <div key={idx} style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}>{cert}</div>
+                  ))}
+                </div>
+              </div>
             </CardBox>
           </div>
         </div>

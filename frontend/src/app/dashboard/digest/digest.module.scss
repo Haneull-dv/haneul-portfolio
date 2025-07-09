@@ -97,11 +97,12 @@
 
 /* KPI 카드 개별 스타일 */
 .kpiCard {
-  background: #fff;
-  border-radius: 0;
-  padding: 20px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+  background: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-height: unset !important;
   * {
     border-radius: 0 !important;
   }
@@ -390,4 +391,20 @@
   flex: 1 1 auto;
   min-width: 0;
   word-break: break-all;
+}
+
+.dashboardWidget, .widgetCard, .kpiCard {
+  background: #fff !important;
+  border-radius: 0 !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1e293b;
+  padding: 24px !important;
+  min-height: 120px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
 }

@@ -1007,7 +1007,7 @@ const TrendsPageContent: React.FC = () => {
         {currentView === 'selection' && (
           <>
             {/* Header Card with Breadcrumbs */}
-            <div className={styles.card} style={{ marginTop: 8 }}>
+            <div className={styles.card} style={{ marginTop: 32}}>
               <div className={styles.breadcrumbs}>
                 <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
                 <span className={styles.breadcrumbSeparator}>/</span>

@@ -132,7 +132,7 @@
     min-width: 300px;
     background-color: #f9f9f9;
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid #eee;
     display: flex;
     flex-direction: column;
@@ -281,25 +281,28 @@
 
 .tableContainer {
   overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid var(--grey);
+  border-radius: 0;
+  border: 1px solid #e9ecef;
 }
 
 .resultTable {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: #fff;
   min-width: 800px;
-  font-size: 14px;
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 400;
 
   thead th {
     background: #f8f9fa;
     padding: 12px 16px;
     text-align: left;
     font-weight: 600;
-    color: var(--dark);
-    border-bottom: 2px solid var(--grey);
+    color: #173e92;
+    border-bottom: 2px solid #e9ecef;
     white-space: nowrap;
+    border-radius: 0;
     &:first-child {
       text-align: center;
     }
@@ -310,17 +313,18 @@
 
   tbody td {
     padding: 10px 16px;
-    border-bottom: 1px solid var(--grey);
-    color: var(--dark);
+    border-bottom: 1px solid #e9ecef;
+    color: #111827;
     white-space: nowrap;
+    border-radius: 0;
+    background: #fff;
   }
 
   tbody tr:last-child td {
     border-bottom: none;
   }
-  
   tbody tr:hover td {
-      background-color: var(--light-blue);
+    background-color: #f3f4f6;
   }
 }
 
@@ -330,11 +334,11 @@
 
 .numberCell {
   text-align: right;
-  font-family: 'Roboto Mono', monospace;
-  font-weight: 500;
-  color: var(--dark);
+  font-family: inherit;
+  font-weight: 400;
+  color: #111827;
   position: relative;
-
+  border-radius: 0;
   &[title]::after {
     content: attr(title);
     position: absolute;
@@ -353,20 +357,18 @@
     transition: opacity 0.2s, visibility 0.2s;
     pointer-events: none;
   }
-
   &[title]:hover::after {
     opacity: 1;
     visibility: visible;
   }
-
   &.match {
-    background-color: rgba(46, 204, 113, 0.1);
+    background-color: rgba(46, 204, 113, 0.08);
   }
   &.mismatch {
-    background-color: rgba(231, 76, 60, 0.1);
+    background-color: rgba(231, 76, 60, 0.08);
   }
   &.none {
-    // No special style
+    background: #fff;
   }
 }
 

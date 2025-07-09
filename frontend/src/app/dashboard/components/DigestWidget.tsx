@@ -3,160 +3,114 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../dashboard.module.scss';
+import { FaArrowUp, FaFileAlt, FaBell, FaChartBar } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import clsx from 'clsx';
 
-// Mock data for demo purposes
-const mockKPIData = [
-  {
-    title: "주간 최고 수익률",
-    value: "+12.4%",
-    subtitle: "네오위즈 (지난 주 대비)",
-    icon: "bx bx-trending-up",
-    color: "#27ae60",
-    trend: "up" as const
-  },
-  {
-    title: "총 공시 건수",
-    value: "47건",
-    subtitle: "이번 주 신규 공시",
-    icon: "bx bx-file-blank",
-    color: "#3498db",
-    trend: "neutral" as const
-  },
-  {
-    title: "이슈 알림",
-    value: "8건",
-    subtitle: "긍정적 이슈 증가",
-    icon: "bx bx-bell",
-    color: "#f39c12",
-    trend: "up" as const
-  },
-  {
-    title: "분석 완료",
-    value: "156개",
-    subtitle: "게임 기업 분석 완료",
-    icon: "bx bx-chart",
-    color: "#9b59b6",
-    trend: "neutral" as const
-  }
-];
-
-interface KPICardProps {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: string;
-  color: string;
-  trend?: 'up' | 'down' | 'neutral';
+function getDigestKPI() {
+  return [
+    { title: '주간 최고 수익률', value: '+12.4%', subtitle: '네오위즈 (지난 주 대비)', icon: <FaArrowUp color="#2563eb" size={20} />, color: '#f4f8fb', bar: '#2563eb' },
+    { title: '총 공시 건수', value: '47건', subtitle: '이번 주 신규 공시', icon: <FaFileAlt color="#6d28d9" size={20} />, color: '#f4f8fb', bar: '#6d28d9' },
+    { title: '이슈 알림', value: '8건', subtitle: '긍정적 이슈 증가', icon: <FaBell color="#fbbf24" size={20} />, color: '#fdf7ed', bar: '#fbbf24' },
+    { title: '분석 완료', value: '156개', subtitle: '게임 기업 분석 완료', icon: <FaChartBar color="#a78bfa" size={20} />, color: '#f7f5fa', bar: '#a78bfa' },
+  ];
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, color, trend }) => {
-  const getTrendIcon = () => {
-    switch(trend) {
-      case 'up': return 'bx bx-trending-up';
-      case 'down': return 'bx bx-trending-down';
-      default: return 'bx bx-minus';
-    }
-  };
+const KPI_BAR_COLORS = ['#22c55e', '#2563eb', '#f59e42', '#a78bfa'];
 
-  const getTrendColor = () => {
-    switch(trend) {
-      case 'up': return '#27ae60';
-      case 'down': return '#e74c3c';
-      default: return '#95a5a6';
-    }
-  };
-
-  const cardStyle = {
-    '--card-color': color,
-    '--card-bg': color + '20'
-  } as React.CSSProperties;
-
-  return (
-    <div className={styles.kpiCard} style={cardStyle}>
-      <div className={styles.colorBar}></div>
-      <div className={styles.cardContent}>
-        <div className={styles.textWrapper}>
-          <div className={styles.title}>{title}</div>
-          <div className={styles.value}>{value}</div>
-          <div className={styles.subtitle}>
-            <i className={`${getTrendIcon()} ${styles.trendIcon}`} style={{ color: getTrendColor() }}></i>
-            {subtitle}
-          </div>
-        </div>
-        <div className={styles.iconWrapper}>
-          <i className={`${icon} ${styles.icon}`}></i>
-        </div>
-      </div>
+const KPICard: React.FC<{ title: string; value: string; unit?: string; barColor: string; className?: string }> = ({ title, value, unit, barColor, className }) => (
+  <div className={className} style={{
+    background: '#fff',
+    border: '1px solid #e5e7eb',
+    borderRadius: 0,
+    minHeight: 60,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '12px 18px 14px 18px',
+    boxShadow: 'none',
+    position: 'relative',
+    overflow: 'hidden',
+    color: '#222',
+  }}>
+    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: barColor, borderRadius: 0 }} />
+    <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{title}</div>
+    <div style={{ fontSize: 24, fontWeight: 700, color: '#222', display: 'flex', alignItems: 'baseline', gap: 4 }}>
+      {value}
+      {unit && <span style={{ fontSize: 15, fontWeight: 500, color: '#222' }}>{unit}</span>}
     </div>
-  );
-};
+  </div>
+);
 
 const DigestWidget: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [kpiData, setKpiData] = useState([
+    { title: '총 상장사', value: '24', unit: '분석 대상' },
+    { title: '평균 시가총액', value: '1.2조', unit: 'KRW' },
+    { title: '금주 신규 공시', value: '12', unit: '건' },
+    { title: '금주 주요 이슈', value: '7', unit: '건' },
+  ]);
   const [lastUpdate, setLastUpdate] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    // Set last update time
-    const now = new Date();
-    setLastUpdate(now.toLocaleString('ko-KR'));
+    setLastUpdate(new Date().toLocaleString('ko-KR'));
   }, []);
 
   const handleRefresh = () => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
+      setKpiData([
+        { title: '총 상장사', value: '24', unit: '분석 대상' },
+        { title: '평균 시가총액', value: '1.2조', unit: 'KRW' },
+        { title: '금주 신규 공시', value: '12', unit: '건' },
+        { title: '금주 주요 이슈', value: '7', unit: '건' },
+      ]);
       setIsLoading(false);
       setLastUpdate(new Date().toLocaleString('ko-KR'));
     }, 1000);
   };
 
+    
+
   return (
-    <div className={styles.widgetCard}>
+    <div className={styles.widgetCard} style={{ padding: 24 }}>
       <div className={styles.widgetHeader}>
         <h3 className={styles.widgetTitle}>
-          <i className="bx bx-pie-chart-alt-2"></i>
           시장 동향 요약
         </h3>
-        <p className={styles.widgetDescription}>
+        <p className={styles.widgetDescription} style={{ fontSize: '12px', margin: 0 }}>
           게임 업계 주요 지표와 실시간 동향을 한눈에 확인하세요
         </p>
       </div>
-
       <div className={styles.widgetContent}>
-        <div className={styles.kpiGrid}>
-          {mockKPIData.map((kpi, index) => (
-            <KPICard key={index} {...kpi} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 12, marginTop: 24 }}>
+          {kpiData.map((kpi, idx) => (
+            <KPICard key={idx} {...kpi} barColor={KPI_BAR_COLORS[idx]} className={styles.digestKpiCard} />
           ))}
         </div>
-
-        <div style={{ 
-          background: '#f8f9fa', 
-          borderRadius: '8px', 
-          padding: '12px', 
-          fontSize: '12px',
-          color: '#666',
-          textAlign: 'center'
-        }}>
-          <i className="bx bx-time"></i>
+        <div className={styles.dashboardStatusBox}>
           최근 업데이트: {lastUpdate}
         </div>
       </div>
-
-      <div className={styles.widgetFooter}>
-        <button 
-          className={`${styles.actionButton} ${styles.primary}`}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+        <button
+          className={styles.widgetLink}
+          style={{ width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', background: '#173e92', color: '#fff', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
           onClick={handleRefresh}
           disabled={isLoading}
-          style={{ width: 'auto', padding: '8px 16px', margin: 0 }}
         >
-          <i className={isLoading ? "bx bx-loader bx-spin" : "bx bx-refresh"}></i>
+          <i className={isLoading ? 'bx bx-loader bx-spin' : 'bx bx-refresh'}></i>
           새로고침
         </button>
-        
-        <Link href="/dashboard/digest" className={styles.widgetLink}>
+        <button
+          className={styles.widgetLink}
+          style={{ width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', background: '#173e92', color: '#fff', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+          onClick={() => router.push('/dashboard/digest')}
+        >
           전체 동향 보기
           <i className="bx bx-right-arrow-alt"></i>
-        </Link>
+        </button>
       </div>
     </div>
   );

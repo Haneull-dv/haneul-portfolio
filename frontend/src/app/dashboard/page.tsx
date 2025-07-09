@@ -34,15 +34,13 @@ const DashboardPage: React.FC = () => {
           Haneul's Financial Workspace
         </div>
         <div style={{marginBottom: 18, color: '#6b7280', fontSize: 15}}>
-          게임 산업 분석과 재무 데이터 처리를 위한 통합 워크스페이스
+          재무팀 IR팀의 반복 업무 자동화하는 
         </div>
         <div className={styles.dashboardWidgetGrid}>
           <div className={styles.dashboardWidget}><DigestWidget /></div>
           <div className={styles.dashboardWidget}><TrendsWidget /></div>
           <div className={styles.dashboardWidget}><ValidationWidget /></div>
           <div className={styles.dashboardWidget}><DSDWidget /></div>
-          <div className={styles.dashboardWidget}>{/* TODO: 위젯 추가 자리 */}</div>
-          <div className={styles.dashboardWidget}>{/* TODO: 위젯 추가 자리 */}</div>
         </div>
       </div>
     </Layout>
