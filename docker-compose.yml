@@ -216,7 +216,7 @@ services:
     container_name: disclosure
     build:
       context: ./weekly_disclosure
-      dockerfile: ./weekly_disclosure/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8090:8090"
     volumes:

@@ -170,3 +170,6 @@ LIMIT 10;
 [stockprice]
 $env:ENV="development"
 docker compose up -d --build stockprice
+
+$env:ENV="production"
+docker compose up -d --build stockprice

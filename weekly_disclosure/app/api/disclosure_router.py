@@ -5,6 +5,9 @@ from typing import Optional
 # 공통 DB 모듈 import
 import sys
 import os
+
+from app.config.db.db_singleton import db_singleton
+from app.config.db.db_builder import get_db_session
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../..'))
 from app.config.db.db_singleton import db_singleton
 

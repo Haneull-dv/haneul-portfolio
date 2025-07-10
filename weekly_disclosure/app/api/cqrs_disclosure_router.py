@@ -22,13 +22,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 # 도메인 서비스 import
 from app.domain.controller.disclosure_controller import DisclosureController
 from app.domain.service.disclosure_service import DisclosureService
-from weekly_db.db.db_builder import get_db_session
+from app.domain.service.weekly_db_service import WeeklyDataService, WeeklyBatchService
+from app.config.db.db_singleton import db_singleton
+from app.config.db.db_builder import get_db_session
 
 # 설정 import
 from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
 
 # 주차 계산 utility import
-from weekly_db.db.weekly_unified_model import WeeklyDataModel
+from app.domain.model.weekly_model import WeeklyDataModel
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/cqrs-disclosure")
@@ -48,61 +50,29 @@ async def collect_disclosure_with_cqrs(
     
     n8n에서 매주 자동으로 호출됩니다.
     """
-    job_id = None
     week = WeeklyDataModel.get_current_week_monday()
-    
+    batch_service = WeeklyBatchService(db_session=db)
+    data_service = WeeklyDataService(db_session=db)
+    job_id = None
     try:
         logger.info(f"🔧 [CQRS Command] Disclosure 수집 시작 - Week: {week}")
-        
-        # ==========================================
         # 1. 배치 작업 시작 로그 (CQRS Monitoring)
-        # ==========================================
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            batch_start_response = await client.post(
-                "http://weekly_data:8091/weekly-cqrs/domain-command/disclosure",
-                params={
-                    "week": week,
-                    "action": "start_job"
-                }
-            )
-            batch_start_result = batch_start_response.json()
-            job_id = batch_start_result.get("job_id")
-            
-            logger.info(f"📝 [CQRS] 배치 작업 시작 로그 - Job ID: {job_id}")
-        
-        # ==========================================
+        job_id = await batch_service.start_batch_job(job_type="disclosure", week=week)
         # 2. Command Side: 로컬 도메인 테이블에 저장
-        # ==========================================
-        
-        # Disclosure Controller로 데이터 수집
         controller = DisclosureController()
         logger.info(f"🔍 [CQRS Command] 공시 데이터 수집 - {TOTAL_COMPANIES}개 기업")
-        
         disclosure_results = await controller.fetch_game_companies_disclosures(db_session=db)
         logger.info(f"📋 [CQRS Command] 공시 수집 완료 - {len(disclosure_results.disclosures)}건")
-        
-        # 로컬 테이블 저장 통계
         local_updated = 0
         local_skipped = 0
-        projection_data = []  # weekly_data로 보낼 projection 데이터
-        
-        # ==========================================
-        # 3. 로컬 테이블 저장 및 Projection 데이터 준비
-        # ==========================================
-        
+        projection_data = []
         for disclosure in disclosure_results.disclosures:
             try:
-                # 종목코드로 기업명 찾기 - DisclosureItem 객체의 속성에 직접 접근
                 company_name = GAME_COMPANIES.get(
                     disclosure.stock_code, 
                     disclosure.company_name
                 )
-                
-                # 로컬 테이블 저장은 기존 DisclosureService에서 이미 처리됨
-                # (controller.fetch_game_companies_disclosures() 내부에서 저장)
                 local_updated += 1
-                
-                # Projection용 데이터 준비 (weekly_data 테이블로 전송할 형태)
                 projection_item = {
                     "company_name": company_name,
                     "content": f"[{disclosure.disclosure_date}] {disclosure.disclosure_title} - {disclosure.report_name}",
@@ -116,38 +86,20 @@ async def collect_disclosure_with_cqrs(
                         "cqrs_pattern": "command_to_projection"
                     }
                 }
-                
                 projection_data.append(projection_item)
-                
                 logger.debug(f"✅ [CQRS Command] 로컬 저장 및 Projection 준비: {company_name}")
-                
             except Exception as e:
                 logger.error(f"❌ [CQRS Command] 개별 공시 처리 실패: {str(e)}")
                 local_skipped += 1
-        
-        # ==========================================
-        # 4. Projection: weekly_data 테이블로 전송
-        # ==========================================
-        
+        # 3. Projection: weekly_data 테이블로 저장
         logger.info(f"🔄 [CQRS Projection] weekly_data로 projection 시작 - {len(projection_data)}건")
-        
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            projection_response = await client.post(
-                "http://weekly_data:8091/weekly-cqrs/project-domain-data",
-                params={
-                    "category": "disclosure", 
-                    "week": week
-                },
-                json=projection_data
-            )
-            projection_result = projection_response.json()
-            
-            logger.info(f"✅ [CQRS Projection] Projection 완료 - Updated: {projection_result.get('updated', 0)}")
-        
-        # ==========================================
-        # 5. 배치 작업 완료 로그
-        # ==========================================
-        
+        projection_result = await data_service.bulk_upsert_weekly_data(
+            weekly_items=projection_data,
+            category="disclosure",
+            week=week
+        )
+        logger.info(f"✅ [CQRS Projection] Projection 완료 - Updated: {projection_result.get('updated', 0)}")
+        # 4. 배치 작업 완료 로그
         final_result = {
             "local_updated": local_updated,
             "local_skipped": local_skipped,
@@ -155,26 +107,11 @@ async def collect_disclosure_with_cqrs(
             "projection_skipped": projection_result.get("skipped", 0),
             "total_collected": len(disclosure_results.disclosures)
         }
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            await client.post(
-                "http://weekly_data:8091/weekly-cqrs/domain-command/disclosure",
-                params={
-                    "week": week,
-                    "action": "finish_job"
-                },
-                json={
-                    "job_id": job_id,
-                    "result": final_result
-                }
-            )
-            
-            logger.info(f"📝 [CQRS] 배치 작업 완료 로그 - Job ID: {job_id}")
-        
-        # ==========================================
-        # 6. 최종 응답
-        # ==========================================
-        
+        await batch_service.finish_batch_job(
+            job_id=job_id,
+            result=final_result
+        )
+        # 5. 최종 응답
         return {
             "status": "success",
             "week": week,
@@ -194,15 +131,96 @@ async def collect_disclosure_with_cqrs(
             "job_id": job_id,
             "collected_at": datetime.now(timezone.utc).isoformat()
         }
-        
     except Exception as e:
         error_message = f"Disclosure CQRS 처리 실패: {str(e)}"
         logger.error(f"❌ [CQRS Command] {error_message}")
+        if job_id:
+            await batch_service.finish_batch_job(
+                job_id=job_id,
+                result={
+                    "local_updated": 0,
+                    "local_skipped": 0,
+                    "projection_updated": 0,
+                    "projection_skipped": 0,
+                    "total_collected": 0
+                },
+                error_message=error_message
+            )
         return {
             "status": "error",
             "message": "Disclosure CQRS 처리 중 오류가 발생했습니다.",
             "error": error_message
         }
+
+
+@router.post("/project-disclosure-weekly")
+async def project_disclosure_weekly(
+    week: str = None,
+    db: AsyncSession = Depends(get_db_session)
+) -> Dict[str, Any]:
+    """
+    [CQRS Projection Only] disclosure 도메인 데이터를 주차별 weekly_data 테이블로 projection (category='disclosure')
+    - DART 재수집 없이 로컬 DB(disclosures) 기준 projection만 수행
+    - week 미지정 시 이번주 월요일 기준
+    """
+    from app.domain.service.disclosure_service import DisclosureService
+    from app.config.companies import GAME_COMPANIES, TOTAL_COMPANIES
+    from app.domain.model.weekly_model import WeeklyDataModel
+    from datetime import datetime, timezone
+    logger.info(f"[Projection Only] Disclosure Projection 시작 - week: {week}")
+    if not week:
+        week = WeeklyDataModel.get_current_week_monday()
+    data_service = WeeklyDataService(db_session=db)
+    # 1. 로컬 DB에서 해당 주차 disclosure 데이터 조회
+    disclosure_service = DisclosureService(db_session=db)
+    disclosures = await disclosure_service.db_service.get_week_disclosures(week=week)
+    local_skipped = 0
+    local_updated = 0
+    projection_data = []
+    for disclosure in disclosures:
+        try:
+            company_name = GAME_COMPANIES.get(
+                disclosure["stock_code"],
+                disclosure["company_name"]
+            )
+            projection_item = {
+                "company_name": company_name,
+                "content": f"[{disclosure['disclosure_date']}] {disclosure['disclosure_title']} - {disclosure['report_name']}",
+                "stock_code": disclosure["stock_code"],
+                "metadata": {
+                    "disclosure_title": disclosure["disclosure_title"],
+                    "disclosure_date": disclosure["disclosure_date"],
+                    "report_name": disclosure["report_name"],
+                    "stock_code": disclosure["stock_code"],
+                    "source": "dart_api",
+                    "cqrs_pattern": "command_to_projection"
+                }
+            }
+            projection_data.append(projection_item)
+            local_updated += 1
+        except Exception as e:
+            logger.error(f"[Projection Only] 개별 disclosure 처리 실패: {str(e)}")
+            local_skipped += 1
+    # 2. Projection: weekly_data 테이블로 저장
+    projection_result = await data_service.bulk_upsert_weekly_data(
+        weekly_items=projection_data,
+        category="disclosure",
+        week=week
+    )
+    logger.info(f"[Projection Only] Projection 완료 - Updated: {projection_result.get('updated', 0)}")
+    return {
+        "status": "success",
+        "week": week,
+        "projection": {
+            "updated": projection_result.get("updated", 0),
+            "skipped": projection_result.get("skipped", 0),
+            "errors": projection_result.get("errors", 0),
+            "table": "weekly_data"
+        },
+        "total_companies": TOTAL_COMPANIES,
+        "total_collected": len(disclosures),
+        "collected_at": datetime.now(timezone.utc).isoformat()
+    }
 
 
 @router.get("/cqrs-status")

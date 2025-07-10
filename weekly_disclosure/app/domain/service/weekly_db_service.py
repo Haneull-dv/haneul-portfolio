@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 import logging
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.domain.model.weekly_model import WeeklyDataModel, WeeklyBatchJobModel
 from app.config.db.db_singleton import db_singleton
@@ -29,85 +30,63 @@ class WeeklyDataService:
         week: str = None
     ) -> Dict[str, Any]:
         """
-        주차별 데이터 대량 저장 (중복 체크 포함)
-        
+        주차별 데이터 대량 저장 (중복 체크 포함, ON CONFLICT DO NOTHING)
         Args:
             weekly_items: 저장할 데이터 리스트
             category: 데이터 카테고리 (disclosure/issue/stockprice)
             week: 대상 주차 (None이면 현재 주 월요일)
-        
         Returns:
             {"status": "success", "updated": 8, "skipped": 3, "week": "2025-01-13"}
         """
         session = await self.get_session()
-        
         if not week:
             week = WeeklyDataModel.get_current_week_monday()
-        
         year, week_number = WeeklyDataModel.get_week_info(week)
-        
         updated_count = 0
         skipped_count = 0
         error_count = 0
-        
-        try:
-            for item in weekly_items:
-                try:
-                    # 중복 체크
-                    existing = await session.execute(
-                        select(WeeklyDataModel).where(
-                            and_(
-                                WeeklyDataModel.company_name == item["company_name"],
-                                WeeklyDataModel.category == category,
-                                WeeklyDataModel.week == week
-                            )
-                        )
-                    )
-                    
-                    if existing.scalar_one_or_none():
-                        logger.info(f"중복 스킵: {item['company_name']} - {category} - {week}")
-                        skipped_count += 1
-                        continue
-                    
-                    # 새로운 데이터 저장
-                    weekly_data = WeeklyDataModel(
-                        company_name=item["company_name"],
-                        content=item["content"],
-                        category=category,
-                        week=week,
-                        week_year=year,
-                        week_number=week_number,
-                        stock_code=item.get("stock_code"),
-                        extra_data=item.get("metadata", {})
-                    )
-                    
-                    session.add(weekly_data)
+        for item in weekly_items:
+            try:
+                insert_stmt = pg_insert(WeeklyDataModel).values(
+                    company_name=item["company_name"],
+                    content=item["content"],
+                    category=category,
+                    week=week,
+                    week_year=year,
+                    week_number=week_number,
+                    stock_code=item.get("stock_code"),
+                    extra_data=item.get("metadata", {})
+                ).on_conflict_do_nothing(
+                    index_elements=[
+                        WeeklyDataModel.__table__.c.company_name,
+                        WeeklyDataModel.__table__.c.category,
+                        WeeklyDataModel.__table__.c.week
+                    ]
+                )
+                result = await session.execute(insert_stmt)
+                if result.rowcount == 1:
                     updated_count += 1
-                    
-                except Exception as e:
-                    logger.error(f"데이터 저장 오류 - {item.get('company_name', 'Unknown')}: {str(e)}")
-                    error_count += 1
-                    continue
-            
+                else:
+                    logger.warning(f"[중복] 이미 존재하여 스킵: {item.get('company_name', 'Unknown')} - {category} - {week}")
+                    skipped_count += 1
+            except Exception as e:
+                logger.error(f"데이터 저장 오류 - {item.get('company_name', 'Unknown')}: {str(e)}")
+                error_count += 1
+                continue
+        try:
             await session.commit()
-            logger.info(f"배치 저장 완료 - Category: {category}, Week: {week}, Updated: {updated_count}, Skipped: {skipped_count}")
-            
-            return {
-                "status": "success",
-                "updated": updated_count,
-                "skipped": skipped_count,
-                "errors": error_count,
-                "week": week,
-                "category": category
-            }
-            
         except Exception as e:
-            await session.rollback()
-            logger.error(f"배치 저장 실패 - Category: {category}, Week: {week}: {str(e)}")
-            raise
-        finally:
-            if not self.db_session:  # 외부에서 주입받지 않은 세션이면 닫기
-                await session.close()
+            logger.error(f"커밋 중 오류 - Category: {category}, Week: {week}: {str(e)} (롤백하지 않고 진행)")
+            # 커밋 오류가 발생해도 롤백하지 않고 진행 (예: 중복 등)
+        logger.info(f"배치 저장 완료 - Category: {category}, Week: {week}, Updated: {updated_count}, Skipped: {skipped_count}, Errors: {error_count}")
+        return {
+            "status": "success",
+            "updated": updated_count,
+            "skipped": skipped_count,
+            "errors": error_count,
+            "week": week,
+            "category": category
+        }
     
     async def get_weekly_data(
         self, 

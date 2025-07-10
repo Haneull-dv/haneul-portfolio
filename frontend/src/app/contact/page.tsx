@@ -59,7 +59,7 @@ const ContactPage: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: <FaGithub size={28} />, name: 'GitHub', url: 'https://github.com/Haneull-dv' },
+    { icon: <FaGithub size={28} />, name: 'GitHub', url: 'https://github.com/Haneull-dv/haneul-portfolio' },
     { icon: <FaInstagram size={28} />, name: 'Instagram', url: 'https://instagram.com/skyyy_neul' }
   ];
 

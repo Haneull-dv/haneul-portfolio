@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 import sys
 import os
+
+import uvicorn
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
 from app.api.disclosure_router import router as disclosure_router
@@ -46,3 +48,7 @@ app.include_router(n8n_disclosure_router, tags=["n8n 자동화"])
 app.include_router(cqrs_disclosure_router, tags=["CQRS 패턴"])
 
 print(f"🤍0 메인 진입 - 게임기업 공시 서비스 시작 (DI 기반)")
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8090))  # 로컬은 8090, 배포는 8080
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
