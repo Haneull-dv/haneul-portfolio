@@ -6,7 +6,7 @@ from typing import Optional
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../..'))
-from weekly_db.db.db_builder import get_db_session
+from app.config.db.db_singleton import db_singleton
 
 # 서비스 모듈 import
 from app.domain.controller.disclosure_controller import DisclosureController

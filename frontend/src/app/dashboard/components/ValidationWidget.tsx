@@ -135,9 +135,9 @@ const ValidationWidget: React.FC = () => {
         </button>
         {validationResult && (
           <div style={{
-            background: validationResult.includes('정확합니다') ? '#d4edda' :
+            background: validationResult.includes('정확합니다') ? '#F7E7A6' :
                       validationResult.includes('불일치') ? '#fff3cd' : '#f8d7da',
-            color: validationResult.includes('정확합니다') ? '#155724' :
+            color: validationResult.includes('정확합니다') ? '#111' :
                    validationResult.includes('불일치') ? '#856404' : '#721c24',
             borderRadius: 0,
             padding: '12px',

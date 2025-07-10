@@ -24,7 +24,7 @@ const mockAnalysisData = [
   },
   {
     metric: '혁신성',
-    네오위즈: 88,
+    네오위즈: 80,
     펄어비스: 90,
   },
   {
@@ -63,16 +63,16 @@ const TrendsWidget: React.FC = () => {
               <Radar
                 name="네오위즈"
                 dataKey="네오위즈"
-                stroke="#3498db"
-                fill="#3498db"
+                stroke="#960505" // 톤다운 레드
+                fill="#960505"
                 fillOpacity={0.1}
                 strokeWidth={2}
               />
               <Radar
                 name="펄어비스"
                 dataKey="펄어비스"
-                stroke="#e74c3c"
-                fill="#e74c3c"
+                stroke="#094cb1" // 톤다운 블루
+                fill="#094cb1"
                 fillOpacity={0.1}
                 strokeWidth={2}
               />

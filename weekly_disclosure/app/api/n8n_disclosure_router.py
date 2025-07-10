@@ -8,9 +8,9 @@ import logging
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
-from weekly_db.db.db_builder import get_db_session
-from weekly_db.db.weekly_service import WeeklyDataService, WeeklyBatchService
-from weekly_db.db.weekly_unified_model import WeeklyDataModel
+from app.config.db.db_singleton import db_singleton
+from app.domain.service.weekly_service import WeeklyDataService, WeeklyBatchService
+from app.domain.model.weekly_unified_model import WeeklyDataModel
 
 # Disclosure 서비스 import
 from app.domain.controller.disclosure_controller import DisclosureController

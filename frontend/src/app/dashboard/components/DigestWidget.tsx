@@ -16,7 +16,12 @@ function getDigestKPI() {
   ];
 }
 
-const KPI_BAR_COLORS = ['#22c55e', '#2563eb', '#f59e42', '#a78bfa'];
+const KPI_BAR_COLORS = [
+  '#523107', // 파스텔 레몬(톤다운)
+  '#523107', 
+  '#523107', 
+  '#523107', 
+];
 
 const KPICard: React.FC<{ title: string; value: string; unit?: string; barColor: string; className?: string }> = ({ title, value, unit, barColor, className }) => (
   <div className={className} style={{

@@ -340,6 +340,17 @@
   }
 }
 
+.actionButton.primary, .actionButton.orange {
+  background: #523107;
+  color: white;
+}
+.actionButton.primary:hover:not(:disabled), .actionButton.orange:hover:not(:disabled) {
+  background: #6d3f02;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(75, 108, 160, 0.18);
+}
+
 // Chart Container (for TrendsWidget)
 .chartContainer {
   height: 260px;

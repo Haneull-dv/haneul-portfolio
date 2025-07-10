@@ -416,8 +416,8 @@ const RadarChartAnalysis: React.FC<{
   }, [analysisData]);
 
   const colors = [
-    '#173e92', // Navy
-    '#c0392b', // Deep Red
+    '#960505', // 네오위즈: 톤다운 레드
+    '#094cb1', // 펄어비스: 톤다운 블루
     '#218c5a', // Deep Green
     '#b9770e', // Deep Orange
     '#5e548e', // Deep Purple
@@ -1015,7 +1015,7 @@ const TrendsPageContent: React.FC = () => {
               </div>
               <h2 className={styles.cardTitle} style={{ color: '#222' }}>KPI Trends</h2>
               <p style={{ color: '#374151', fontSize: 16 }}>
-                게임업계 상장기업의 재무건전성을 종합 분석합니다. 성장성, 수익성, 안정성 등 핵심 KPI를 통해 객관적인 재무 비교가 가능합니다.
+                게임업계 상장기업의 재무정보를 DART 사업보고서 기준으로 분석합니다. 재무 KPI를 통해 동종 게임업계 간 비교가 가능하며 인사이트 요약을 제공합니다.
               </p>
               <div style={{ display: 'flex', gap: 32, marginTop: 24 }}>
                 <div style={{ textAlign: 'center' }}>

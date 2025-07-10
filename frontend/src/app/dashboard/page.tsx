@@ -23,7 +23,7 @@ const DashboardPage: React.FC = () => {
             title="Dashboard" 
             breadcrumbs={breadcrumbs}
             actions={
-              <a href="#" className={styles.actionButton}>
+              <a href="#" className={`${styles.actionButton} ${styles.primary}`} style={{background: '#472a03', color: '#fff', width: 'auto', padding: '8px 16px', margin: 0, fontWeight: 600, fontSize: 15, border: 'none', borderRadius: 0, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', boxShadow: 'none', outline: 'none', minWidth: 0, minHeight: 0, backgroundColor: '#472a03 !important', colorScheme: 'none'}}>
                 <i className='bx bxs-cloud-download bx-fade-down-hover'></i>
                 <span className="text">Get PDF</span>
               </a>
@@ -34,7 +34,7 @@ const DashboardPage: React.FC = () => {
           Haneul's Financial Workspace
         </div>
         <div style={{marginBottom: 18, color: '#6b7280', fontSize: 15}}>
-          재무팀 IR팀의 반복 업무 자동화하는 
+          재무팀 IR팀을 위한 업무 효율화 플랫폼
         </div>
         <div className={styles.dashboardWidgetGrid}>
           <div className={styles.dashboardWidget}><DigestWidget /></div>

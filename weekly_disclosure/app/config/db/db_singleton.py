@@ -5,8 +5,10 @@ from typing import Optional
 from dotenv import load_dotenv
 from pathlib import Path
 
-# 환경변수 로드
-load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / "postgres/.env")
+
+# ENV 환경변수가 development일 때만 .env 로드
+if os.getenv("ENV", "development") == "development":
+    load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / "postgres/.env")
 print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
 
 # Base 클래스 생성

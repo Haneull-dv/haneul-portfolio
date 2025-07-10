@@ -1,0 +1,2 @@
+ENV=production
+DATABASE_URL=postgresql+asyncpg://postgres:SYMrFOPHMEPvVhMWtrnopOU1fHWTwrHc@postgres.railway.internal:5432/railway

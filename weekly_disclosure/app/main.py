@@ -10,6 +10,10 @@ from app.api.disclosure_router import router as disclosure_router
 from app.api.n8n_disclosure_router import router as n8n_disclosure_router
 from app.api.cqrs_disclosure_router import router as cqrs_disclosure_router
 
+# DB 테이블 생성을 위한 import 추가
+from app.config.db.db_singleton import db_singleton
+from app.domain.model.disclosure_model import Base
+
 load_dotenv()
 app = FastAPI(title="Game Company Disclosure Service")
 

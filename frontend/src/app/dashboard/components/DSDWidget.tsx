@@ -141,8 +141,8 @@ const DSDWidget: React.FC = () => {
         </button>
         {conversionResult && (
           <div style={{
-            background: '#d4edda',
-            color: '#155724',
+            background: '#F7E7A6',
+            color: '#111',
             borderRadius: 0,
             padding: '12px',
             fontSize: '14px',
