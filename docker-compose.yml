@@ -215,14 +215,16 @@ services:
   disclosure:
     container_name: disclosure
     build:
-      context: .
+      context: ./weekly_disclosure
       dockerfile: ./weekly_disclosure/Dockerfile
     ports:
       - "8090:8090"
     volumes:
-      - .:/app
+      - ./weekly_disclosure:/app
     env_file:
       - ./weekly_disclosure/.env
+    environment:
+      - ENV=${ENV}
     depends_on:
       - postgres
     networks:

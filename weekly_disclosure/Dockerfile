@@ -1,22 +1,25 @@
+# 1. 베이스 이미지 설정
 FROM python:3.10-slim
 
+# 2. 환경 변수 설정
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app  
+
+# 3. 작업 디렉토리 설정
 WORKDIR /app
 
-# 의존성 파일 복사 및 설치
+# 4. 의존성 파일 복사 및 설치
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 전체 소스코드 복사
+# 5. 소스코드 복사
 COPY . /app
 
-# Python 경로 설정
-ENV PYTHONPATH=/app
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# 6. 작업 디렉토리 변경
+WORKDIR /app
+
+# 7. 애플리케이션 실행
+CMD ["python", "app/main.py"]
 
 # 포트 노출
 EXPOSE 8090
-
-# 앱 실행 (weekly_disclosure 디렉토리 기준)
-WORKDIR /app/weekly_disclosure
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8090"] 
