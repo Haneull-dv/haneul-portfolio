@@ -439,45 +439,53 @@ const RadarChartAnalysis: React.FC<{
 
   return (
     <div className={styles.card}>
-      <div className={styles.sectionHeader}>
-        <h3>
-          <i className='bx bxs-radar'></i>
-          재무건전성 종합 분석
-        </h3>
-        <div className={styles.sectionDescription}>
-          <p>성장성, 수익성, 안정성 3개 영역 종합 평가</p>
-          <div className={styles.infoTooltipContainer}>
-            <i className='bx bx-help-circle'></i>
-            <div className={styles.infoTooltip}>{tooltipContent}</div>
+      <div
+        style={{
+          background: '#f9f9f9',
+          border: '1px solid #eee',
+          borderRadius: 0,
+          padding: '1.5rem',
+        }}
+      >
+        <div className={styles.sectionHeader}>
+          <h3>
+            <i className='bx bxs-radar'></i>
+            재무건전성 종합 분석
+          </h3>
+          <div className={styles.sectionDescription}>
+            <p>성장성, 수익성, 안정성 3개 영역 종합 평가</p>
+            <div className={styles.infoTooltipContainer}>
+              <i className='bx bx-help-circle'></i>
+              <div className={styles.infoTooltip}>{tooltipContent}</div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height={400}>
-          <RadarChart data={chartData}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="metric" />
-            <PolarRadiusAxis 
-              angle={90} 
-              domain={[0, 100]}
-              tick={false}
-            />
-            {analysisData.filter(item => item.kpiData).map(({ company }, index) => (
-              <Radar
-                key={company.corp_code}
-                name={company.corp_name}
-                dataKey={company.corp_name}
-                stroke={colors[index % colors.length]}
-                fill={colors[index % colors.length]}
-                fillOpacity={0.2}
-                strokeWidth={2.5}
+        <div className={styles.chartContainer}>
+          <ResponsiveContainer width="100%" height={400}>
+            <RadarChart data={chartData}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="metric" />
+              <PolarRadiusAxis 
+                angle={90} 
+                domain={[0, 100]}
+                tick={false}
               />
-            ))}
-            <RechartsTooltip />
-            <Legend />
-          </RadarChart>
-        </ResponsiveContainer>
+              {analysisData.filter(item => item.kpiData).map(({ company }, index) => (
+                <Radar
+                  key={company.corp_code}
+                  name={company.corp_name}
+                  dataKey={company.corp_name}
+                  stroke={colors[index % colors.length]}
+                  fill={colors[index % colors.length]}
+                  fillOpacity={0.2}
+                  strokeWidth={2.5}
+                />
+              ))}
+              <RechartsTooltip />
+              <Legend />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

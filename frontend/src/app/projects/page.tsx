@@ -136,10 +136,6 @@ const ProjectsPage: React.FC = () => {
               </div>
               <div className={styles.projectInfo}>
                 <h3 className={styles.projectTitle}>{project.title}</h3>
-                <div className={styles.projectBadges}>
-                  <span className={styles.badge + ' ' + (project.status === 'Completed' ? styles.badgeGreen : styles.badgeYellow)}>{project.status}</span>
-                  {project.hasModal && <span className={styles.badge + ' ' + styles.badgeBlue}>PDF 뷰어</span>}
-                </div>
                 <p className={styles.projectDesc}>{project.description}</p>
                 {/* Removed projectTechList and projectLinks for a cleaner card */}
               </div>

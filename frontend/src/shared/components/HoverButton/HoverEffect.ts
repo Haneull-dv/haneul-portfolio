@@ -24,7 +24,9 @@ export default function initHoverEffect() {
 
     const killShapes = () => {
       animatedShapes.forEach((shape) => {
-        svg.removeChild(shape);
+        if (svg && shape && svg.contains(shape)) {
+          svg.removeChild(shape);
+        }
       });
     };
 

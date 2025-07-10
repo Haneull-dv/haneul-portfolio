@@ -43,16 +43,15 @@ const techSkills = {
 };
 
 const CardBox: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{
-    background: '#f9f9f9',
-    border: 'none',
-    borderRadius: 0,
-    padding: 18,
-    marginBottom: 12,
-    color: '#111827',
-    fontSize: '15px',
-    lineHeight: 1.7
-  }}>{children}</div>
+  <div
+    style={{
+      background: '#f9f9f9',
+      border: '1px solid #eee',
+      borderRadius: 0,
+      padding: '1.5rem',
+      // Remove marginBottom, color, fontSize, lineHeight overrides
+    }}
+  >{children}</div>
 );
 
 const AboutPage: React.FC = () => {

@@ -48,16 +48,29 @@ const KPICard: React.FC<{ title: string; value: string; unit?: string; subtitle?
   const trendColor = trend === 'up' ? styles.textPositive : styles.textNegative;
   return (
     <div className={styles.kpiCard}>
-      <div className={styles.title}>{title}</div>
-      <div className={styles.valueRow}>
-        <span className={styles.value}>{value}</span>
-        {unit && <span className={styles.unit}>{unit}</span>}
-        {companyName && <span className={styles.companyName}>{companyName}</span>}
+      <div
+        style={{
+          background: '#f9f9f9',
+          border: '1px solid #eee',
+          borderRadius: 0,
+          padding: '1.5rem',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
+      >
+        <div className={styles.title}>{title}</div>
+        <div className={styles.valueRow}>
+          <span className={styles.value}>{value}</span>
+          {unit && <span className={styles.unit}>{unit}</span>}
+          {companyName && <span className={styles.companyName}>{companyName}</span>}
+        </div>
+        {subtitle && <div className={clsx(styles.subtitle, trend && trendColor)}>
+          {trend && <i className={`bx ${trendIcon}`}></i>}
+          <span>{subtitle}</span>
+        </div>}
       </div>
-      {subtitle && <div className={clsx(styles.subtitle, trend && trendColor)}>
-        {trend && <i className={`bx ${trendIcon}`}></i>}
-        <span>{subtitle}</span>
-      </div>}
     </div>
   );
 };

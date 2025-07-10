@@ -83,7 +83,15 @@ const ContactPage: React.FC = () => {
         <div className={styles.validationGrid}>
           <div className={styles.card}>
             <h3>Send Message</h3>
-            <div style={{ background: '#f9f9f9', border: 'none', borderRadius: 0, padding: 18, marginBottom: 12, color: '#111827', fontSize: '15px', lineHeight: 1.7 }}>
+            <div
+              style={{
+                background: '#f9f9f9',
+                border: '1px solid #eee',
+                borderRadius: 0,
+                padding: '1.5rem',
+                // Remove marginBottom, color, fontSize, lineHeight overrides
+              }}
+            >
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <div style={{ flex: 1 }}>
@@ -112,7 +120,15 @@ const ContactPage: React.FC = () => {
           </div>
           <div className={styles.card}>
             <h3>Contact Information</h3>
-            <div style={{ background: '#f9f9f9', border: 'none', borderRadius: 0, padding: 18, marginBottom: 12, color: '#111827', fontSize: '15px', lineHeight: 1.7 }}>
+            <div
+              style={{
+                background: '#f9f9f9',
+                border: '1px solid #eee',
+                borderRadius: 0,
+                padding: '1.5rem',
+                // Remove marginBottom, color, fontSize, lineHeight overrides
+              }}
+            >
               {contactInfo.map((info, index) => (
                 <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: 18 }}>
                   <div style={{ width: '48px', height: '48px', backgroundColor: '#173e92', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px' }}>

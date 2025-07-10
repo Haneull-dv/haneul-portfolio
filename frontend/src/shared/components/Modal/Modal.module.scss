@@ -13,14 +13,14 @@
   }
   
   .modal {
-    background: #1e1e2d; /* A dark background from the theme */
-    border-radius: 16px;
-    padding: 28px;
+    background: #fff;
+    border-radius: 0;
+    padding: 32px 32px 24px 32px;
     width: 90%;
     max-width: 420px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    color: #e0e0e0;
-    border: 1px solid #3a3a5a;
+    box-shadow: 0 2px 16px rgba(16,24,40,0.10);
+    color: #222;
+    border: 1px solid #e9ecef;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -32,43 +32,40 @@
   }
   
   .title {
-    font-size: 1.5rem; /* 24px */
+    font-size: 1.35rem;
     font-weight: 700;
-    margin: 0;
-    color: #ffffff;
+    margin: 0 0 8px 0;
+    color: #173e92;
   }
   
   .content {
-    font-size: 1rem; /* 16px */
+    font-size: 1.05rem;
     line-height: 1.7;
-    color: #c0c0c0;
-    text-align: center;
-    white-space: pre-wrap; /* Respects newlines */
+    color: #222;
+    text-align: left;
+    white-space: pre-line;
+    padding: 0;
   }
   
   .footer {
-    margin-top: 12px;
+    margin-top: 18px;
     display: flex;
     justify-content: center;
   }
   
   .confirmButton {
-    background: #4A6CFD;
-    color: white;
+    background: #173e92;
+    color: #fff;
     border: none;
-    padding: 14px 32px;
-    border-radius: 8px;
+    padding: 12px 0;
+    border-radius: 0;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
     transition: all 0.2s ease;
     width: 100%;
-  
-    &:hover {
-      background: #3b5aed;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(74, 108, 253, 0.3);
-    }
+    margin-top: 12px;
+    box-shadow: none;
   }
   
   @keyframes fadeIn {
