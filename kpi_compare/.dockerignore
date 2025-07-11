@@ -1,27 +1,27 @@
+# Git 및 기본 설정 파일
 .git
 .gitignore
-.env
+
+# 환경변수 파일은 남겨두되 도커엔 포함되지 않도록 (Railway는 env_file 따로 지정)
+# .env ← 유지해도 됨
+
+# Python 빌드/캐시/가상환경 무시
 __pycache__/
 *.py[cod]
-*$py.class
+*.py.class
 *.so
 .Python
+
+# 가상환경 및 불필요한 디렉토리 무시
 env/
 build/
-develop-eggs/
 dist/
 downloads/
-eggs/
 .eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
 *.egg-info/
 .installed.cfg
 *.egg
 venv/
 .venv/
 .idea/
-.vscode/ 
+.vscode/

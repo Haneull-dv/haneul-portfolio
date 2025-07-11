@@ -22,6 +22,8 @@ else:
         "http://localhost:3001",
         "https://portfolio-v0-02-git-main-haneull-dvs-projects.vercel.app",
         "https://portfolio-v0-02-1hkt...g4n-haneull-dvs-projects.vercel.app",
+        "https://haneull.com",
+        "https://conan.ai.kr"
     ]
 
 app.add_middleware(

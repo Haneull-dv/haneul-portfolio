@@ -88,11 +88,8 @@ services:
       - "8085:8085"
     volumes:
       - ./conanai_dsdgen:/app
-      - ./dart_documents:/app/app/dart_documents
     env_file:
       - ./conanai_dsdgen/.env
-    depends_on:
-      - postgres
     networks:
       - app-network
 
@@ -109,8 +106,6 @@ services:
       - DART_API_KEY=dummy_api_key
     env_file:
       - ./conanai_dsdcheck/.env
-    depends_on:
-      - postgres
     networks:
       - app-network
 
@@ -251,16 +246,16 @@ services:
   kpi_compare:
     container_name: kpi_compare
     build:
-      context: .
-      dockerfile: ./kpi_compare/Dockerfile
+      context: ./kpi_compare
+      dockerfile: Dockerfile
     ports:
       - "9007:9007"
     volumes:
-      - .:/app
+      - ./kpi_compare/app:/app/app
     env_file:
       - ./kpi_compare/.env
-    depends_on:
-      - postgres
+    environment:
+      - ENV=${ENV}
     networks:
       - app-network
 

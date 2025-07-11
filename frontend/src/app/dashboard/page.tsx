@@ -55,7 +55,7 @@ const DashboardPage: React.FC = () => {
               <ul style={{ margin: '10px 0 0 0', padding: 0, listStyle: 'none', color: '#444', fontSize: 15 }}>
                 <li style={{ marginBottom: 4 }}>- KPI 비교로 경쟁사 재무지표 분석</li>
                 <li style={{ marginBottom: 4 }}>- 주요 공시 이슈 확인</li>
-                <li>- IR Book 및 주총 자료용 요약 리포트 생성</li>
+                <li>- IR 전략 수립 및 투자자 대응을 위한 분석 요약 확보</li>
               </ul>
             </div>
             <div style={{ borderLeft: '3px solid #e5e7eb', paddingLeft: 14 }}>
@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
               <ul style={{ margin: '10px 0 0 0', padding: 0, listStyle: 'none', color: '#444', fontSize: 15 }}>
                 <li style={{ marginBottom: 4 }}>- 재무제표 엑셀 업로드 및 정합성 검증</li>
                 <li style={{ marginBottom: 4 }}>- 포맷 자동 변환으로 공시 양식화</li>
-                <li>- DART 제출용 파일 생성 완료</li>
+                <li>- DART 전자공시 제출용 재무제표 생성 완료</li>
               </ul>
             </div>
           </div>
