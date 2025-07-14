@@ -64,7 +64,7 @@ interface SelectedInfo {
 }
 
 // API Functions
-const API_BASE_URL = 'http://localhost:9007';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL_KPI;
 
 // Query Client
 const queryClient = new QueryClient({

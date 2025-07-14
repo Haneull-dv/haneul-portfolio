@@ -50,7 +50,7 @@ const DSDPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('sheet_name', sheetName);
-      const response = await fetch('http://localhost:8085/dsdgen/upload', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -284,7 +284,7 @@ const DSDPage: React.FC = () => {
     // 페이지 로드 시 기본 엑셀 파일을 불러옴
     const loadDefaultFile = async () => {
       try {
-        const response = await fetch(`/${DEFAULT_EXCEL_FILE_NAME}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/${DEFAULT_EXCEL_FILE_NAME}`);
         if (!response.ok) return;
         const blob = await response.blob();
         const defaultFile = new File([blob], DEFAULT_EXCEL_FILE_NAME, { type: blob.type });

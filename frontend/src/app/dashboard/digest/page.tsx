@@ -5,9 +5,9 @@ import styles from './digest.module.scss';
 import clsx from 'clsx';
 
 // --- 상수 및 인터페이스 정의 ---
-const STOCKPRICE_API_BASE = 'http://localhost:9006/stockprice';
-const DISCLOSURE_API_BASE = 'http://localhost:8090/disclosures';
-const ISSUE_API_BASE = 'http://localhost:8089/issue';
+const STOCKPRICE_API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL_STOCKPRICE}/stockprice`;
+const DISCLOSURE_API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL_DISCLOSURE}/disclosures`;
+const ISSUE_API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL_ISSUE}/issue`;
 
 const KOREAN_COMPANIES_MAP: Record<string, string> = {
     "035420": "네이버", "035720": "카카오", "259960": "크래프톤", "036570": "엔씨소프트", "251270": "넷마블",

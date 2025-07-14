@@ -136,7 +136,7 @@ const ValidationPage: React.FC = () => {
     // 페이지 로드 시 기본 엑셀 파일을 불러옵니다.
     const loadDefaultFile = async () => {
       try {
-        const response = await fetch(`/${DEFAULT_EXCEL_FILE_NAME}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/${DEFAULT_EXCEL_FILE_NAME}`);
         if (!response.ok) {
           throw new Error('기본 엑셀 파일을 불러오는 데 실패했습니다.');
         }
@@ -179,7 +179,7 @@ const ValidationPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await fetch('http://localhost:8086/api/v1/dsdfooting/check-footing', { method: 'POST', body: formData });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/api/v1/dsdfooting/check-footing`, { method: 'POST', body: formData });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || '검증 요청이 실패했습니다.');
