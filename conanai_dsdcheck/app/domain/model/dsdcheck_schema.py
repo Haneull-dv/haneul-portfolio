@@ -95,7 +95,7 @@ class ComparisonResult(BaseModel):
     fs_div: str
     sj_div: str
     account_nm: str
-    column: Literal["thstrm_amount", "frmtrm_amount"]
+    column: str
     excel: str
     dart: str
-    diff: int
+    diff: str

@@ -211,12 +211,18 @@ def clean_amount_value(value) -> str:
     """
     if pd.isna(value) or value == "" or value == "-":
         return "0"
+    
     str_value = str(value).strip()
-    is_negative = str_value.startswith("-")
+    
+    # 음수인지 판단 (괄호 포함)
+    is_negative = str_value.startswith("-") or (str_value.startswith("(") and str_value.endswith(")"))
+
     # 숫자만 추출
     cleaned = re.sub(r'[^\d]', '', str_value)
-    if cleaned == "":
+    
+    if not cleaned:
         return "0"
+        
     return f"-{cleaned}" if is_negative else cleaned
 
 

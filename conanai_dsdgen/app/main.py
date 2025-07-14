@@ -6,17 +6,18 @@ import os
 from .api.xsldsd_router import router as xsldsd_router
 
 load_dotenv()
-app = FastAPI()
+app = FastAPI(title="DSDGen Service")
 
 # 환경에 따라 origins 다르게 관리
 ENV = os.getenv("ENV", "development")  # 기본값 development
 
 if ENV == "production":
     allow_origins = [
-        "https://haneull.com",  # 커스텀 도메인
-        "https://conan.ai.kr",
-        "https://portfolio-v0-02-git-main-haneull-dvs-projects.vercel.app",  # vercel 공식 도메인(운영/테스트용)
-        # 필요하다면 다른 공식 도메인 추가
+        "https://www.haneull.com",
+        "https://portfolio-v0-02-git-main-haneull-dvs-projects.vercel.app",
+        "https://portfolio-v0-02-2gdu3pezg-haneull-dvs-projects.vercel.app",
+        "https://dsdgen.haneull.com",
+        "https://conan.ai.kr"
     ]
 else:
     allow_origins = [

@@ -23,9 +23,11 @@ ENV = os.getenv("ENV", "development")
 
 if ENV == "production":
     allow_origins = [
-        "https://haneull.com",
-        "https://conan.ai.kr",
+        "https://www.haneull.com",
         "https://portfolio-v0-02-git-main-haneull-dvs-projects.vercel.app",
+        "https://portfolio-v0-02-2gdu3pezg-haneull-dvs-projects.vercel.app",
+        "https://disclosure.haneull.com",
+        "https://conan.ai.kr"
     ]
 else:
     allow_origins = [

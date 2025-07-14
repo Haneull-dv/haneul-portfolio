@@ -1,9 +1,16 @@
-# Python
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Python artifacts
 *.so
 .Python
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
 build/
 develop-eggs/
 dist/
@@ -20,61 +27,41 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Virtualenv
 venv/
 env/
 ENV/
 .env
 **/.env
 
-# Environment and config files
-.env
-**/.env
-.cursor/mcp.json
-stocktrend_service/.cursor/mcp.json
-
-# IDE
+# IDE/editor
 .idea/
 .vscode/
 *.swp
 *.swo
 
 # Docker
-.docker/
 docker-compose.override.yml
 
 # Logs
 *.log
 logs/
 
-# Database
+# Databases
 *.db
 *.sqlite3
 
-# OS
+# Mac & Windows
 .DS_Store
 Thumbs.db
 
-# Project specific
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.dll
-*.dylib
-*.zip
-*.tar.gz
-*.rar
-*.7z
+# Node
+node_modules/
 
 # DART documents
 dart_documents/
 dart_documents/extracted/
 
-node_modules/
-.env
-dist/
-build/
-.DS_Store
-
+# .cursor AI project metadata
+.cursor/
+stocktrend_service/.cursor/

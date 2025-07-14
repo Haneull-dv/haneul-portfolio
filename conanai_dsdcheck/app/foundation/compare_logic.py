@@ -22,16 +22,21 @@ def compare_statements(
             excel_item = excel_map[key]
             dart_item = dart_map[key]
             for col in ["thstrm_amount", "frmtrm_amount"]:
-                excel_val = int(excel_item.__dict__[col]) if excel_item.__dict__[col].lstrip('-').isdigit() else 0
-                dart_val = int(dart_item.__dict__[col]) if dart_item.__dict__[col].lstrip('-').isdigit() else 0
-                if excel_val != dart_val:
-                    results.append(ComparisonResult(
-                        fs_div=key[0],
-                        sj_div=key[1],
-                        account_nm=key[2],
-                        column=col,
-                        excel=str(excel_item.__dict__[col]),
-                        dart=str(dart_item.__dict__[col]),
-                        diff=excel_val - dart_val
-                    ))
+                excel_val_str = excel_item.__dict__.get(col, "0")
+                dart_val_str = dart_item.__dict__.get(col, "0")
+
+                # 값 일치 여부 확인
+                is_match = excel_val_str == dart_val_str
+                
+                # 결과 추가 (O/X)
+                results.append(ComparisonResult(
+                    fs_div=key[0],
+                    sj_div=key[1],
+                    account_nm=key[2],
+                    column=col,
+                    excel=excel_val_str,
+                    dart=dart_val_str,
+                    diff="O" if is_match else "X"
+                ))
+                
     return results 

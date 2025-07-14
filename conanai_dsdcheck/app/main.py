@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .api.dsdfooting_router import router as dsdfooting_router
 from .api.dsdcheck_router import router as dsdcheck_router
 
-
+#하늘이 대박바보
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
