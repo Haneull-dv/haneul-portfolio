@@ -1,72 +1,80 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import FloatingChatbot from "@/shared/components/FloatingChatbot";
-import CloudBackground from "@/shared/components/CloudBackground/CloudBackground";
+import ThreeCanvas from '@/shared/components/ThreeCanvas/ThreeCanvas';
+
+const TEXT = "haneul's portfolio";
 
 export default function IntroPage() {
   const router = useRouter();
+  const [displayed, setDisplayed] = useState("");
 
+  // body, html, #__next 배경 투명하게 덮어쓰기
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      body, html, #__next {
+        background: transparent !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  // 타이핑 애니메이션 (undefined 방지, TEXT가 undefined일 때도 방지)
+  useEffect(() => {
+    setDisplayed("");
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < TEXT.length) {
+        setDisplayed((prev) => prev + TEXT[i]);
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 90);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 클릭 시 대시보드 이동
   const handleClick = () => {
-    // 대시보드로 이동
     router.push("/dashboard");
   };
 
   return (
-    <main
-      className="intro-main"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        display: "block",
-        height: "100vh",
-        background: "#0a0a15",
-      }}
-    >
-      <CloudBackground />
-      <div 
-        className="character-container"
-        style={{ 
-          position: "relative", 
-          margin: "0 auto", 
-          top: "50%", 
-          transform: "translateY(-50%)", 
-          zIndex: 1, 
-          display: "flex", 
-        justifyContent: "center",
-        alignItems: "center",
-          width: "min(600px, 90vw)",
-          height: "min(600px, 90vw)",
-          maxWidth: "600px",
-          maxHeight: "600px"
-      }}
-    >
-        <FloatingChatbot 
-          onClick={handleClick} 
-          style={{ 
-            position: "static", 
-            width: "100%", 
-            height: "100%" 
+    <main style={{ width: '100vw', height: '100vh', minHeight: '100vh', minWidth: '100vw', overflow: 'hidden', padding: 0, margin: 0, position: 'relative' }}>
+      <ThreeCanvas />
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'auto',
+          zIndex: 10,
+        }}
+        className="intro-text-container"
+      >
+        <h1 className="intro-title shimmer-fade-in">Hello. I’m Haneul.</h1>
+        <a
+          className="enter-link"
+          href="#"
+          style={{ pointerEvents: 'auto', padding: '18px 40px', borderRadius: '8px', minWidth: '120px', textAlign: 'center', display: 'inline-block' }}
+          onClick={e => {
+            e.preventDefault();
+            router.push("/dashboard");
           }}
-          hideTooltip={true}
-        />
+        >
+          Enter
+        </a>
       </div>
-      
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .character-container {
-            width: min(400px, 85vw) !important;
-            height: min(400px, 85vw) !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .character-container {
-            width: min(300px, 80vw) !important;
-            height: min(300px, 80vw) !important;
-          }
-        }
-      `}</style>
     </main>
   );
 }

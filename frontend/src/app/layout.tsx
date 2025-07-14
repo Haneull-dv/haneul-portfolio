@@ -4,6 +4,7 @@ import "../styles/globals.scss";
 import "./globals.css";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { playfairDisplay } from '@/shared/lib/fonts';
 
 // Promise.withResolvers polyfill
 if (typeof Promise.withResolvers === 'undefined') {
@@ -46,19 +47,20 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable}`}>
       <head>
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-geist-sans), var(--font-geist-mono), Arial, Helvetica, sans-serif' }}
+        style={{ fontFamily: 'var(--font-geist-sans), var(--font-geist-mono), var(--font-playfair-display), Arial, Helvetica, sans-serif' }}
       >
         {children}
       </body>

@@ -78,19 +78,24 @@ const AboutPage: React.FC = () => {
           </div>
         </div>
         <div className={styles.validationGrid}>
-          <div className={styles.card}>
-            <h3>About</h3>
-            <CardBox>
-              <div style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400, lineHeight: 1.6, color: 'var(--dark)', height: 140, display: 'flex', alignItems: 'center', margin: '-6px' }}>
-                <div>
-                  <p style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}>
-                    안녕하세요! 저는 <strong>김하늘</strong>입니다. 
-                    재무 도메인에 대한 이해와 AI활용·코딩 역량을 갖추고자 꾸준히 노력해왔습니다.
-                  </p>
-                  <p style={{ fontFamily: 'inherit', fontSize: 16, fontWeight: 400 }}>
-                  IR팀 인턴으로 근무하며 반복되는 업무에서 개선점을 발견하고, 이를 자동화하는 솔루션을 직접 기획하고 구현해 스타트업 경진대회 본선에 진출했습니다.
-                  </p>
-                </div>
+        <div className={styles.card}>
+          <h3>About</h3>
+          <CardBox>
+            <div
+              style={{
+                fontFamily: 'inherit',
+                fontSize: 16,
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: 'var(--dark)',
+                height: 'auto',
+              }}
+            >
+              <div>
+                기술은 도구일 뿐, 제가 집중하는 건 <strong>업무 효율과 빠른 의사결정이 가능한 실무 환경을 만드는 일</strong>입니다.
+                
+                재무회계 지식과 개발 역량, AI 활용 능력을 바탕으로 재무팀 실무자의 귀중한 시간을 아껴주는 데 보탬이 되고 싶습니다.
+              </div>
               </div>
             </CardBox>
           </div>

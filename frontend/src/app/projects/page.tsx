@@ -11,7 +11,7 @@ import VideoModal from '@/shared/components/VideoModal/VideoModal';
 import styles from './projects.module.scss';
 
 const pdfMap: Record<string, string> = {
-  '파스타집 사업계획서': '/projects/pdfs/soar.pdf',
+  '파스타집 사업 개선 제안서': '/projects/pdfs/soar.pdf',
 };
 
 const ProjectsPage: React.FC = () => {
@@ -28,7 +28,8 @@ const ProjectsPage: React.FC = () => {
   const projects = [
     {
       title: 'Conan AI',
-      description: "IR 및 재무팀의 반복적인 수작업 업무를 자동화하여 핵심 업무에 집중할 수 있는 환경을 만들고자 했습니다. 문제 해결을 위한 아이디어를 구체화하여 업무 자동화 플랫폼 'Conan AI'를 기획하였고, 스타트업 경진대회 본선에 진출하며 아이디어의 사업성과 실현 가능성을 인정받았습니다.",
+      period: '2025.04 ~ 2025.05',
+      description: "IR팀 인턴으로 일하며 느낀 업무의 비효율을 해결하는 솔루션 Conan AI를 기획하여 스타트업 경진대회 본선까지 진출했습니다.",
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
       status: 'In Progress',
       image: '/projects/conanai.png',
@@ -39,6 +40,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '네오위즈 IR팀 인턴',
+      period: '2022.12 ~ 2023.06',
       description: '기업의 지배구조에 관심을 갖고 네오위즈 IR팀에서 6개월간 근무했습니다. 주주총회 기획부터 공시 자료 작성, 애널리스트 미팅 지원까지 IR의 핵심 프로세스를 경험했습니다.',
       technologies: ['Next.js', 'TypeScript', 'PostgreSQL', 'Socket.io'],
       status: 'Completed',
@@ -50,6 +52,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '미래정치연구소 연구보조원',
+      period: '2020.10 ~ 2021.03',
       description: '동유럽 5개국의 시민-정당 관계 동향을 추적, 분석하여 월간 보고서를 작성했습니다. 핵심 이슈를 구조화하고 데이터 기반의 인사이트를 도출했으며 이를 월례 발표회에서 전달했습니다.',
       technologies: ['Research', 'Excel', 'Word', 'Policy Analysis'],
       status: 'Completed',
@@ -60,6 +63,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       title: '파스타집 사업 개선 제안서',
+      period: '2022.10',
       description: '단순한 아르바이트 경험에 그치지 않고 매장의 성장을 위해 사업 개선안을 기획 및 제안했습니다. 마케팅 전략, 운영 효율화 방안, 주변 상권 및 경쟁사 분석을 포함한 자료를 통해 문제점을 진단하고 해결책을 제시했습니다.',
       technologies: ['Business Plan', 'Marketing', 'Analysis'],
       status: 'Completed',
@@ -134,10 +138,12 @@ const ProjectsPage: React.FC = () => {
                   style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                 />
               </div>
-              <div className={styles.projectInfo}>
-                <h3 className={styles.projectTitle}>{project.title}</h3>
-                <p className={styles.projectDesc}>{project.description}</p>
-                {/* Removed projectTechList and projectLinks for a cleaner card */}
+              <div className={styles.projectContent}>
+                <div className={styles.projectTitleRow}>
+                  <div className={styles.projectTitle}>{project.title}</div>
+                  <div className={styles.projectDate}>{project.period}</div>
+                </div>
+                <div className={styles.projectDescription}>{project.description}</div>
               </div>
             </div>
           ))}

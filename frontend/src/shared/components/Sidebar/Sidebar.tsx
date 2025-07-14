@@ -1,12 +1,15 @@
+// src/shared/components/Sidebar/Sidebar.tsx
+
 "use client";
 
+import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useActiveMenu } from '../../hooks/useActiveMenu';
 import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
-  isHidden: boolean;
-  toggleSidebar: () => void;
+  isMobile: boolean;
+  isOpen: boolean;
+  onMenuClick?: () => void;
 }
 
 interface MenuItem {
@@ -22,7 +25,7 @@ interface MenuGroup {
 }
 
 const menuGroups: MenuGroup[] = [
-  {
+    {
     title: 'Workspace',
     items: [
       { id: 'dashboard', icon: 'bx-grid-alt', text: 'Dashboard', href: '/dashboard' },
@@ -42,58 +45,61 @@ const menuGroups: MenuGroup[] = [
   }
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isHidden, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, onMenuClick }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { setActive } = useActiveMenu();
 
-  const handleMenuClick = (menuId: string, href: string) => {
+  const handleMenuClick = (href: string) => {
     if (href !== '#') {
       router.push(href);
     }
-    setActive(menuId);
+    if (onMenuClick) {
+      onMenuClick();
+    }
   };
 
-  const isMenuActive = (item: MenuItem) => {
-    return pathname === item.href;
-  };
+  const sidebarClassName = [
+    styles.sidebar,
+    isMobile && styles.isMobile,
+    isMobile && isOpen && styles.isOpen,
+  ].filter(Boolean).join(' ');
 
   return (
-    <section id="sidebar" className={`${styles.sidebar} ${isHidden ? styles.hide : ''}`}>
+    <aside id="sidebar" className={sidebarClassName}>
       <div className={styles.brand}>
-        <span className={styles.text}>Financial Workspace</span>
+        <span className={styles.text}>FinOps One</span>
       </div>
       
-      {menuGroups.map((group, groupIndex) => (
-        <div key={group.title} className={styles.menuGroup}>
-          <div className={styles.groupHeader}>
-            <span className={styles.groupTitle}>{group.title}</span>
+      <nav className={styles.navigation}>
+        {menuGroups.map((group, groupIndex) => (
+          <div key={group.title} className={styles.menuGroup}>
+            <div className={styles.groupHeader}>
+              <span className={styles.groupTitle}>{group.title}</span>
+            </div>
+            <ul className={styles.sideMenu}>
+              {group.items.map((item) => (
+                <li key={item.id} className={pathname === item.href ? styles.active : ''}>
+                  <a
+                    href={item.href}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMenuClick(item.href);
+                    }}
+                    className={styles.menuItem}
+                  >
+                    <i className={`bx ${item.icon}`}></i>
+                    <span className={styles.text}>{item.text}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {groupIndex < menuGroups.length - 1 && (
+              <div className={styles.divider}></div>
+            )}
           </div>
-          
-          <ul className={styles.sideMenu}>
-            {group.items.map((item) => (
-              <li key={item.id} className={isMenuActive(item) ? styles.active : ''}>
-                <a 
-                  href={item.href} 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMenuClick(item.id, item.href);
-                  }}
-                  className={styles.menuItem}
-                >
-                  <i className={`bx ${item.icon}`}></i>
-                  <span className={styles.text}>{item.text}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          
-          {groupIndex < menuGroups.length - 1 && (
-            <div className={styles.divider}></div>
-          )}
-        </div>
-      ))}
-      
+        ))}
+      </nav>
+
       <div className={styles.userProfile}>
         <div className={styles.profileInfo}>
           <div className={styles.profileAvatar}>
@@ -101,15 +107,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isHidden, toggleSidebar }) => {
           </div>
           <div className={styles.profileText}>
             <span className={styles.profileName}>Haneul Kim</span>
-            <span className={styles.profileRole}>Financial Technologist</span>
+            <span className={styles.profileRole}>Automation Architect</span>
           </div>
         </div>
-        <button className={styles.settingsButton}>
+        <button className={styles.settingsButton} aria-label="Settings">
           <i className="bx bx-cog"></i>
         </button>
       </div>
-    </section>
+    </aside>
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

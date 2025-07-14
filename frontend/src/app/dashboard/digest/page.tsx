@@ -176,6 +176,12 @@ const DigestPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  useEffect(() => {
+    console.log('📦 Disclosure API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_DISCLOSURE);
+    console.log('📦 Stockprice API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_STOCKPRICE);
+    console.log('📦 Issue API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_ISSUE);
+  }, []);
+
   const integrateData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -184,11 +190,24 @@ const DigestPage: React.FC = () => {
         try { return await fetcher(); } catch (e) { return fallback; }
       };
 
-      const [stockRes, disclosureRes, issueRes] = await Promise.all([
-        safeFetch(apiClient.getAllStocks, { data: [] as WeeklyStockPrice[] }),
-        safeFetch(apiClient.getDisclosuresWithCompanies, { disclosures: [] as WeeklyDisclosure[], companies: [] as GameCompany[] }),
-        safeFetch(apiClient.getWeeklyIssues, { data: [] as WeeklyIssue[] }),
-      ]);
+      console.log('🔗 [API 요청] STOCKPRICE:', `${STOCKPRICE_API_BASE}/db/all`);
+      const stockRes = await safeFetch(async () => {
+        const res = await fetch(`${STOCKPRICE_API_BASE}/db/all`);
+        console.log('📥 [API 응답] STOCKPRICE status:', res.status, res.statusText);
+        return res.json();
+      }, { data: [] as WeeklyStockPrice[] });
+      console.log('🔗 [API 요청] DISCLOSURE:', `${DISCLOSURE_API_BASE}/recent-with-companies`);
+      const disclosureRes = await safeFetch(async () => {
+        const res = await fetch(`${DISCLOSURE_API_BASE}/recent-with-companies`);
+        console.log('📥 [API 응답] DISCLOSURE status:', res.status, res.statusText);
+        return res.json();
+      }, { disclosures: [] as WeeklyDisclosure[], companies: [] as GameCompany[] });
+      console.log('🔗 [API 요청] ISSUE:', `${ISSUE_API_BASE}/recent`);
+      const issueRes = await safeFetch(async () => {
+        const res = await fetch(`${ISSUE_API_BASE}/recent`);
+        console.log('📥 [API 응답] ISSUE status:', res.status, res.statusText);
+        return res.json();
+      }, { data: [] as WeeklyIssue[] });
 
       const stockData: WeeklyStockPrice[] = stockRes?.data ?? [];
       const companies: GameCompany[] = disclosureRes?.companies ?? [];
@@ -268,10 +287,10 @@ const DigestPage: React.FC = () => {
   const kpiCards = [
     { title: "총 상장사", value: integratedData.length.toString(), unit: "분석 대상" },
     { title: "평균 시가총액", value: "1.2조", unit: "KRW" },
-    { title: "금주 신규 공시", value: "12", unit: "건" },
-    { title: "금주 주요 이슈", value: "7", unit: "건" },
-    ...(topGainer ? [{ title: "주가 등락률 최대 상승", value: `${topGainer.changeRate?.toFixed(2)}%`, companyName: topGainer.companyName, trend: 'up' as const }] : []),
-    ...(topLoser ? [{ title: "주가 등락률 최대 하락", value: `${topLoser.changeRate?.toFixed(2)}%`, companyName: topLoser.companyName, trend: 'down' as const }] : []),
+    { title: "신규 공시", value: "12", unit: "건" },
+    { title: "주요 이슈", value: "7", unit: "건" },
+    ...(topGainer ? [{ title: "주가 최대 상승", value: `${topGainer.changeRate?.toFixed(2)}%`, companyName: topGainer.companyName, trend: 'up' as const }] : []),
+    ...(topLoser ? [{ title: "주가 최대 하락", value: `${topLoser.changeRate?.toFixed(2)}%`, companyName: topLoser.companyName, trend: 'down' as const }] : []),
   ];
 
   if (loading) return (
@@ -286,16 +305,28 @@ const DigestPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <div className={styles.contentWrapper}>
         <div className={styles.pageHeaderArea}>
-          <div className={styles.breadcrumbs}>
-            <span>Dashboard</span>
-            <span className={styles.separator}>/</span>
-            <span className={styles.current}>Market Digest</span>
-          </div>
-          <h1 className={styles.pageTitle}>Market Digest</h1>
-          <div className={styles.kpiGrid}>
-            {kpiCards.map((kpi, idx) => (
-              <KPICard key={idx} {...kpi} />
-            ))}
+          <div className={styles.card} style={{ marginTop: 32 }}>
+            <div className={styles.breadcrumbs}>
+              <span className={styles.breadcrumbLink}>Dashboard</span>
+              <span className={styles.breadcrumbSeparator}>/</span>
+              <span className={styles.breadcrumbCurrent}>Market Digest</span>
+            </div>
+            <h2 className={styles.cardTitle}>Market Digest</h2>
+            <p style={{ color: '#374151', fontSize: 16, marginBottom: 18 }}>
+              금주 게임업계 상장기업의 시장 동향과 이슈를 한눈에 확인하세요.
+            </p>
+            <div className={styles.digestStatsGrid}>
+              {kpiCards.map((kpi, idx) => (
+                <div className={styles.miniKpiCard} key={idx}>
+                  <div className={styles.miniKpiTitle}>{kpi.title}</div>
+                  <div className={styles.miniKpiValueRow}>
+                    <span className={styles.miniKpiValue}>{kpi.value}</span>
+                    {kpi.unit && <span className={styles.miniKpiUnit}>{kpi.unit}</span>}
+                  </div>
+                  {kpi.companyName && <div className={styles.miniKpiCompany}>{kpi.companyName}</div>}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className={styles.tableHeader}>

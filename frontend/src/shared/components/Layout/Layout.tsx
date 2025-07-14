@@ -1,9 +1,10 @@
+// src/shared/components/Layout/Layout.tsx
+
 "use client";
 
-import React from 'react';
-// useSidebar 훅의 실제 경로를 확인해주세요.
-import { useSidebar } from '../../hooks/useSidebar';
-import Sidebar from '../Sidebar/Sidebar'; // Sidebar 컴포넌트의 상대 경로
+import React, { useState } from 'react';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import Sidebar from '../Sidebar/Sidebar';
 import styles from './Layout.module.scss';
 
 interface LayoutProps {
@@ -11,31 +12,54 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { isHidden, toggleSidebar } = useSidebar();
+  // SSR을 고려한 useMediaQuery 훅으로 isMobile 상태 관리
+  const isMobile = useMediaQuery('(max-width: 1024px)');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      setIsSidebarOpen((prev) => !prev);
+    }
+  };
+
+  // 메뉴 클릭 시 (모바일에서) 사이드바 닫기
+  const handleCloseSidebar = () => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  // content 영역의 클래스를 동적으로 결정
+  const contentClassName = isMobile ? styles.content : `${styles.content} ${styles.contentPC}`;
 
   return (
-    <>
-      <button
-        className={styles.hamburger}
-        aria-label="Toggle sidebar"
-        onClick={toggleSidebar}
-        style={{
-          position: 'fixed',
-          top: 20,
-          left: 20,
-          zIndex: 3001,
-          display: 'none',
-        }}
-      >
-        <i className="bx bx-menu"></i>
-      </button>
-      <div className={styles.layout}>
-        <Sidebar isHidden={isHidden} toggleSidebar={toggleSidebar} />
-        <section id="content" className={styles.content}>
-          {children}
-        </section>
-      </div>
-    </>
+    <div className={styles.layout}>
+      {/* 모바일 사이드바 오버레이 */}
+      {isMobile && isSidebarOpen && (
+        <div className={styles.overlay} onClick={handleCloseSidebar} />
+      )}
+
+      {/* 모바일 햄버거 버튼 */}
+      {isMobile && (
+        <button
+          className={styles.hamburger}
+          aria-label="Toggle sidebar"
+          onClick={handleToggleSidebar}
+        >
+          <i className="bx bx-menu"></i>
+        </button>
+      )}
+
+      <Sidebar
+        isMobile={isMobile}
+        isOpen={isSidebarOpen}
+        onMenuClick={handleCloseSidebar}
+      />
+
+      <main id="content" className={contentClassName}>
+        {children}
+      </main>
+    </div>
   );
 };
 

@@ -133,10 +133,18 @@ const ValidationPage: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('📦 DSDCHECK API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK);
+  }, []);
+
+  useEffect(() => {
     // 페이지 로드 시 기본 엑셀 파일을 불러옵니다.
     const loadDefaultFile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/${DEFAULT_EXCEL_FILE_NAME}`);
+        const encodedFileName = encodeURIComponent(DEFAULT_EXCEL_FILE_NAME);
+        const defaultUrl = `/${encodedFileName}`;
+        console.log('🔗 [정적 fetch] 기본 엑셀 파일:', defaultUrl);
+        const response = await fetch(defaultUrl);
+        console.log('📥 [정적 응답] status:', response.status, response.statusText);
         if (!response.ok) {
           throw new Error('기본 엑셀 파일을 불러오는 데 실패했습니다.');
         }
@@ -145,10 +153,8 @@ const ValidationPage: React.FC = () => {
         setFile(defaultFile);
       } catch (error) {
         console.error(error);
-        // alert(error.message); // 사용자에게 알릴 필요가 있다면 활성화
       }
     };
-
     loadDefaultFile();
   }, []);
 
@@ -179,7 +185,11 @@ const ValidationPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/api/v1/dsdfooting/check-footing`, { method: 'POST', body: formData });
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/api/v1/dsdfooting/check-footing`;
+      console.log('🔗 [API 요청] DSDCHECK 합계검증:', url);
+      console.log('📄 [FormData] file:', file);
+      const response = await fetch(url, { method: 'POST', body: formData });
+      console.log('📥 [API 응답] status:', response.status, response.statusText);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || '검증 요청이 실패했습니다.');
@@ -272,8 +282,8 @@ const ValidationPage: React.FC = () => {
         <p>{modal.message}</p>
       </Modal>
       <Layout>
-        <div className={styles.pageWrapper}>
-          <div className={styles.card}>
+        {/* 실제 validation 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
+        <div className={styles.card}>
             <div className={styles.breadcrumbs}>
               <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
               <span className={styles.breadcrumbSeparator}>/</span>
@@ -417,7 +427,6 @@ const ValidationPage: React.FC = () => {
               ))}
             </div>
           )}
-        </div>
       </Layout>
     </>
   );

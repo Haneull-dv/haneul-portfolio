@@ -77,7 +77,9 @@ const queryClient = new QueryClient({
 });
 
 const fetchCompanies = async (): Promise<CompaniesResponse> => {
+  console.log('🔗 [API 요청] KPI 기업목록:', `${API_BASE_URL}/kpi/companies`);
   const response = await fetch(`${API_BASE_URL}/kpi/companies`);
+  console.log('📥 [API 응답] KPI 기업목록 status:', response.status, response.statusText);
   if (!response.ok) {
     throw new Error('백엔드 서버에 연결할 수 없습니다. KPI 비교 서버가 실행 중인지 확인해주세요.');
   }
@@ -686,6 +688,10 @@ const TrendsPageContent: React.FC = () => {
     { label: 'Financial Trends', active: true }
   ];
 
+  useEffect(() => {
+    console.log('📦 KPI API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_KPI);
+  }, []);
+
   // 기업 목록 조회
   const { data: companiesData, isLoading, error } = useQuery({
     queryKey: ['companies'],
@@ -776,7 +782,7 @@ const TrendsPageContent: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {selectedEntries.map((entry, idx) => (
-          <div key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div key={entry.company.corp_code + '_' + (entry.selectedReport?.rcept_no || 'none') + '_' + idx} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span style={{ color: '#173e92', fontWeight: 600, fontSize: 15, minWidth: 80 }}>{entry.company.corp_name}</span>
             {entry.isLoadingReports ? (
               <span style={{ color: '#374151', fontSize: 15 }}>보고서 로딩중...</span>
@@ -818,8 +824,49 @@ const TrendsPageContent: React.FC = () => {
           const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
           const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
           return (
-            <span key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ background: '#f3f4f6', color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span
+              key={entry.company.corp_code + '_' + (entry.selectedReport?.rcept_no || 'none') + '_' + idx}
+              style={{
+                background: '#f5f6fa',
+                color: '#222',
+                fontWeight: 400,
+                fontSize: 15,
+                padding: '4px 10px',
+                borderRadius: 6,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                border: 'none',
+                boxShadow: 'none',
+                position: 'relative',
+                transition: 'background 0.15s'
+              }}
+            >
               {entry.company.corp_name}{displayYear}
+              <button
+                onClick={() => handleCompanyRemove(idx)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#bbb',
+                  fontSize: 15,
+                  marginLeft: 2,
+                  cursor: 'pointer',
+                  padding: 0,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  opacity: 0.6,
+                  transition: 'opacity 0.15s',
+                  height: 18,
+                  width: 18
+                }}
+                title="제거"
+                onMouseOver={e => (e.currentTarget.style.opacity = '1')}
+                onMouseOut={e => (e.currentTarget.style.opacity = '0.6')}
+              >
+                <i className="bx bx-x" style={{ fontSize: 16 }}></i>
+              </button>
             </span>
           );
         })}
@@ -1011,6 +1058,8 @@ const TrendsPageContent: React.FC = () => {
 
   return (
     <Layout>
+      {/* 실제 trends 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
+      {/* ... trends 페이지의 실제 내용 ... */}
       <div className={styles.pageWrapper}>
         {currentView === 'selection' && (
           <>
@@ -1022,7 +1071,7 @@ const TrendsPageContent: React.FC = () => {
                 <span className={styles.breadcrumbCurrent}>KPI Trends</span>
               </div>
               <h2 className={styles.cardTitle} style={{ color: '#222' }}>KPI Trends</h2>
-              <p style={{ color: '#374151', fontSize: 16 }}>
+              <p style={{ color: '#6b7280', fontSize: 16, fontWeight: 400 }}>
                 게임업계 상장기업의 재무정보를 DART 사업보고서 기준으로 분석합니다. 재무 KPI를 통해 동종 게임업계 간 비교가 가능하며 인사이트 요약을 제공합니다.
               </p>
               <div style={{ display: 'flex', gap: 32, marginTop: 24 }}>
@@ -1041,101 +1090,100 @@ const TrendsPageContent: React.FC = () => {
               </div>
             </div>
 
-            {/* 3-card vertical stack, all with unified design */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 0 }}>
-              {/* 기업 검색 및 선택 */}
-              <div className={styles.card} style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
-                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>기업 검색 및 선택</h3>
-                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석할 게임회사를 검색하고 선택하세요 (최대 5개)</span>
+            {/* 기업 및 사업보고서 선택 - 하나의 카드 안에 가로 2회색박스 */}
+            <div className={styles.card} style={{ marginTop: 0, padding: '20px', border: '1px solid #e9ecef', borderRadius: 0 }}>
+              <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0, marginBottom: 12, letterSpacing: '-0.01em' }}>기업 및 사업보고서 선택</h3>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
+                {/* 기업 검색 및 선택 박스 */}
+                <div style={{ background: '#f3f4f6', border: '1px solid #e9ecef', borderRadius: 0, flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <h4 style={{ color: '#173e92', fontWeight: 600, fontSize: 16, margin: 0, marginBottom: 5, letterSpacing: '-0.01em' }}>기업 검색 및 선택</h4>
+                  <span style={{ color: '#6b7280', fontSize: 14, fontWeight: 400, marginBottom: 5 }}>분석할 게임회사를 검색하고 선택하세요 (최대 5개)</span>
+                  <div style={{ position: 'relative' }} ref={searchRef}>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      placeholder="기업명 검색 (예: ㄴ, 네이버, 넥슨...)"
+                      style={{
+                        width: '100%',
+                        padding: '9px 13px',
+                        border: '1px solid #e9ecef',
+                        borderRadius: 0,
+                        fontSize: 14,
+                        color: '#374151',
+                        marginBottom: 0,
+                        outline: 'none',
+                        fontWeight: 400,
+                        background: '#fff',
+                        boxSizing: 'border-box',
+                        marginTop: 5
+                      }}
+                      onFocus={() => setIsSearchOpen(true)}
+                    />
+                    {/* 검색 결과 드롭다운 */}
+                    {isSearchOpen && filteredCompanies.length > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        background: '#fff',
+                        border: '1px solid #e9ecef',
+                        zIndex: 10,
+                        boxShadow: '0 2px 8px rgba(16,24,40,0.06)',
+                        borderRadius: 0,
+                        maxHeight: 240,
+                        overflowY: 'auto',
+                      }}>
+                        {filteredCompanies.map(company => (
+                          <div
+                            key={company.corp_code}
+                            style={{ padding: '10px 14px', cursor: 'pointer', color: '#374151', fontSize: 14, borderBottom: '1px solid #f3f4f6' }}
+                            onClick={() => {
+                              handleCompanySelect(company);
+                              setIsSearchOpen(false);
+                              setSearchQuery(company.corp_name);
+                            }}
+                          >
+                            {company.corp_name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div style={{ position: 'relative' }} ref={searchRef}>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    placeholder="기업명 검색 (예: ㄴ, 네이버, 넥슨...)"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #e9ecef',
-                      borderRadius: 0,
-                      fontSize: 15,
-                      color: '#374151',
-                      marginBottom: 0,
-                      outline: 'none',
-                      fontWeight: 400,
-                      background: '#fff',
-                      boxSizing: 'border-box',
-                      marginTop: 8
-                    }}
-                    onFocus={() => setIsSearchOpen(true)}
-                  />
-                  {/* 검색 결과 드롭다운 */}
-                  {isSearchOpen && filteredCompanies.length > 0 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 4px)',
-                      left: 0,
-                      right: 0,
-                      background: '#fff',
-                      border: '1px solid #e9ecef',
-                      zIndex: 10,
-                      boxShadow: '0 2px 8px rgba(16,24,40,0.06)',
-                      borderRadius: 0,
-                      maxHeight: 240,
-                      overflowY: 'auto',
-                    }}>
-                      {filteredCompanies.map(company => (
-                        <div
-                          key={company.corp_code}
-                          style={{ padding: '12px 16px', cursor: 'pointer', color: '#374151', fontSize: 15, borderBottom: '1px solid #f3f4f6' }}
-                          onClick={() => {
-                            handleCompanySelect(company);
-                            setIsSearchOpen(false);
-                            setSearchQuery(company.corp_name);
-                          }}
-                        >
-                          {company.corp_name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                {/* 사업보고서 선택 박스 */}
+                <div style={{ background: '#f3f4f6', border: '1px solid #e9ecef', borderRadius: 0, flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <h4 style={{ color: '#173e92', fontWeight: 600, fontSize: 16, margin: 0, marginBottom: 5, letterSpacing: '-0.01em' }}>사업보고서 선택</h4>
+                  <span style={{ color: '#6b7280', fontSize: 14, fontWeight: 400, marginBottom: 5 }}>분석을 원하는 기업별 사업보고서를 선택하세요.</span>
+                  {renderReportSelection()}
                 </div>
               </div>
-              {/* 사업보고서 선택 */}
-              <div className={styles.card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
-                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>사업보고서 선택</h3>
-                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석을 원하는 기업별 사업보고서를 선택하세요.</span>
-                </div>
-                {renderReportSelection()}
+            </div>
+            {/* 선택된 분석 항목 카드 */}
+            <div className={styles.card} style={{ marginTop: 2, padding: '20px', border: '1px solid #e9ecef', borderRadius: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 10 }}>
+                <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 18, margin: 0, letterSpacing: '-0.01em' }}>선택된 분석 항목 ({selectedEntries.length}/5)</h3>
+                <span style={{ color: '#6b7280', fontSize: 14, fontWeight: 400 }}>분석할 기업과 보고서를 확인하고 분석을 시작하세요</span>
               </div>
-              {/* 선택된 분석 항목 */}
-              <div className={styles.card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
-                  <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0 }}>선택된 분석 항목 ({selectedEntries.length}/5)</h3>
-                  <span style={{ color: '#374151', fontSize: 15, fontWeight: 400 }}>분석할 기업과 보고서를 확인하고 분석을 시작하세요</span>
-                </div>
-                {renderSelectedAnalysis()}
-                <button
-                  onClick={handleAnalyze}
-                  disabled={selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport)}
-                  style={{
-                    background: '#173e92',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 0,
-                    fontWeight: 600,
-                    fontSize: 15,
-                    padding: '12px 24px',
-                    marginTop: 16,
-                    cursor: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'not-allowed' : 'pointer',
-                    opacity: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 0.5 : 1,
-                    boxShadow: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'none' : '0 2px 8px rgba(16,24,40,0.06)'
-                  }}
-                >KPI 분석 시작</button>
-              </div>
+              {renderSelectedAnalysis()}
+              <button
+                onClick={handleAnalyze}
+                disabled={selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport)}
+                style={{
+                  background: '#173e92',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 0,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  padding: '11px 22px',
+                  marginTop: 10,
+                  cursor: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'not-allowed' : 'pointer',
+                  opacity: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 0.5 : 1,
+                  boxShadow: selectedEntries.length === 0 || selectedEntries.some(e => !e.selectedReport) ? 'none' : '0 2px 8px rgba(16,24,40,0.06)'
+                }}
+              >KPI 분석 시작</button>
             </div>
           </>
         )}

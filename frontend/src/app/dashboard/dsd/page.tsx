@@ -50,10 +50,15 @@ const DSDPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('sheet_name', sheetName);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`, {
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`;
+      console.log('🔗 [API 요청] DSDGEN 업로드:', url);
+      console.log('📄 [FormData] file:', file);
+      console.log('📄 [FormData] sheet_name:', sheetName);
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
+      console.log('📥 [API 응답] status:', response.status, response.statusText);
       if (!response.ok) {
         throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
       }
@@ -202,13 +207,13 @@ const DSDPage: React.FC = () => {
               onChange={e => setSheetName(e.target.value)}
               style={{ width: '100%', padding: '10px', borderRadius: 0, border: '1px solid #222', fontSize: '16px', background: '#fff', color: '#222' }}
             >
-              {sheetNames.map(name => (
+              {sheetNames.filter(name => name !== 'Index' && name !== '공시기본정보').map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
           </div>
         )}
-        <button onClick={handleUpload} disabled={loading} className={styles.actionButton}>
+        <button onClick={handleUpload} disabled={!isReady || loading} className={styles.actionButton}>
           {loading ? '업로드 중...' : '업로드 및 변환'}
         </button>
         {error && <div style={{ color: '#e74c3c', marginTop: 18, fontWeight: 500 }}>{error}</div>}
@@ -271,53 +276,52 @@ const DSDPage: React.FC = () => {
     { label: 'DSD 데이터 생성', active: true }
   ];
 
-  // 반응형 및 사이드바 겹침/overflow 방지용 스타일 추가
-  const containerStyle: React.CSSProperties = {
-    padding: '40px 40px 40px 284px', // sidebar(260px) + 24px
-    background: '#f8f9fa',
-    minHeight: '100vh',
-    minWidth: 0,
-    overflowX: 'hidden',
-  };
+  const [isReady, setIsReady] = useState(false); // ✅ 새 상태 추가
 
   useEffect(() => {
-    // 페이지 로드 시 기본 엑셀 파일을 불러옴
     const loadDefaultFile = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/${DEFAULT_EXCEL_FILE_NAME}`);
+        const encodedFileName = encodeURIComponent(DEFAULT_EXCEL_FILE_NAME);
+        const defaultUrl = `/${encodedFileName}`;
+        const response = await fetch(defaultUrl);
         if (!response.ok) return;
         const blob = await response.blob();
         const defaultFile = new File([blob], DEFAULT_EXCEL_FILE_NAME, { type: blob.type });
-        setFile(defaultFile);
-        setResult(null);
-        setError(null);
+
         const reader = new FileReader();
         reader.onload = (evt) => {
           const data = evt.target?.result;
           const workbook = XLSX.read(data, { type: 'binary' });
+          const sheet = workbook.SheetNames[0] || '';
+          setFile(defaultFile);
           setSheetNames(workbook.SheetNames);
-          setSheetName(workbook.SheetNames[0] || '');
+          setSheetName(sheet);
+          setIsReady(true); // ✅ 여기서 최종 ready 상태를 켜줌
         };
         reader.readAsBinaryString(defaultFile);
       } catch (e) {
-        // 무시: 파일 없으면 아무것도 안 함
+        // 무시
+      } finally {
+        setLoading(false);
       }
     };
     loadDefaultFile();
   }, []);
 
+  
+
   return (
     <Layout>
-      <div className={styles.pageWrapper}>
-        <div className={styles.card}>
-          <div className={styles.breadcrumbs}>
-            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbCurrent}>DART Converter</span>
-          </div>
-          <h2 className={styles.cardTitle}>DART Converter</h2>
-          <p>엑셀 파일을 DART 공시 형식으로 변환하여 표준화된 데이터를 생성하세요.</p>
+      {/* 실제 dsd 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
+      <div className={styles.card}>
+        <div className={styles.breadcrumbs}>
+          <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+          <span className={styles.breadcrumbSeparator}>/</span>
+          <span className={styles.breadcrumbCurrent}>DART Converter</span>
         </div>
+        <h2 className={styles.cardTitle}>DART Converter</h2>
+        <p>엑셀 파일을 DART 공시 형식으로 변환하여 표준화된 데이터를 생성하세요.</p>
         {renderUploadCard()}
         {renderTable()}
       </div>
