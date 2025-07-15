@@ -176,47 +176,45 @@ const DSDPage: React.FC = () => {
   };
   const renderUploadCard = () => (
     <div className={styles.uploadSection}>
-      <div className={styles.card}>
-        <h3 style={{ marginBottom: 24 }}>엑셀 파일 업로드</h3>
-        <div className={styles.uploadArea} style={{ marginBottom: 24 }} onClick={handleUploadAreaClick}>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileChange}
-            className={styles.fileInput}
-            id="file-upload"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="file-upload" className={styles.uploadLabel} style={{ pointerEvents: 'none' }}>
-            <i className='bx bx-cloud-upload'></i>
-            <span>엑셀 파일을 선택하거나 드래그하세요.</span>
-          </label>
-          {file && (
-            <div className={styles.fileInfo}>
-              <i className='bx bx-file'></i>
-              <span>{file.name}</span>
-            </div>
-          )}
-        </div>
-        {sheetNames.length > 0 && (
-          <div style={{ margin: '20px 0' }}>
-            <select
-              value={sheetName}
-              onChange={e => setSheetName(e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: 0, border: '1px solid #222', fontSize: '16px', background: '#fff', color: '#222' }}
-            >
-              {sheetNames.filter(name => name !== 'Index' && name !== '공시기본정보').map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
+      <h3 style={{ marginBottom: 24 }}>엑셀 파일 업로드</h3>
+      <div className={styles.uploadArea} style={{ marginBottom: 24 }} onClick={handleUploadAreaClick}>
+        <input
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={handleFileChange}
+          className={styles.fileInput}
+          id="file-upload"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+        />
+        <label htmlFor="file-upload" className={styles.uploadLabel} style={{ pointerEvents: 'none' }}>
+          <i className='bx bx-cloud-upload'></i>
+          <span>엑셀 파일을 선택하거나 드래그하세요.</span>
+        </label>
+        {file && (
+          <div className={styles.fileInfo}>
+            <i className='bx bx-file'></i>
+            <span>{file.name}</span>
           </div>
         )}
-        <button onClick={handleUpload} disabled={!isReady || loading} className={styles.actionButton}>
-          {loading ? '업로드 중...' : '업로드 및 변환'}
-        </button>
-        {error && <div style={{ color: '#e74c3c', marginTop: 18, fontWeight: 500 }}>{error}</div>}
       </div>
+      {sheetNames.length > 0 && (
+        <div style={{ margin: '20px 0' }}>
+          <select
+            value={sheetName}
+            onChange={e => setSheetName(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: 0, border: '1px solid #222', fontSize: '16px', background: '#fff', color: '#222' }}
+          >
+            {sheetNames.filter(name => name !== 'Index' && name !== '공시기본정보').map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      <button onClick={handleUpload} disabled={!isReady || loading} className={styles.actionButton}>
+        {loading ? '업로드 중...' : '업로드 및 변환'}
+      </button>
+      {error && <div style={{ color: '#e74c3c', marginTop: 18, fontWeight: 500 }}>{error}</div>}
     </div>
   );
 
@@ -311,20 +309,25 @@ const DSDPage: React.FC = () => {
   
 
   return (
-   <>
-      {/* 실제 dsd 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
+    <div className={styles.pageWrapper}>
+      {/* 헤더 카드 */}
       <div className={styles.card}>
         <div className={styles.breadcrumbs}>
-          <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
+          <span className={styles.breadcrumbLink}>Dashboard</span>
           <span className={styles.breadcrumbSeparator}>/</span>
           <span className={styles.breadcrumbCurrent}>DART Converter</span>
         </div>
         <h2 className={styles.cardTitle}>DART Converter</h2>
-        <p>엑셀 파일을 DART 공시 형식으로 변환하여 표준화된 데이터를 생성하세요.</p>
-        {renderUploadCard()}
-        {renderTable()}
+        <p style={{ color: '#374151', fontSize: 16, marginBottom: 0 }}>
+          엑셀 파일을 DART 공식 형식으로 변환하여 표준화된 데이터를 생성하세요.
+        </p>
       </div>
-    </>
+      {/* 업로드 카드 */}
+      <div className={styles.card}>
+        {renderUploadCard()}
+      </div>
+      {renderTable()}
+    </div>
   );
 };
 
