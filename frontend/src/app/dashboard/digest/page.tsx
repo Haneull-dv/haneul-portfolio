@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './digest.module.scss';
 import clsx from 'clsx';
+import PageHeader from '@/shared/components/PageHeader/PageHeader';
 
 // --- 상수 및 인터페이스 정의 ---
 const STOCKPRICE_API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL_STOCKPRICE}/stockprice`;
@@ -303,44 +304,39 @@ const DigestPage: React.FC = () => {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.contentWrapper}>
-        <div className={styles.pageHeaderArea}>
-          <div className={styles.card} style={{ marginTop: 32 }}>
-            <div className={styles.breadcrumbs}>
-              <span className={styles.breadcrumbLink}>Dashboard</span>
-              <span className={styles.breadcrumbSeparator}>/</span>
-              <span className={styles.breadcrumbCurrent}>Market Digest</span>
+      <PageHeader
+        title="Market Digest"
+        description="금주 게임업계 상장기업의 시장 동향과 이슈를 한눈에 확인하세요."
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Market Digest', active: true }
+        ]}
+        className={styles.card}
+      >
+        <div className={styles.digestStatsGrid}>
+          {kpiCards.map((kpi, idx) => (
+            <div className={styles.miniKpiCard} key={idx}>
+              <div className={styles.miniKpiTitle}>{kpi.title}</div>
+              <div className={styles.miniKpiValueRow}>
+                <span className={styles.miniKpiValue}>{kpi.value}</span>
+                {kpi.unit && <span className={styles.miniKpiUnit}>{kpi.unit}</span>}
+              </div>
+              {kpi.companyName && <div className={styles.miniKpiCompany}>{kpi.companyName}</div>}
             </div>
-            <h2 className={styles.cardTitle}>Market Digest</h2>
-            <p style={{ color: '#374151', fontSize: 16, marginBottom: 18 }}>
-              금주 게임업계 상장기업의 시장 동향과 이슈를 한눈에 확인하세요.
-            </p>
-            <div className={styles.digestStatsGrid}>
-              {kpiCards.map((kpi, idx) => (
-                <div className={styles.miniKpiCard} key={idx}>
-                  <div className={styles.miniKpiTitle}>{kpi.title}</div>
-                  <div className={styles.miniKpiValueRow}>
-                    <span className={styles.miniKpiValue}>{kpi.value}</span>
-                    {kpi.unit && <span className={styles.miniKpiUnit}>{kpi.unit}</span>}
-                  </div>
-                  {kpi.companyName && <div className={styles.miniKpiCompany}>{kpi.companyName}</div>}
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
-        <div className={styles.tableHeader}>
-          <h3 className={styles.tableTitle}>통합 기업 분석 대시보드 ({integratedData.length}개 기업)</h3>
-          <input
-            type="text"
-            placeholder="기업명 검색..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className={styles.headerSearchInput}
-          />
-        </div>
-        <IntegratedTable data={integratedData} searchTerm={searchTerm} onSearch={setSearchTerm} />
+      </PageHeader>
+      <div className={styles.tableHeader}>
+        <h3 className={styles.tableTitle}>통합 기업 분석 대시보드 ({integratedData.length}개 기업)</h3>
+        <input
+          type="text"
+          placeholder="기업명 검색..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className={styles.headerSearchInput}
+        />
       </div>
+      <IntegratedTable data={integratedData} searchTerm={searchTerm} onSearch={setSearchTerm} />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import styles from '../validation/validation.module.scss';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+import PageHeader from '@/shared/components/PageHeader/PageHeader';
 
 const DEFAULT_EXCEL_FILE_NAME = '[주식회사네오위즈]사업보고서_재무제표(2025.03.19)_ko.xlsx';
 
@@ -310,18 +311,15 @@ const DSDPage: React.FC = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      {/* 헤더 카드 */}
-      <div className={styles.card}>
-        <div className={styles.breadcrumbs}>
-          <span className={styles.breadcrumbLink}>Dashboard</span>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <span className={styles.breadcrumbCurrent}>DART Converter</span>
-        </div>
-        <h2 className={styles.cardTitle}>DART Converter</h2>
-        <p style={{ color: '#374151', fontSize: 16, marginBottom: 0 }}>
-          엑셀 파일을 DART 공식 형식으로 변환하여 표준화된 데이터를 생성하세요.
-        </p>
-      </div>
+      <PageHeader
+        title="DART Converter"
+        description="엑셀 파일을 DART 공식 형식으로 변환하여 표준화된 데이터를 생성하세요."
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'DART Converter', active: true }
+        ]}
+        className={styles.card}
+      />
       {/* 업로드 카드 */}
       <div className={styles.card}>
         {renderUploadCard()}

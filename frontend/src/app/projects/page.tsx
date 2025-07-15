@@ -111,20 +111,21 @@ const ProjectsPage: React.FC = () => {
   return (
     <Layout>
       <div className={styles.pageWrapper}>
-        <div className={styles.card}>
-          <div className={styles.breadcrumbs}>
-            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbCurrent}>Projects</span>
-          </div>
-          <h2 className={styles.cardTitle}>Projects</h2>
+        <PageHeader
+          title="Projects"
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Projects', active: true }
+          ]}
+          className={styles.card}
+        >
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
             <a href="#" className={styles.actionButton} style={{ width: 'auto', maxWidth: 180 }}>
               <i className='bx bx-plus bx-fade-down-hover'></i>
               <span>New Project</span>
             </a>
           </div>
-        </div>
+        </PageHeader>
         <div className={styles.projectGrid}>
           {projects.map((project, index) => (
             <div key={index} className={styles.projectCard} onClick={() => handleCardClick(project)}>

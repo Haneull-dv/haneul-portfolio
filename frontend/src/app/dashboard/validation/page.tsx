@@ -7,6 +7,7 @@ import styles from './validation.module.scss';
 import { useDropzone } from 'react-dropzone';
 import Modal from '@/shared/components/Modal/Modal';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+import PageHeader from '@/shared/components/PageHeader/PageHeader';
 
 // --- Interface Definitions ---
 interface FootingResultItem {
@@ -280,152 +281,148 @@ const ValidationPage: React.FC = () => {
       >
         <p>{modal.message}</p>
       </Modal>
-    
-        {/* 실제 validation 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
+      <PageHeader
+        title="Data Validation"
+        description="엑셀 파일의 계정과목 주당 검증을 통해 데이터 정확성을 확인하세요."
+        breadcrumbs={breadcrumbs}
+        className={styles.card}
+        style={{ marginTop: 32, marginBottom: 24 }}
+      />
+      <div className={styles.validationGrid}>
         <div className={styles.card}>
-            <div className={styles.breadcrumbs}>
-              <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
-              <span className={styles.breadcrumbSeparator}>/</span>
-              <span className={styles.breadcrumbCurrent}>Data Validation</span>
-            </div>
-            <h2 className={styles.cardTitle}>Data Validation</h2>
-            <p>엑셀 파일의 계정과목 주당 검증을 통해 데이터 정확성을 확인하세요.</p>
+          <h3>엑셀 파일 업로드</h3>
+          <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileUpload}
+              className={styles.fileInput}
+            />
+            <label className={styles.uploadLabel}>
+              <i className='bx bx-cloud-upload'></i>
+              <span>엑셀 파일을 선택하거나 드래그하세요</span>
+            </label>
+            {file && (<div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>)}
           </div>
-          <div className={styles.validationGrid}>
-            <div className={styles.card}>
-              <h3>엑셀 파일 업로드</h3>
-              <div className={styles.uploadArea} onClick={handleUploadAreaClick}>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileUpload}
-                  className={styles.fileInput}
-                />
-                <label className={styles.uploadLabel}>
-                  <i className='bx bx-cloud-upload'></i>
-                  <span>엑셀 파일을 선택하거나 드래그하세요</span>
-                </label>
-                {file && (<div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>)}
-              </div>
+        </div>
+        <div className={styles.card}>
+          <h3>검증 실행</h3>
+          <div className={styles.actionContainer}>
+            <div className={styles.actionItem}>
+              <h4>합계검증</h4>
+              <p>계정 간 합계를 교차 검증하여 데이터의 수치적 오류를 찾아냅니다.</p>
+              <button onClick={handleFootingValidation} disabled={loading || !file} className={styles.actionButton}>
+                {loading ? '검증 중...' : '검증 시작하기'}
+              </button>
             </div>
-            <div className={styles.card}>
-              <h3>검증 실행</h3>
-              <div className={styles.actionContainer}>
-                <div className={styles.actionItem}>
-                  <h4>합계검증</h4>
-                  <p>계정 간 합계를 교차 검증하여 데이터의 수치적 오류를 찾아냅니다.</p>
-                  <button onClick={handleFootingValidation} disabled={loading || !file} className={styles.actionButton}>
-                    {loading ? '검증 중...' : '검증 시작하기'}
-                  </button>
-                </div>
-                <div className={styles.actionItem}>
-                  <h4>전기보고서 대사</h4>
-                  <p>DART 공시자료와 엑셀 데이터를 비교하여 일치여부를 검증합니다.</p>
-                  <div className={styles.inputGroup}>
-                    <input type="text" placeholder="기업명 (예: 네오위즈)" value={corpName} onChange={e => setCorpName(e.target.value)} className={styles.formInput} />
-                    <input type="number" placeholder="사업연도 (예: 2023)" value={year} onChange={e => setYear(e.target.value)} className={styles.formInput} />
-                  </div>
-                  <button onClick={handleDartComparison} disabled={!file || !corpName || !year || loading} className={`${styles.actionButton} ${styles.orange}`}>
-                    대사 시작하기
-                  </button>
-                </div>
+            <div className={styles.actionItem}>
+              <h4>전기보고서 대사</h4>
+              <p>DART 공시자료와 엑셀 데이터를 비교하여 일치여부를 검증합니다.</p>
+              <div className={styles.inputGroup}>
+                <input type="text" placeholder="기업명 (예: 네오위즈)" value={corpName} onChange={e => setCorpName(e.target.value)} className={styles.formInput} />
+                <input type="number" placeholder="사업연도 (예: 2023)" value={year} onChange={e => setYear(e.target.value)} className={styles.formInput} />
               </div>
+              <button onClick={handleDartComparison} disabled={!file || !corpName || !year || loading} className={`${styles.actionButton} ${styles.orange}`}>
+                대사 시작하기
+              </button>
             </div>
           </div>
-          {/* Results Section */}
-          {footingResponse && processedData && (
-            <div className={`${styles.card} ${styles.resultsSection}`}>
-              <div className={styles.resultHeader}>
-                <h3>검증 결과</h3>
-                <div className={styles.summary}>
-                  <span className={styles.totalSheets}>검증 시트: {footingResponse.total_sheets}개</span>
-                  <span className={`${styles.mismatchCount} ${footingResponse.mismatch_count > 0 ? styles.error : styles.success}`}>
-                    총 불일치 항목: {footingResponse.mismatch_count}개
-                  </span>
-                </div>
-              </div>
-              <div className={styles.resultTabs}>
-                {footingResponse.results.map(result => (
-                  <button key={result.sheet} className={`${styles.tabButton} ${activeResultTab === result.sheet ? styles.active : ''}`} onClick={() => setActiveResultTab(result.sheet)}>
-                    {result.title} ({result.sheet})
-                  </button>
-                ))}
-              </div>
-              {footingResponse.results.map(sheetResult => (
-                activeResultTab === sheetResult.sheet && (
-                  <div key={sheetResult.sheet} className={styles.tableContainer}>
-                    <table className={styles.resultTable}>
-                      <thead>
-                        <tr>
-                          {processedData[sheetResult.sheet].headers.map((header, index) => <th key={`${header}-${index}`}>{header}</th>)}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {processedData[sheetResult.sheet].rows.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            {processedData[sheetResult.sheet].headers.map((header, colIndex) => {
-                              const isFirstColumn = colIndex === 0;
-                              const cellData = row[header];
-                              const tooltipText =
-                                cellData?.status === 'mismatch' && cellData.expected != null
-                                  ? `기대값: ${formatNumber(cellData.expected)}`
-                                  : '';
+        </div>
+      </div>
+      {/* Results Section */}
+      {footingResponse && processedData && (
+        <div className={`${styles.card} ${styles.resultsSection}`}>
+          <div className={styles.resultHeader}>
+            <h3>검증 결과</h3>
+            <div className={styles.summary}>
+              <span className={styles.totalSheets}>검증 시트: {footingResponse.total_sheets}개</span>
+              <span className={`${styles.mismatchCount} ${footingResponse.mismatch_count > 0 ? styles.error : styles.success}`}>
+                총 불일치 항목: {footingResponse.mismatch_count}개
+              </span>
+            </div>
+          </div>
+          <div className={styles.resultTabs}>
+            {footingResponse.results.map(result => (
+              <button key={result.sheet} className={`${styles.tabButton} ${activeResultTab === result.sheet ? styles.active : ''}`} onClick={() => setActiveResultTab(result.sheet)}>
+                {result.title} ({result.sheet})
+              </button>
+            ))}
+          </div>
+          {footingResponse.results.map(sheetResult => (
+            activeResultTab === sheetResult.sheet && (
+              <div key={sheetResult.sheet} className={styles.tableContainer}>
+                <table className={styles.resultTable}>
+                  <thead>
+                    <tr>
+                      {processedData[sheetResult.sheet].headers.map((header, index) => <th key={`${header}-${index}`}>{header}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {processedData[sheetResult.sheet].rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {processedData[sheetResult.sheet].headers.map((header, colIndex) => {
+                          const isFirstColumn = colIndex === 0;
+                          const cellData = row[header];
+                          const tooltipText =
+                            cellData?.status === 'mismatch' && cellData.expected != null
+                              ? `기대값: ${formatNumber(cellData.expected)}`
+                              : '';
 
-                              return (
-                                <td
-                                  key={`${header}-${colIndex}`}
-                                  style={isFirstColumn ? { paddingLeft: `${row.indent * 20 + 10}px` } : {}}
-                                  className={isFirstColumn ? (row.isBold ? styles.boldCell : '') : `${styles.numberCell} ${cellData ? styles[cellData.status] : ''}`}
-                                  {...(tooltipText && { title: tooltipText })}
-                                >
-                                  {isFirstColumn ? cellData : formatNumber(cellData?.value)}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )
-              ))}
-            </div>
-          )}
-          {/* DART Comparison Section */}
-          {comparisonResult && (
-            <div className={`${styles.card} ${styles.resultsSection}`}>
-              <div className={styles.resultHeader}>
-                <h3>3. 검증 결과 (DART 대사)</h3>
+                          return (
+                            <td
+                              key={`${header}-${colIndex}`}
+                              style={isFirstColumn ? { paddingLeft: `${row.indent * 20 + 10}px` } : {}}
+                              className={isFirstColumn ? (row.isBold ? styles.boldCell : '') : `${styles.numberCell} ${cellData ? styles[cellData.status] : ''}`}
+                              {...(tooltipText && { title: tooltipText })}
+                            >
+                              {isFirstColumn ? cellData : formatNumber(cellData?.value)}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              {comparisonResult.map((result, index) => (
-                <div key={index} className={styles.tableContainer}>
-                  <h4>{result.sheet_name} ({result.fs_div} {result.sj_div})</h4>
-                  <p>총 {result.total_items}개 항목 중 {result.mismatch_items}개 불일치</p>
-                  {result.mismatch_items > 0 && (
-                    <table className={styles.resultTable}>
-                      <thead>
-                        <tr>
-                          <th>계정명</th>
-                          <th>엑셀 값</th>
-                          <th>DART 값</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.mismatches.map((mismatch, i) => (
-                          <tr key={i}>
-                            <td>{mismatch.account_nm}</td>
-                            <td className={styles.numberCell}>{formatNumber(mismatch.excel_val)}</td>
-                            <td className={styles.numberCell}>{formatNumber(mismatch.dart_val)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              ))}
+            )
+          ))}
+        </div>
+      )}
+      {/* DART Comparison Section */}
+      {comparisonResult && (
+        <div className={`${styles.card} ${styles.resultsSection}`}>
+          <div className={styles.resultHeader}>
+            <h3>3. 검증 결과 (DART 대사)</h3>
+          </div>
+          {comparisonResult.map((result, index) => (
+            <div key={index} className={styles.tableContainer}>
+              <h4>{result.sheet_name} ({result.fs_div} {result.sj_div})</h4>
+              <p>총 {result.total_items}개 항목 중 {result.mismatch_items}개 불일치</p>
+              {result.mismatch_items > 0 && (
+                <table className={styles.resultTable}>
+                  <thead>
+                    <tr>
+                      <th>계정명</th>
+                      <th>엑셀 값</th>
+                      <th>DART 값</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.mismatches.map((mismatch, i) => (
+                      <tr key={i}>
+                        <td>{mismatch.account_nm}</td>
+                        <td className={styles.numberCell}>{formatNumber(mismatch.excel_val)}</td>
+                        <td className={styles.numberCell}>{formatNumber(mismatch.dart_val)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
-          )}
+          ))}
+        </div>
+      )}
     </>
   );
 };
