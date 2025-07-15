@@ -3,7 +3,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import Layout from '@/shared/components/Layout/Layout';
 import styles from './validation.module.scss';
 import { useDropzone } from 'react-dropzone';
 import Modal from '@/shared/components/Modal/Modal';
@@ -281,7 +280,7 @@ const ValidationPage: React.FC = () => {
       >
         <p>{modal.message}</p>
       </Modal>
-      <Layout>
+    
         {/* 실제 validation 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
         <div className={styles.card}>
             <div className={styles.breadcrumbs}>
@@ -427,7 +426,6 @@ const ValidationPage: React.FC = () => {
               ))}
             </div>
           )}
-      </Layout>
     </>
   );
 };
