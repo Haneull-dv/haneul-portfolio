@@ -9,28 +9,32 @@ import styles from '../dashboard.module.scss';
 const mockAnalysisData = [
   {
     metric: '성장성',
-    네오위즈: 85,
-    펄어비스: 72,
+    넥슨게임즈: 85,
+    엔씨소프트: 66,
   },
   {
     metric: '수익성',
-    네오위즈: 78,
-    펄어비스: 88,
+    넥슨게임즈: 83,
+    엔씨소프트: 89,
+    
   },
   {
     metric: '안정성',
-    네오위즈: 92,
-    펄어비스: 85,
+    넥슨게임즈: 86,
+    엔씨소프트: 84,
+    
   },
   {
     metric: '혁신성',
-    네오위즈: 80,
-    펄어비스: 90,
+    넥슨게임즈: 80,
+    엔씨소프트: 85,
+    
   },
   {
     metric: '시장점유율',
-    네오위즈: 65,
-    펄어비스: 82,
+    넥슨게임즈: 87,
+    엔씨소프트: 77,
+    
   }
 ];
 
@@ -61,16 +65,16 @@ const TrendsWidget: React.FC = () => {
                 tick={{ fontSize: 10, fill: '#666' }}
               />
               <Radar
-                name="네오위즈"
-                dataKey="네오위즈"
+                name="넥슨게임즈"
+                dataKey="넥슨게임즈"
                 stroke="#960505" // 톤다운 레드
                 fill="#960505"
                 fillOpacity={0.1}
                 strokeWidth={2}
               />
               <Radar
-                name="펄어비스"
-                dataKey="펄어비스"
+                name="엔씨소프트"
+                dataKey="엔씨소프트"
                 stroke="#094cb1" // 톤다운 블루
                 fill="#094cb1"
                 fillOpacity={0.1}

@@ -70,9 +70,13 @@
   color: #6b7280;
   margin-bottom: 6px;
   letter-spacing: 0.01em;
-  display: flex;
-  align-items: center;
+  /* display: flex; */
+  /* align-items: center; */
   gap: 4px;
+  flex-wrap: wrap;
+  word-break: break-all;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .breadcrumbs .current {
   color: #173e92;

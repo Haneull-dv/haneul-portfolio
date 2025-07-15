@@ -6,44 +6,43 @@
   box-shadow: 0 2px 8px rgba(16,24,40,0.06);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   padding: 24px 24px 16px 24px;
 }
 
 .breadcrumbs {
   ol {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 14px;
-    color: #6b7280;
-    font-weight: 400;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    overflow-x: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    scrollbar-width: thin; /* Firefox */
   }
   li {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    a, span {
-      color: #6b7280;
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s;
-    }
-    .active {
-      color: #173e92;
-      font-weight: 600;
-    }
+    flex-shrink: 0 !important;
+  }
+  a, span {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+  .active {
+    color: #173e92;
+    font-weight: 700;
+    font-size: 13px;
   }
 }
 
 .separator {
-  color: #d1d5db;
-  font-size: 14px;
-  margin: 0 2px;
+  color: #b0b4ba;
+  font-size: 13px;
+  margin: 0 5px;
   user-select: none;
+  font-weight: 400;
 }
 
 .headerMain {
@@ -66,8 +65,10 @@
 }
 
 .description {
-  color: #374151;
-  font-size: 16px;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: inherit;
   margin-bottom: 0;
 }
 
@@ -130,19 +131,48 @@
     padding: 10px 4px 8px 4px;
     gap: 8px;
   }
+  .headerMain {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+  }
   .title {
     font-size: 17px;
+    word-break: break-all;
+    white-space: normal;
+    width: auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+    flex: unset;
   }
   .actions {
     gap: 4px;
+    width: auto;
+    flex-wrap: nowrap;
     button, .actionBtn {
-      font-size: 0;
-      padding: 8px;
+      font-size: 14px;
+      padding: 8px 16px;
       min-width: 36px;
       min-height: 36px;
+      width: auto;
+      justify-content: center;
       svg, i {
         font-size: 20px;
       }
     }
+  }
+  .breadcrumbs {
+    width: 100%;
+    flex-wrap: nowrap;
+    word-break: break-all;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  .description {
+    width: 100%;
+    word-break: break-all;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 } 

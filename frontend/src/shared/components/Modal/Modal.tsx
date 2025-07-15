@@ -6,11 +6,12 @@ import styles from './Modal.module.scss';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
+  hideFooter?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, hideFooter }) => {
   if (!isOpen) {
     return null;
   }
@@ -24,11 +25,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         <div className={styles.content}>
           {children}
         </div>
-        <div className={styles.footer}>
-          <button onClick={onClose} className={styles.confirmButton}>
-            확인
-          </button>
-        </div>
+        { !hideFooter && (
+          <div className={styles.footer}>
+            <button onClick={onClose} className={styles.confirmButton}>
+              확인
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

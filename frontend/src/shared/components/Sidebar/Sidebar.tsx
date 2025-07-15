@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, onMenuClick }) => {
   return (
     <aside id="sidebar" className={sidebarClassName}>
       <div className={styles.brand}>
-        <span className={styles.text}>FinOps One</span>
+        <span className={styles.text}>Haneul's Workspace</span>
       </div>
       
       <nav className={styles.navigation}>
@@ -107,12 +107,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, isOpen, onMenuClick }) => {
           </div>
           <div className={styles.profileText}>
             <span className={styles.profileName}>Haneul Kim</span>
-            <span className={styles.profileRole}>Automation Architect</span>
           </div>
         </div>
-        <button className={styles.settingsButton} aria-label="Settings">
-          <i className="bx bx-cog"></i>
-        </button>
       </div>
     </aside>
   );
