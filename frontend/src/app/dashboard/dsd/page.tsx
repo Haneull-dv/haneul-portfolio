@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Layout from '@/shared/components/Layout/Layout';
 import * as XLSX from 'xlsx';
 import styles from '../validation/validation.module.scss';
 import PrimaryButton from '@/shared/components/PrimaryButton';
@@ -312,7 +311,7 @@ const DSDPage: React.FC = () => {
   
 
   return (
-    <Layout>
+   <>
       {/* 실제 dsd 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
       <div className={styles.card}>
         <div className={styles.breadcrumbs}>
@@ -325,7 +324,7 @@ const DSDPage: React.FC = () => {
         {renderUploadCard()}
         {renderTable()}
       </div>
-    </Layout>
+    </>
   );
 };
 

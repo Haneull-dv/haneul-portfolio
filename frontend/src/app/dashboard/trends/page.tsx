@@ -4,7 +4,6 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 import * as XLSX from 'xlsx';
-import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './trends.module.scss';
 import PrimaryButton from '@/shared/components/PrimaryButton';
@@ -1009,7 +1008,7 @@ const TrendsPageContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
+      <>
         <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
         <div className={styles.container}>
           <div className={styles.loading}>
@@ -1018,13 +1017,13 @@ const TrendsPageContent: React.FC = () => {
             <p>잠시만 기다려주세요</p>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (error) {
     return (
-      <Layout>
+      <>
         <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
         <div className={styles.container}>
           <div className={styles.error}>
@@ -1036,13 +1035,13 @@ const TrendsPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (isAnalyzing) {
     return (
-      <Layout>
+        <>
         <PageHeader title="Financial Trends" breadcrumbs={breadcrumbs} />
         <div className={styles.container}>
           <div className={styles.loading}>
@@ -1052,12 +1051,12 @@ const TrendsPageContent: React.FC = () => {
             <p>최대 1분 정도 소요될 수 있습니다.</p>
           </div>
         </div>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       {/* 실제 trends 페이지 콘텐츠만 남기고 래퍼 div 제거 */}
       {/* ... trends 페이지의 실제 내용 ... */}
       <div className={styles.pageWrapper}>
@@ -1238,7 +1237,7 @@ const TrendsPageContent: React.FC = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   );
 };
 
