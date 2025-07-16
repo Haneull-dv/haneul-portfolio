@@ -174,7 +174,7 @@ const ValidationPage: React.FC = () => {
     if (file.name !== DEFAULT_EXCEL_FILE_NAME) {
       showModal(
         '🚧기능 준비 중🚧',
-        '현재 이 기능은 "네오위즈"의 계정과목 체계에 맞춘 검증 과정을 시연하기 위해 설정되었습니다.\n 업로드하신 파일은 계정과목 구조가 달라 정확한 검증이 어렵습니다. 기능 테스트를 위해 준비된 표준 샘플 파일을 이용해 주시기 바랍니다.'
+        '현재 이 기능은 "네오위즈"의 계정과목 체계에 맞춘 검증 과정을 시연하기 위해 설정되었습니다.\n 업로드하신 파일은 계정과목 구조가 달라 정확한 검증이 어렵습니다. 화면 새로고침 후 준비된 파일을 이용해 주시기 바랍니다.'
       );
       return;
     }
@@ -283,7 +283,7 @@ const ValidationPage: React.FC = () => {
       </Modal>
       <PageHeader
         title="Data Validation"
-        description="엑셀 파일의 계정과목 주당 검증을 통해 데이터 정확성을 확인하세요."
+        description="엑셀 파일에 담긴 재무제표의 합계 오류와 전기 대비 차이를 자동 검증합니다."
         breadcrumbs={breadcrumbs}
         className={styles.card}
         style={{ marginTop: 32, marginBottom: 24 }}

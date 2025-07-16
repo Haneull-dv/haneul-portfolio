@@ -1083,7 +1083,7 @@ const TrendsPageContent: React.FC = () => {
         <div className={styles.container}>
           <div className={styles.loading}>
             <i className='bx bx-loader-alt bx-spin'></i>
-            <h3>게임업계 기업 데이터를 불러오는 중...</h3>
+            <h3>게임 업계 기업 데이터를 불러오는 중...</h3>
             <p>잠시만 기다려주세요</p>
           </div>
         </div>
@@ -1129,7 +1129,7 @@ const TrendsPageContent: React.FC = () => {
     <div className={styles.pageWrapper}>
       <PageHeader
         title="KPI Trends"
-        description="게임업계 재무지표를 정량 비교하여 핵심 성과 차이를 한눈에 파악할 수 있습니다."
+        description="게임 업계 재무지표를 정량 비교하여 핵심 성과 차이를 한눈에 파악할 수 있습니다."
         breadcrumbs={
           currentView === 'analysis'
             ? [
@@ -1155,7 +1155,7 @@ const TrendsPageContent: React.FC = () => {
       <Modal
         isOpen={kpiGuideOpen}
         onClose={() => setKpiGuideOpen(false)}
-        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>게임업계 재무 KPI 선정 기준</span>}
+        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>게임 업계 재무 KPI 선정 기준</span>}
         modalClassName={styles.rectModal}
       >
         <div

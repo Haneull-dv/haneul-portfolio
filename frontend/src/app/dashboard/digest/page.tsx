@@ -307,7 +307,7 @@ const DigestPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <PageHeader
         title="Market Digest"
-        description="주간 게임업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
+        description="주간 게임 업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Market Digest', active: true }

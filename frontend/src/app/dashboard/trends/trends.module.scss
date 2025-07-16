@@ -135,27 +135,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 1rem 0;
   text-align: center;
-  color: var(--dark-grey);
+  color: #173e92;
   
   i {
-    font-size: 3rem;
-    color: var(--blue);
+    font-size: 1rem;
+    color: #173e92;
     margin-bottom: 1rem;
     animation: spin 2s linear infinite;
   }
   
-  h3 {
-    color: var(--dark);
-    margin: 1rem 0 0.5rem 0;
-    font-size: 1.25rem;
-  }
-  
-  p {
-    color: var(--dark-grey);
-    margin: 0.25rem 0;
-    font-size: 0.875rem;
+  p, h3 {
+    color: #173e92;
+    margin: 0.1rem 0 0 0;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   @keyframes spin {
@@ -1116,7 +1111,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   // 카드 내 기업검색/사업보고서 flex row → column
   .card > div[style*="flex-direction: row"] {
     flex-direction: column !important;
@@ -1388,5 +1383,18 @@
   .customRectModal .rectButton {
     font-size: 15px !important;
     padding: 8px 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  // Removed global html, body selector to fix SCSS module build error
+  .pageWrapper {
+    padding: 0 !important;
+    min-height: unset !important;
+    height: auto !important;
+  }
+  .container {
+    padding: 0 !important;
+    min-height: 0 !important;
   }
 }

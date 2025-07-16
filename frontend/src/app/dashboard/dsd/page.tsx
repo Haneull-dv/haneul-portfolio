@@ -38,38 +38,14 @@ const DSDPage: React.FC = () => {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!file || !sheetName) {
       setError('엑셀 파일과 시트를 선택해주세요.');
       return;
     }
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('sheet_name', sheetName);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`;
-      console.log('🔗 [API 요청] DSDGEN 업로드:', url);
-      console.log('📄 [FormData] file:', file);
-      console.log('📄 [FormData] sheet_name:', sheetName);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-      });
-      console.log('📥 [API 응답] status:', response.status, response.statusText);
-      if (!response.ok) {
-        throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      setResult(data);
-    } catch (err: any) {
-      setError(err.message || '알 수 없는 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
+    handleUploadWithParams(file, sheetName);
   };
+  
 
   // 단위 변환 함수
   const convertUnit = (value: string | number) => {
@@ -92,7 +68,6 @@ const DSDPage: React.FC = () => {
       marginRight: 'auto',
     }}>
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-start', gap: 16 }}>
-        <span style={{ fontWeight: 500, fontSize: 16, marginRight: 8 }}>단위</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" onClick={() => setUnit('원')} disabled={unit === '원'} className={styles.actionButton} style={{ minWidth: 80, marginRight: 8 }}>
             ₩ 원
@@ -103,26 +78,21 @@ const DSDPage: React.FC = () => {
         </div>
       </div>
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-        {copyMsg ? (
-          <span style={{
-            ...buttonStyle,
-            background: '#388e3c',
-            color: '#fff',
-            border: 'none',
-            textAlign: 'center',
-            pointerEvents: 'none',
-            fontWeight: 600,
-            fontSize: 16,
-            minWidth: 120,
-            height: 48,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(56,142,60,0.08)'
-          }}>{copyMsg}</span>
-        ) : (
-          <button onClick={handleCopyTable} className={styles.actionButton} style={{ minWidth: 100 }}>복사하기</button>
-        )}
+        <button
+          onClick={handleCopyTable}
+          className={styles.actionButton}
+          style={{
+            minWidth: 100,
+            background: copyMsg ? '#e3f2fd' : undefined,
+            color: copyMsg ? '#1976d2' : undefined,
+            border: copyMsg ? '1.5px solid #1976d2' : undefined,
+            transition: 'all 0.2s',
+            fontWeight: 600
+          }}
+          disabled={!!copyMsg}
+        >
+          {copyMsg ? '표가 복사되었습니다.' : '복사하기'}
+        </button>
       </div>
     </div>
   );
@@ -295,11 +265,16 @@ const DSDPage: React.FC = () => {
           setFile(defaultFile);
           setSheetNames(workbook.SheetNames);
           setSheetName(sheet);
-          setIsReady(true); // ✅ 여기서 최종 ready 상태를 켜줌
+          setIsReady(true); // ✅ 기존 코드 유지
+        
+          // ✅ 여기서 업로드 함수 수동 호출 (sheetName이 아직 비어있을 수 있으니 직접 넘김)
+          setTimeout(() => {
+            handleUploadWithParams(defaultFile, sheet);
+          }, 0);
         };
         reader.readAsBinaryString(defaultFile);
       } catch (e) {
-        // 무시
+        // handle error if needed
       } finally {
         setLoading(false);
       }
@@ -307,8 +282,37 @@ const DSDPage: React.FC = () => {
     loadDefaultFile();
   }, []);
 
+  const handleUploadWithParams = async (fileParam: File, sheetParam: string) => {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', fileParam);
+      formData.append('sheet_name', sheetParam);
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`;
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || '알 수 없는 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+   
+  useEffect(() => {
+    if (file && sheetName) {
+      handleUploadWithParams(file, sheetName);
+    }
+  }, [sheetName]);
   
-
   return (
     <div className={styles.pageWrapper}>
       <PageHeader

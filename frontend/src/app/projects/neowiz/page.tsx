@@ -9,10 +9,10 @@ import styles from '../projects.module.scss';
 
 const researchCards = [
   {
-    title: '게임업계 블록체인 플랫폼 리서치',
+    title: '게임 업계 블록체인 플랫폼 리서치',
     image: '/neowiz/blockchain_research.png',
     type: '리서치',
-    description: '게임업계의 블록체인 플랫폼 동향을 정리한 리서치 자료입니다.',
+    description: '게임 업계의 블록체인 플랫폼 동향을 정리한 리서치 자료입니다.',
     pdf: '/projects/pdfs/blockchainplatform.pdf',
     hasModal: true,
   },
@@ -28,23 +28,23 @@ const researchCards = [
     title: '동종업계(게임) 신작 리서치',
     image: '/neowiz/new_games_research.png',
     type: '리서치',
-    description: '동종 게임업계의 신작 출시 동향을 정리한 리서치입니다.',
+    description: '동종 게임 업계의 신작 출시 동향을 정리한 리서치입니다.',
     pdf: '/projects/pdfs/1Q23_conferencecall_newproduct.pdf',
     hasModal: true,
   },
   {
-    title: '국내외 게임업체 주요 공시 및 실적 보고서',
+    title: '국내외 게임 업체 주요 공시 및 실적 보고서',
     image: '/neowiz/major_reports.png',
     type: '보고서',
-    description: '국내외 주요 게임업체의 공시 및 실적을 정리한 보고서입니다.',
+    description: '국내외 주요 게임 업체의 공시 및 실적을 정리한 보고서입니다.',
     pdf: '/projects/pdfs/아직안함major_reports.pdf',
     hasModal: true,
   },
   {
-    title: '23년 게임업계 주주총회 현황',
+    title: '23년 게임 업계 주주총회 현황',
     image: '/neowiz/shareholder_meeting_2023.png',
     type: '보고서',
-    description: '2023년도 게임업계들의 주주총회 일정 및 안건 정리와 주요 메시지 및 주주들과의 Q&A를 정리한 보고서입니다.',
+    description: '2023년도 게임 업계들의 주주총회 일정 및 안건 정리와 주요 메시지 및 주주들과의 Q&A를 정리한 보고서입니다.',
     pdf: '/projects/pdfs/General_Meeting_of_Shareholders23_research.pdf',
     hasModal: true,
   },
@@ -70,7 +70,7 @@ const NeowizProjectsPage: React.FC = () => {
 
   const handleCardClick = (card: typeof researchCards[0]) => {
     if (
-      card.title === '국내외 게임업체 주요 공시 및 실적 보고서' ||
+      card.title === '국내외 게임 업체 주요 공시 및 실적 보고서' ||
       card.title === '애널리스트 리포트 요약'
     ) {
       return;
