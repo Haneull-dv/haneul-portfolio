@@ -26,7 +26,7 @@
 */
 .headerSearchInput {
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 0;
   border: 1px solid #d1d5db;
   font-size: 14px;
   min-width: 250px;
@@ -175,9 +175,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin: 20px 0 0 0;
   padding: 0 0 4px 0;
+}
+
+.excelDownloadBtn {
+  background: #173e92;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 8px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.18s;
+  box-shadow: none;
+  outline: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover, &:focus {
+    background: #102a5c;
+  }
 }
 
 .tableTitle {

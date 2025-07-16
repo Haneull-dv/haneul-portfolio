@@ -9,16 +9,17 @@ interface ModalProps {
   title: React.ReactNode;
   children: React.ReactNode;
   hideFooter?: boolean;
+  modalClassName?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, hideFooter }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, hideFooter, modalClassName }) => {
   if (!isOpen) {
     return null;
   }
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modal + (modalClassName ? ' ' + modalClassName : '')} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3 className={styles.title}>{title}</h3>
         </div>

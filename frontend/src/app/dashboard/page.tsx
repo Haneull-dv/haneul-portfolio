@@ -70,7 +70,7 @@ const DashboardPage: React.FC = () => {
         onClose={() => setGuideOpen(false)}
         title={
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <span>📘실무자 활용 가이드</span>
+            <span>실무자 활용 가이드</span>
           </span>
         }
         hideFooter={true}
@@ -130,7 +130,7 @@ const DashboardPage: React.FC = () => {
                 fontWeight: 700,
                 fontSize: 17,
                 border: 'none',
-                borderRadius: 2,
+                borderRadius: 0,
                 padding: '10px 0',
                 width: '100%',
                 maxWidth: 320,

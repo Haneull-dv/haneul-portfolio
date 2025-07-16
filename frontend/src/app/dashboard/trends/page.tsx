@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import styles from './trends.module.scss';
 import PrimaryButton from '@/shared/components/PrimaryButton';
+import Modal from '@/shared/components/Modal/Modal';
 
 // Types
 interface Company {
@@ -541,7 +542,7 @@ const KpiTable: React.FC<{
     <div className={styles.card} style={{ marginTop: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92' }}>KPI 상세 분석</div>
-        <PrimaryButton small onClick={exportToExcel}>엑셀 저장</PrimaryButton>
+        <button className={styles.excelDownloadBtn} onClick={exportToExcel}>엑셀 다운로드</button>
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15, color: '#374151' }}>
         <thead>
@@ -642,14 +643,14 @@ const AnalysisDashboard: React.FC<{
               <path d="M16 20L8 12L16 4" stroke="#173e92" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <span style={{ fontSize: '1.7rem', fontWeight: 800, color: '#222', marginLeft: 2 }}>KPI Trends</span>
+          <span style={{ fontSize: '1rem', fontWeight: 500, color: '#222', marginLeft: 2 }}>기업명</span>
         </div>
-        <div style={{ color: '#374151', fontSize: '1rem', fontWeight: 400, marginBottom: 0, marginLeft: 36 }}>
+        <div style={{ color: '#374151', fontSize: '1rem', fontWeight: 400, marginBottom: 0, marginLeft: 36, display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 8, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap' }}>
           {selectedEntries.map((entry, idx) => {
             const businessYearMatch = entry.selectedReport?.report_nm.match(/\((\d{4})/);
             const displayYear = businessYearMatch ? ` (${businessYearMatch[1]}.12)` : '';
             return (
-              <span key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span key={entry.selectedReport ? entry.company.corp_code + '_' + entry.selectedReport.rcept_no : entry.company.corp_code + '_none_' + idx} style={{ color: '#173e92', fontWeight: 600, fontSize: 15, padding: '6px 14px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 {entry.company.corp_name}{displayYear}
               </span>
             );
@@ -665,13 +666,59 @@ const AnalysisDashboard: React.FC<{
         </div>
       ) : (
         <>
-          <RadarChartAnalysis analysisData={analysisData} />
+          <div className={styles.card + ' ' + styles.radarChartCard} style={{ marginTop: 10 }}>
+            <RadarChartAnalysis analysisData={analysisData} />
+          </div>
           <KpiTable analysisData={analysisData} activeCategory={activeCategory} selectedEntries={selectedEntries} />
         </>
       )}
     </div>
   );
 };
+
+const KPI_GUIDE_TEXT = `
+게임 산업은 일반 제조업과 달리, 신작 의존도가 높고 수익 구조의 고정비 비중이 크며 무형자산(IP) 중심의 자산 구성이라는 특수성을 지닙니다. 또한 유저 기반 플랫폼 산업의 성격상 운영 지표(DAU, ARPPU 등)와 재무성과가 유기적으로 연결됩니다. 따라서 산업 구조 분석, 업계 애널리스트 리포트를 참고하여 선정했으며, 아래 재무KPI는 재무지표와 운영지표를 함께 고려한 관점을 전제로 합니다.
+
+① 성장성 지표
+▸ 매출액 증가율
+전년 대비 매출 성장률
+신작의 성공 여부, 글로벌 시장 확장, 퍼블리싱 계약 확대 등 외형 성장을 직접 반영합니다. 다만 이 매출 증가는 대부분 MAU, ARPPU, 결제 전환율 등 비재무 지표에서 비롯되므로 재무 수치 해석 시 운영 지표와의 연계 분석이 필수적입니다.
+
+▸ 영업이익 증가율
+전년 대비 영업이익 성장률
+마케팅 효율, 비용 구조 최적화, 수수료 계약 변경 등 이익 체력 개선을 나타내며, 고정비 성격이 강한 개발비·인건비 구조상, 효율적 규모 성장 없이도 이익률이 쉽게 흔들릴 수 있어 변화 폭은 경영 전략과 밀접하게 연관됩니다.
+
+② 수익성 지표
+▸ 영업이익률
+매출 대비 영업이익 비율
+고정비 부담이 큰 산업 구조에서는 매출이 늘어나더라도 손익분기점을 넘기지 못하는 구간이 자주 발생합니다. 특히 플랫폼 수수료, 인건비, 외주 제작비 부담이 큰 신작 초반에는 마진이 급격히 낮아질 수 있어 구간별 수익 구조 파악에 핵심이 되는 지표입니다.
+
+▸ ROE (자기자본이익률)
+순이익 ÷ 자기자본
+게임업 특성상 자체 개발 IP의 가치가 회계상 무형자산에 거의 반영되지 않기 때문에 자기자본이 과소계상되어 ROE가 실제보다 높게 나타날 수 있습니다. 지표 왜곡 가능성이 존재하므로 동종업체 간 비교 또는 시계열 추세 해석을 통해 신중히 판단해야 합니다.
+
+▸ 순이익률
+매출 대비 순이익 비율
+해외 매출 비중이 높고 자회사 투자나 금융자산 운용이 활발한 업계 특성상, 환차손익·지분법손익 등 영업외손익의 변동이 전체 손익에 미치는 영향이 큽니다. 실질적인 수익성을 종합적으로 평가하기 위해 반드시 확인해야 할 지표입니다.
+
+③ 안정성 지표
+▸ 부채비율
+총부채 ÷ 자기자본
+게임기업 간 재무 전략 차이로 부채 구조 편차가 크며 대규모 신작 개발이나 M&A 투자와 같은 이슈에 따라 일시적으로 레버리지가 확대되기도 합니다. 단순 수치보다는 전략적 투자 선택의 흐름 속에서 변화 추이를 해석하는 시각이 필요합니다.
+
+▸ 유동비율
+유동자산 ÷ 유동부채
+선급금·미지급금 등 운전자본 항목의 비중이 높고 인건비·개발비의 선반영이 잦은 업계 구조상,
+단기 지급능력만을 판단하기보다는 재무 전략의 안정성까지 함께 판단하는 지표로 활용됩니다.
+
+④ 활동성 지표
+▸ 총자산회전율
+매출 ÷ 총자산
+자체 개발 IP의 회계상 장부가치가 낮아 총자산이 과소계상되는 경향이 있으며, 이로 인해 회전율이 실제보다 높게 나타나는 왜곡이 발생할 수 있습니다. 무형자산 증가 시 변화 추이를 추적하는 보조 지표로 활용하는 것이 바람직합니다.
+
+⑤ 현금흐름 지표
+▸ 영업활동 현금흐름 (CFO)
+회계상 이익이 높더라도 마케팅비 선집행, 환율 변동, 감가상각 등으로 인해 실제 현금 유입 시점이 지연되거나 왜곡될 수 있습니다. EBITDA 및 CFO를 통해 실질적인 현금 창출력을 함께 추적해야 수익성에 대한 신뢰도 높은 판단이 가능합니다.`;
 
 // Main Component with Query Support
 const TrendsPageContent: React.FC = () => {
@@ -681,6 +728,7 @@ const TrendsPageContent: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [kpiGuideOpen, setKpiGuideOpen] = useState(false);
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -711,6 +759,7 @@ const TrendsPageContent: React.FC = () => {
     }
     const normalizedQuery = searchQuery.toLowerCase().trim();
     const results = (companiesData?.companies || []).filter(company => {
+      if (company.corp_name === '카카오게임즈') return false;
       const name = company.corp_name.toLowerCase();
       if (name.includes(normalizedQuery)) return true;
       if (normalizedQuery.length === 1) {
@@ -1006,6 +1055,27 @@ const TrendsPageContent: React.FC = () => {
     setAnalysisData([]);
   };
 
+  useEffect(() => {
+    if (kpiGuideOpen) {
+      // KPI Trends 모달만 네모로 강제 적용
+      const modal = document.querySelector('div[class*="Modal_module__overlay"] > div[class*="Modal_module__modal"]') as HTMLElement;
+      if (modal) {
+        modal.style.borderRadius = '0';
+        modal.style.maxWidth = '600px';
+        modal.style.width = '90vw';
+      }
+    }
+    // cleanup: 닫힐 때 원복
+    return () => {
+      const modal = document.querySelector('div[class*="Modal_module__overlay"] > div[class*="Modal_module__modal"]') as HTMLElement;
+      if (modal) {
+        modal.style.borderRadius = '';
+        modal.style.maxWidth = '';
+        modal.style.width = '';
+      }
+    };
+  }, [kpiGuideOpen]);
+
   if (isLoading) {
     return (
       <>
@@ -1059,16 +1129,53 @@ const TrendsPageContent: React.FC = () => {
     <div className={styles.pageWrapper}>
       <PageHeader
         title="KPI Trends"
-        description="게임업계 상장기업의 재무정보를 DART 사업보고서 기준으로 분석합니다. 재무 KPI를 통해 동종 게임업계 간 비교가 가능하며 인사이트 요약을 제공합니다."
-        breadcrumbs={[
-          { label: 'Dashboard', href: '/dashboard' },
-          { label: 'KPI Trends', active: true }
-        ]}
-        className={styles.card}
+        description="게임업계 재무지표를 정량 비교하여 핵심 성과 차이를 한눈에 파악할 수 있습니다."
+        breadcrumbs={
+          currentView === 'analysis'
+            ? [
+                { label: 'Dashboard', href: '/dashboard' },
+                { label: 'KPI Trends', href: '/dashboard/trends' },
+                { label: '분석 결과', active: true }
+              ]
+            : [
+                { label: 'Dashboard', href: '/dashboard' },
+                { label: 'KPI Trends', active: true }
+              ]
+        }
+        className={styles.card + ' ' + styles.headerCard}
+        actions={null}
       />
+      <button
+        className={styles.kpiGuideBtn}
+        onClick={() => setKpiGuideOpen(true)}
+      >
+        <i className='bx bx-help-circle'></i>
+        <span>재무 KPI 선정 기준</span>
+      </button>
+      <Modal
+        isOpen={kpiGuideOpen}
+        onClose={() => setKpiGuideOpen(false)}
+        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>게임업계 재무 KPI 선정 기준</span>}
+        modalClassName={styles.rectModal}
+      >
+        <div
+          style={{
+            fontSize: 15,
+            color: '#222',
+            lineHeight: 1.7,
+            whiteSpace: 'pre-line',
+            textAlign: 'left',
+            margin: '0px auto 0 auto',
+            paddingTop: 0,
+            marginTop: 0
+          }}
+        >
+          {KPI_GUIDE_TEXT}
+        </div>
+      </Modal>
       {currentView === 'selection' && (
         <>
-          {/* 기업 및 사업보고서 선택 - 하나의 카드 안에 가로 2회색박스 */}
+          {/* 기업 및 사업보고서 선택 카드 */}
           <div className={styles.card} style={{ marginTop: 0, padding: '20px', border: '1px solid #e9ecef', borderRadius: 0 }}>
             <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 20, margin: 0, marginBottom: 12, letterSpacing: '-0.01em' }}>기업 및 사업보고서 선택</h3>
             <div style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
@@ -1081,7 +1188,7 @@ const TrendsPageContent: React.FC = () => {
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="기업명 검색 (예: ㄴ, 네이버, 넥슨...)"
+                    placeholder="기업명 검색 (예: 넷마블, 넥슨게임즈, 네오위즈...)"
                     style={{
                       width: '100%',
                       padding: '9px 13px',
@@ -1139,7 +1246,7 @@ const TrendsPageContent: React.FC = () => {
             </div>
           </div>
           {/* 선택된 분석 항목 카드 */}
-          <div className={styles.card} style={{ marginTop: 2, padding: '20px', border: '1px solid #e9ecef', borderRadius: 0 }}>
+          <div className={styles.card + ' ' + styles.selectedCompaniesCard} style={{ marginTop: 2, padding: '20px', border: '1px solid #e9ecef', borderRadius: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 10 }}>
               <h3 style={{ color: '#173e92', fontWeight: 700, fontSize: 18, margin: 0, letterSpacing: '-0.01em' }}>선택된 분석 항목 ({selectedEntries.length}/5)</h3>
               <span style={{ color: '#6b7280', fontSize: 14, fontWeight: 400 }}>분석할 기업과 보고서를 확인하고 분석을 시작하세요</span>
@@ -1163,17 +1270,11 @@ const TrendsPageContent: React.FC = () => {
               }}
             >KPI 분석 시작</button>
           </div>
+          {/* 레이더차트 카드에 radarChartCard 클래스 추가는 AnalysisDashboard 내부에서 처리 필요 */}
         </>
       )}
       {currentView === 'analysis' && (
         <div className={styles.card} style={{ marginTop: 32 }}>
-          <div className={styles.breadcrumbs}>
-            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>Dashboard</span>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbLink} style={{ color: '#6b7280', fontWeight: 500 }}>KPI Trends</span>
-            <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbCurrent}>분석 결과</span>
-          </div>
           <AnalysisDashboard
             analysisData={analysisData}
             selectedEntries={selectedEntries}
@@ -1185,14 +1286,14 @@ const TrendsPageContent: React.FC = () => {
         <div style={{
           position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
+          <div className={styles.customRectModal} style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
             <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92', marginBottom: 12 }}>기업 선택 안내</div>
             <div style={{ color: '#374151', fontSize: 16, marginBottom: 24 }}>
               기업은 최대 5개까지 선택 가능합니다.<br/>
               추가로 선택하시려면 기존 선택 중 일부를 해제해 주세요.<br/>
               항상 관심을 가져주셔서 감사드립니다.
             </div>
-            <button onClick={() => setShowLimitModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
+            <button className={styles.rectButton} onClick={() => setShowLimitModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
               확인
             </button>
           </div>
@@ -1202,14 +1303,14 @@ const TrendsPageContent: React.FC = () => {
         <div style={{
           position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
+          <div className={styles.customRectModal} style={{ background: '#fff', borderRadius: 8, boxShadow: '0 2px 16px rgba(16,24,40,0.12)', padding: '32px 36px', minWidth: 320, textAlign: 'center', border: '1px solid #e9ecef' }}>
             <div style={{ fontWeight: 700, fontSize: 20, color: '#173e92', marginBottom: 12 }}>중복 선택 안내</div>
             <div style={{ color: '#374151', fontSize: 16, marginBottom: 24 }}>
               동일한 기업과 사업연도 조합은 한 번만 선택할 수 있습니다.<br/>
               다른 연도의 사업보고서를 선택하거나 기존 선택을 해제해 주세요.<br/>
               감사합니다.
             </div>
-            <button onClick={() => setShowDuplicateModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
+            <button className={styles.rectButton} onClick={() => setShowDuplicateModal(false)} style={{ background: '#173e92', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600, fontSize: 15, padding: '10px 28px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(16,24,40,0.06)' }}>
               확인
             </button>
           </div>

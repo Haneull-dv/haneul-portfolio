@@ -173,7 +173,7 @@ const ValidationPage: React.FC = () => {
 
     if (file.name !== DEFAULT_EXCEL_FILE_NAME) {
       showModal(
-        '🚧 기능 준비 중',
+        '🚧기능 준비 중🚧',
         '현재 이 기능은 "네오위즈"의 계정과목 체계에 맞춘 검증 과정을 시연하기 위해 설정되었습니다.\n 업로드하신 파일은 계정과목 구조가 달라 정확한 검증이 어렵습니다. 기능 테스트를 위해 준비된 표준 샘플 파일을 이용해 주시기 바랍니다.'
       );
       return;
@@ -212,7 +212,7 @@ const ValidationPage: React.FC = () => {
   };
 
   const handleDartComparison = () => {
-    showModal('🚧 기능 준비 중', '해당 기능은 현재 준비 중입니다.\n더 좋은 모습으로 찾아뵐게요! ✨');
+    showModal('🚧기능 준비 중🚧', '해당 기능은 현재 준비 중입니다.\n더 좋은 모습으로 찾아뵐게요!');
   };
 
   const processedData = useMemo(() => {

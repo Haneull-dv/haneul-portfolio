@@ -9,7 +9,7 @@
   background: #f8f9fa;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 0.5rem;
   min-width: 0;
   min-height: 100vh;
   box-sizing: border-box;
@@ -26,7 +26,12 @@
   box-shadow: 0 2px 8px rgba(16,24,40,0.06);
   padding: 24px 24px 16px 24px;
   margin-bottom: 0;
+  margin-top: 0;
   font-family: inherit;
+}
+
+.pageWrapper > .card:not(:first-child) {
+  margin-top: 4px !important;
 }
 
 .unifiedCardBox {
@@ -48,7 +53,7 @@
 @media (max-width: 1200px) {
   .pageWrapper {
     padding: 20px;
-    gap: 20px;
+    gap: 0.5rem;
   }
   .validationGrid {
     gap: 16px;
@@ -57,7 +62,7 @@
 @media (max-width: 900px), (max-width: 768px) {
   .pageWrapper {
     padding: 16px;
-    gap: 16px;
+    gap: 0.5rem;
   }
   .validationGrid {
     grid-template-columns: 1fr;
@@ -67,7 +72,7 @@
 @media (max-width: 600px) {
   .pageWrapper {
     padding: 8px;
-    gap: 10px;
+    gap: 0.5rem;
   }
   .validationGrid {
     gap: 10px;
@@ -98,12 +103,19 @@
   color: #173e92;
   font-weight: 600;
 }
-.cardTitle {
-  font-size: 24px;
+.cardTitle,
+.sectionHeader h3 {
+  font-size: 18px;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 10px 0;
-  line-height: 1.2;
+  color: #173e92;
+  margin: 0 0 8px 0;
+}
+
+.card > h3 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #173e92 !important;
+  margin: 0 0 8px 0 !important;
 }
 
 // Remove/override all custom card/grid styles below this line
@@ -304,18 +316,13 @@
   }
   
   h3 {
-    margin: 0 0 0.5rem 0;
-    color: var(--dark);
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    color: #173e92;
+    margin: 0 0 8px 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    
-    i {
-      color: var(--blue);
-      font-size: 1.5rem;
-    }
+    gap: 8px;
   }
   
   p {
@@ -506,7 +513,7 @@
   display: flex;
   align-items: center;
   background: var(--light-blue);
-  border-radius: 8px;
+  border-radius: 0 !important;
   padding: 0.5rem 0.75rem;
   
   .companyName {
@@ -1011,4 +1018,375 @@
   color: var(--red);
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.pageWrapper > .card.selectedCompaniesCard + .card.radarChartCard {
+  margin-top: 12px !important;
+}
+
+.excelDownloadBtn {
+  background: #173e92;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 8px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.18s;
+  box-shadow: none;
+  outline: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover, &:focus {
+    background: #102a5c;
+  }
+}
+
+.headerCard {
+  position: relative;
+  min-height: 120px;
+}
+
+.kpiGuideBtn {
+  position: fixed;
+  right: 32px;
+  bottom: 24px;
+  background: #472a03;
+  color: #fff;
+  border: none;
+  border-radius: 0 !important;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  cursor: pointer;
+  min-width: 180px;
+  max-width: 240px;
+  height: 44px;
+  transition: background 0.2s;
+  z-index: 100;
+  &:hover { background: #2d1a00; }
+
+  i {
+    font-size: 1.3em;
+    position: relative;
+    top: 2px;
+  }
+}
+
+.rectModal {
+  border-radius: 0 !important;
+  max-width: 600px !important;
+  width: 90vw !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+  padding: 32px 32px 24px 32px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 2px 16px rgba(16,24,40,0.10) !important;
+  border: 1px solid #e9ecef !important;
+  background: #fff !important;
+}
+
+.rectModal .confirmButton {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .kpiGuideBtn {
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    min-width: 120px;
+    max-width: 180px;
+    height: 38px;
+  }
+  .rectModal {
+    max-width: 98vw !important;
+    padding: 16px 6vw 16px 6vw !important;
+  }
+}
+
+@media (max-width: 768px) {
+  // 카드 내 기업검색/사업보고서 flex row → column
+  .card > div[style*="flex-direction: row"] {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  // 회색 네모(기업검색, 사업보고서) padding 축소
+  .card > div[style*="background: #f3f4f6"] {
+    padding: 10px !important;
+    margin-bottom: 0 !important;
+  }
+  // 기업명 태그(선택된 기업)
+  .selectedCompanies {
+    flex-wrap: wrap;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  .selectedCompany {
+    font-size: 13px !important;
+    padding: 3px 8px !important;
+    border-radius: 2px !important;
+    min-width: unset !important;
+    max-width: 100%;
+    background: #f5f6fa !important;
+  }
+  .selectedCompany .companyName {
+    font-size: 13px !important;
+    padding: 0 !important;
+  }
+  .removeButton {
+    font-size: 13px !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+  // input, select, button 크기 축소 (CSS Module 규칙)
+  .card input,
+  .card select,
+  .card button {
+    font-size: 13px !important;
+    padding: 7px 10px !important;
+  }
+  // KPI 분석 시작 버튼
+  .analyzeButton {
+    font-size: 14px !important;
+    padding: 8px 14px !important;
+  }
+}
+@media (max-width: 600px) {
+  .card {
+    padding: 8px !important;
+  }
+  .selectedCompany {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+  }
+  .card input,
+  .card select,
+  .card button {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .analysisContainer {
+    padding: 0 !important;
+  }
+  .card {
+    padding: 10px !important;
+  }
+  .chartContainer {
+    height: 220px !important;
+    min-height: 180px !important;
+    margin: 0.5rem 0 !important;
+  }
+  // 분석 결과 상단 기업명 태그
+  .analysisContainer > div[style*="align-items: center"] > div[style*="flex-direction: row"] {
+    gap: 4px !important;
+  }
+  .analysisContainer span[style*='padding: 6px 14px'] {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    border-radius: 2px !important;
+    min-width: unset !important;
+    max-width: 100%;
+  }
+  // KPI 상세 분석 표
+  .tableWrapper, .kpiTable {
+    overflow-x: auto !important;
+    font-size: 12px !important;
+  }
+  .kpiTable th, .kpiTable td {
+    padding: 6px 6px !important;
+    font-size: 12px !important;
+    min-width: 70px;
+    white-space: nowrap;
+  }
+  .kpiTable th {
+    font-size: 12px !important;
+  }
+  .kpiTable td {
+    font-size: 12px !important;
+  }
+  .kpiTable tr {
+    min-height: 28px !important;
+  }
+  // 엑셀 다운로드 버튼
+  .excelDownloadBtn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    height: 32px !important;
+    min-width: 90px !important;
+  }
+}
+@media (max-width: 600px) {
+  .card {
+    padding: 6px !important;
+  }
+  .chartContainer {
+    height: 160px !important;
+    min-height: 120px !important;
+  }
+  .kpiTable th, .kpiTable td {
+    padding: 4px 4px !important;
+    font-size: 11px !important;
+    min-width: 60px;
+  }
+  .excelDownloadBtn {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+    height: 26px !important;
+    min-width: 70px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .selectedCompaniesCard .selectedCompanies {
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  .selectedCompaniesCard .selectedCompany {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+    border-radius: 2px !important;
+    background: #f5f6fa !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+  }
+  .selectedCompaniesCard .selectedCompany .companyName {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #173e92 !important;
+    padding: 0 !important;
+    margin-right: 2px !important;
+  }
+  .selectedCompaniesCard .removeButton {
+    font-size: 12px !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-left: 2px !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+  }
+  .selectedCompaniesCard .removeButton i {
+    font-size: 13px !important;
+  }
+  .selectedCompaniesCard .analyzeButton {
+    font-size: 13px !important;
+    padding: 7px 12px !important;
+    min-height: 32px !important;
+    border-radius: 2px !important;
+  }
+}
+@media (max-width: 600px) {
+  .selectedCompaniesCard .selectedCompany {
+    font-size: 11px !important;
+    padding: 1px 4px !important;
+    min-height: 20px !important;
+  }
+  .selectedCompaniesCard .selectedCompany .companyName {
+    font-size: 11px !important;
+  }
+  .selectedCompaniesCard .removeButton {
+    font-size: 11px !important;
+    width: 13px !important;
+    height: 13px !important;
+  }
+  .selectedCompaniesCard .removeButton i {
+    font-size: 11px !important;
+  }
+  .selectedCompaniesCard .analyzeButton {
+    font-size: 12px !important;
+    padding: 5px 8px !important;
+    min-height: 26px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  // 기업명 헤더 가로 스크롤
+  .analysisContainer > div[style*="align-items: center"] > div[style*="flex-direction: row"] {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 2px !important;
+    padding-bottom: 2px !important;
+    margin-left: 0 !important;
+  }
+  .analysisContainer span[style*='padding: 6px 14px'] {
+    font-size: 11px !important;
+    padding: 1px 4px !important;
+    border-radius: 2px !important;
+    min-width: unset !important;
+    max-width: 100%;
+    margin: 0 1px !important;
+    font-weight: 500 !important;
+  }
+  // KPI 상세 분석 표
+  .tableWrapper, .kpiTable {
+    overflow-x: auto !important;
+    font-size: 11px !important;
+  }
+  .kpiTable th, .kpiTable td {
+    padding: 2px 4px !important;
+    font-size: 10px !important;
+    min-width: 56px !important;
+    white-space: nowrap !important;
+  }
+  .kpiTable th {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+  }
+  .kpiTable td {
+    font-size: 10px !important;
+    font-weight: 500 !important;
+  }
+  .kpiTable tr {
+    min-height: 20px !important;
+  }
+}
+@media (max-width: 600px) {
+  .analysisContainer span[style*='padding: 6px 14px'] {
+    font-size: 10px !important;
+    padding: 1px 2px !important;
+  }
+  .kpiTable th, .kpiTable td {
+    padding: 1px 2px !important;
+    font-size: 9px !important;
+    min-width: 44px !important;
+  }
+}
+
+// 직각 하얀 네모 팝업(모달) + 직각 버튼
+.customRectModal {
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-shadow: 0 2px 16px rgba(16,24,40,0.12) !important;
+  border: 1px solid #e9ecef !important;
+  padding: 32px 36px !important;
+  min-width: 320px;
+  max-width: 90vw;
+}
+.customRectModal .rectButton {
+  border-radius: 0 !important;
+}
+@media (max-width: 600px) {
+  .customRectModal {
+    padding: 16px 8px !important;
+    min-width: 0;
+    max-width: 98vw;
+  }
+  .customRectModal .rectButton {
+    font-size: 15px !important;
+    padding: 8px 0 !important;
+  }
 }

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './digest.module.scss';
 import clsx from 'clsx';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
+import * as XLSX from 'xlsx';
 
 // --- 상수 및 인터페이스 정의 ---
 const STOCKPRICE_API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL_STOCKPRICE}/stockprice`;
@@ -297,7 +298,7 @@ const DigestPage: React.FC = () => {
   if (loading) return (
     <div className={styles.stateContainer}>
       <span className={styles.spinner}></span>
-      Loading...
+      데이터를 불러오고 있습니다...
     </div>
   );
   if (error) return <div className={styles.stateContainer}>Error: {error}</div>;
@@ -306,7 +307,7 @@ const DigestPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <PageHeader
         title="Market Digest"
-        description="금주 게임업계 상장기업의 시장 동향과 이슈를 한눈에 확인하세요."
+        description="주간 게임업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Market Digest', active: true }
@@ -327,7 +328,6 @@ const DigestPage: React.FC = () => {
         </div>
       </PageHeader>
       <div className={styles.tableHeader}>
-        <h3 className={styles.tableTitle}>통합 기업 분석 대시보드 ({integratedData.length}개 기업)</h3>
         <input
           type="text"
           placeholder="기업명 검색..."
@@ -335,6 +335,28 @@ const DigestPage: React.FC = () => {
           onChange={e => setSearchTerm(e.target.value)}
           className={styles.headerSearchInput}
         />
+        <button
+          className={styles.excelDownloadBtn}
+          onClick={() => {
+            // 엑셀 다운로드 구현
+            const exportData = integratedData.map(row => ({
+              순위: row.marketCapRank,
+              기업명: row.companyName,
+              국가: row.country,
+              현재가: row.currentPrice ?? '',
+              등락률: row.changeRate !== null && row.changeRate !== undefined ? row.changeRate.toFixed(2) + '%' : '',
+              시가총액: row.marketCap ? (row.marketCap / 10000).toFixed(1) + '조' : '',
+              '금주 공시': row.disclosures.map(d => d.disclosure_title).join('; '),
+              '금주 이슈': row.issues.map(i => i.summary).join('; '),
+            }));
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'MarketDigest');
+            XLSX.writeFile(wb, 'MarketDigest.xlsx');
+          }}
+        >
+          엑셀 다운로드
+        </button>
       </div>
       <IntegratedTable data={integratedData} searchTerm={searchTerm} onSearch={setSearchTerm} />
     </div>
