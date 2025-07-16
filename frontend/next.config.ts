@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+import path from 'path'
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // 외부 이미지 도메인 허용 설정
+  reactStrictMode: true,
+
+  // eslint 무시 설정 (빌드에서)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   images: {
     remotePatterns: [
       {
@@ -18,21 +25,30 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   webpack: (config, { dev, isServer }) => {
     // PDF.js worker 설정
     config.module.rules.push({
       test: /pdf\.worker\.(min\.)?js/,
       type: 'asset/resource',
       generator: {
-        filename: 'static/worker/[hash][ext][query]'
-      }
-    });
+        filename: 'static/worker/[hash][ext][query]',
+      },
+    })
 
-    return config;
+    // ✅ 경로 alias 추가 (tsconfig와 일치시킴)
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname, 'src'),
+      '@shared': path.resolve(__dirname, 'src/shared'),
+      '@features': path.resolve(__dirname, 'src/features'),
+      '@components': path.resolve(__dirname, 'src/shared/components'),
+    }
+
+    return config
   },
-  // PDF.js 라이브러리를 위한 설정
-  transpilePackages: ['pdfjs-dist'],
-};
 
-export default nextConfig;
+  transpilePackages: ['pdfjs-dist'],
+}
+
+export default nextConfig

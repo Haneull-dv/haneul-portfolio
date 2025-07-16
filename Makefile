@@ -71,38 +71,6 @@ dev-weekly-stockprice:
 	docker-compose stop stockprice
 	docker-compose up -d stockprice
 
-## conanai_stocktrend
-build-conanai-stocktrend:
-	docker-compose build stocktrend
-
-up-conanai-stocktrend:
-	docker-compose up -d stocktrend
-
-down-conanai-stocktrend:
-	docker-compose stop stocktrend
-
-logs-conanai-stocktrend:
-	docker-compose logs -f stocktrend
-
-restart-conanai-stocktrend:
-	docker-compose down stocktrend && docker-compose up -d --build stocktrend
-
-## conanai_irsummary
-build-conanai-irsummary:
-	docker-compose build irsummary
-
-up-conanai-irsummary:
-	docker-compose up -d irsummary
-
-down-conanai-irsummary:
-	docker-compose stop irsummary
-
-logs-conanai-irsummary:
-	docker-compose logs -f irsummary
-
-restart-conanai-irsummary:
-	docker-compose down irsummary && docker-compose up -d --build irsummary
-
 ## conanai_dsdgen
 build-conanai-dsdgen:
 	docker-compose build dsdgen
@@ -213,20 +181,20 @@ restart-n8n:
 
 # 🔗 워크플로우 자동화
 workflow-up:
-	docker-compose up -d n8n stockprice stocktrend
+	docker-compose up -d n8n stockprice
 
 workflow-down:
-	docker-compose stop n8n stockprice stocktrend
+	docker-compose stop n8n stockprice
 
 # 📊 주가 관련 서비스들
 stock-services-up:
-	docker-compose up -d stockprice stocktrend
+	docker-compose up -d stockprice
 
 stock-services-down:
-	docker-compose stop stockprice stocktrend
+	docker-compose stop stockprice
 
 stock-services-logs:
-	docker-compose logs -f stockprice stocktrend
+	docker-compose logs -f stockprice
 
 # 🤖 AI 모델 서비스들
 ai-services-up:
@@ -279,6 +247,9 @@ weekly-system-logs:
 
 weekly-system-restart:
 	docker-compose restart weekly_data disclosure issue stockprice kpi_compare
+
+weekly-system-build:
+	docker-compose build weekly_data disclosure issue stockprice kpi_compare
 
 # 🤖 n8n 자동화 테스트 명령어
 test-n8n-disclosure:
@@ -358,7 +329,6 @@ health-check:
 	@echo "  📰 Weekly Issue (뉴스 파이프라인): http://localhost:8089/docs"
 	@echo "  📈 Weekly StockPrice: http://localhost:9006/docs"
 	@echo "  📊 KPI Compare: http://localhost:9007/docs"
-	@echo "  📊 Conanai StockTrend: http://localhost:8081/docs"
 	@echo "  🔍 NewsClassifier: http://localhost:8087/docs"
 	@echo "  📝 Summarizer: http://localhost:8088/docs"
 

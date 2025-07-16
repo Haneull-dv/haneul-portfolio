@@ -47,38 +47,6 @@ services:
     networks:
       - app-network
 
-  stocktrend:
-    container_name: stock
-    build:
-      context: ./conanai_stocktrend
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
-    volumes:
-      - ./conanai_stocktrend:/app
-    env_file:
-      - ./conanai_stocktrend/.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
-  irsummary:
-    container_name: summary
-    build:
-      context: ./conanai_irsummary
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
-    volumes:
-      - ./conanai_irsummary:/app
-    env_file:
-      - ./conanai_irsummary/.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-
   dsdgen:
     container_name: gen
     build:
