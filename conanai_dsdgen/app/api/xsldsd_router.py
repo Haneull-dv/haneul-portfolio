@@ -9,6 +9,16 @@ router = APIRouter(
 )
 
 
+@router.get("/health")
+async def health_check():
+    try:
+        print("💚 /health 라우터 호출됨")
+        return {"status": "ok"}
+    except Exception as e:
+        print("🔥 /health 예외 발생:", e)
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+
+
 @router.post("/upload", response_model=Dict[str, Any])
 async def upload_excel(
     file: UploadFile = File(...),
@@ -30,9 +40,9 @@ async def upload_excel(
         Dict[str, Any]: 파일 정보와 변환된 JSON 데이터
     """
     try:
-        print(f"Processing upload request for file: {file.filename}, sheet_names: {sheet_names}")
+        print(f"✅ /upload 라우터 진입: file={file.filename}, sheet_names={sheet_names}")
         result = await xsldsd_controller.upload_excel_file(file, sheet_names)
         return result
     except Exception as e:
-        print(f"Error in upload_excel: {str(e)}")
+        print(f"🔥 /upload 예외 발생: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to upload Excel file: {str(e)}")
