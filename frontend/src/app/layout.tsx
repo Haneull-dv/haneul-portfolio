@@ -4,7 +4,7 @@ import "../styles/globals.scss";
 import "./globals.css";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { playfairDisplay } from '@/shared/lib/fonts';
+import { playfairDisplay } from '../shared/lib/fonts';
 
 // Promise.withResolvers polyfill
 if (typeof Promise.withResolvers === 'undefined') {
