@@ -26,7 +26,7 @@ COPY . /app
 # 7. 애플리케이션 실행
 # uvicorn은 WORKDIR(/app) 기준으로 실행되므로 경로 수정이 필요 없습니다.
 # --reload 플래그는 개발용입니다. 프로덕션에서는 제거하는 것이 좋습니다.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8089"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
 
 # 8. 포트 노출
 EXPOSE 8089
