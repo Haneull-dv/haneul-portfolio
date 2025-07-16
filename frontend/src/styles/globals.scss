@@ -1,5 +1,5 @@
 // Use shared layout styles (must be first)
-@use '../shared/styles/layout.scss';
+@use '../shared/styles/layout' as *;
 
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");

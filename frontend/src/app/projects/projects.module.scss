@@ -1,4 +1,4 @@
-@import '../dashboard/validation/validation.module.scss';
+@use '../dashboard/validation/validation.module' as *;
 
 .pageWrapper {
   flex: 1;

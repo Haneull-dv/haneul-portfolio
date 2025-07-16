@@ -1,4 +1,4 @@
-@import '../dashboard/validation/validation.module.scss';
+@use '../dashboard/validation/validation.module' as *;
 
 // 추가적인 contact 전용 스타일은 여기에 작성
 

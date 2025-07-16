@@ -13,9 +13,12 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",                    // ✅ 추가됨
+    "baseUrl": "src",                          // 🔄 src 기준으로 절대경로 설정
     "paths": {
-      "@/*": ["src/*"]                // ✅ @/ 경로 문제 해결됨
+      "@/*": ["*"],                            // eg: @/app/layout.tsx
+      "@shared/*": ["shared/*"],               // eg: @shared/lib/fonts
+      "@features/*": ["features/*"],           // (선택) 필요 시 추가
+      "@components/*": ["shared/components/*"] // (선택) 필요 시 추가
     },
     "plugins": [
       {
