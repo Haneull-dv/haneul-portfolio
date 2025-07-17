@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Index
+from app.config.db.base import Base
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from datetime import datetime
-
-Base = declarative_base()
 
 class DisclosureModel(Base):
     """공시 정보 SQLAlchemy 모델"""

@@ -1,26 +1,41 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-
-import sys
+from contextlib import asynccontextmanager
 import os
-
+import sys
 import uvicorn
+
+# 경로 설정
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
+# DB 관련 import
+from app.config.db.base import Base
+from app.config.db.db_singleton import db_singleton
+from app.domain.model.weekly_model import WeeklyDataModel, WeeklyBatchJobModel
+from app.domain.model.disclosure_model import DisclosureModel
+
+# 라우터 import
 from app.api.disclosure_router import router as disclosure_router
 from app.api.n8n_disclosure_router import router as n8n_disclosure_router
 from app.api.cqrs_disclosure_router import router as cqrs_disclosure_router
 
-# DB 테이블 생성을 위한 import 추가
-from app.config.db.db_singleton import db_singleton
-from app.domain.model.disclosure_model import Base
-
 load_dotenv()
-app = FastAPI(title="Game Company Disclosure Service")
-
 ENV = os.getenv("ENV", "development")
 
+# ✅ lifespan 기반 비동기 DB 테이블 생성
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("📌 DB 테이블 생성 중...")
+    async with db_singleton.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("✅ DB 테이블 생성 완료")
+    yield
+
+# FastAPI 앱 정의
+app = FastAPI(title="Game Company Disclosure Service", lifespan=lifespan)
+
+# CORS 설정
 if ENV == "production":
     allow_origins = [
         "https://www.haneull.com",
@@ -47,12 +62,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 라우터 등록
 app.include_router(disclosure_router, prefix="/disclosures", tags=["게임기업 공시"])
 app.include_router(n8n_disclosure_router, tags=["n8n 자동화"])
 app.include_router(cqrs_disclosure_router, tags=["CQRS 패턴"])
 
-print(f"🤍0 메인 진입 - 게임기업 공시 서비스 시작 (DI 기반)")
+print(f"🤍0 메인 진입 - 게임기업 공시 서비스 시작 (lifespan 기반)")
 
+# 로컬 실행
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8090))  # 로컬은 8090, 배포는 8080
+    port = int(os.environ.get("PORT", 8090))
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
