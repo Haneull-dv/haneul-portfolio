@@ -23,6 +23,9 @@ from app.api.cqrs_disclosure_router import router as cqrs_disclosure_router
 load_dotenv()
 ENV = os.getenv("ENV", "development")
 
+print("🚨 ENV =", os.getenv("ENV"))
+print("🚨 DATABASE_URL =", os.getenv("DATABASE_URL"))
+
 # ✅ lifespan 기반 비동기 DB 테이블 생성
 @asynccontextmanager
 async def lifespan(app: FastAPI):

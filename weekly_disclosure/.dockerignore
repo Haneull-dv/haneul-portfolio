@@ -24,4 +24,6 @@ var/
 venv/
 .venv/
 .idea/
-.vscode/ 
+.vscode/
+**/.env
+**/.env.* 

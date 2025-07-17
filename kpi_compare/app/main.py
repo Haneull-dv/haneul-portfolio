@@ -1,14 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 import os
 
 from app.api.kpi_compare_router import router as kpi_compare_router
 
-load_dotenv()
+ENV = os.getenv("ENV", "development")
+if ENV == "development":
+    from dotenv import load_dotenv
+    load_dotenv()
+    print(f"[ENV] 개발환경: .env 파일 로드됨")
+else:
+    print(f"[ENV] 배포환경: .env 파일 로드하지 않음")
+print(f"[ENV] ENV={ENV}")
+print(f"[ENV] DART_API_KEY={os.getenv('DART_API_KEY')}")
+
 app = FastAPI(title="KPI Compare Service")
 
-ENV = os.getenv("ENV", "development")
+
+@app.get("/debug/dart-key")
+def debug_dart_key():
+    dart_key = os.getenv("DART_API_KEY")
+    print("📦 [DEBUG] DART_API_KEY =", dart_key)
+    return {"dart_key": dart_key}
 
 if ENV == "production":
     allow_origins = [
@@ -40,5 +53,6 @@ app.include_router(kpi_compare_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=9007)
+    port = int(os.getenv("PORT", 9007 if ENV == "development" else 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=(ENV=="development"))
 

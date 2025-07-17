@@ -5,11 +5,22 @@ from typing import Optional
 from dotenv import load_dotenv
 from pathlib import Path
 
+# ENV 환경변수 확인
+ENV = os.getenv("ENV", "development")
 
-# ENV 환경변수가 development일 때만 .env 로드
-if os.getenv("ENV", "development") == "development":
-    load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / "postgres/.env")
-print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
+# 개발 환경에서만 .env 로드
+if ENV == "development":
+    dotenv_path = Path(__file__).resolve().parent.parent.parent / "postgres/.env"
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path=dotenv_path)
+        print(f"😍[DB] .env 파일 로드됨: {dotenv_path}")
+    else:
+        print(f"😍[DB] .env 파일 없음: {dotenv_path}")
+else:
+    print("😍[DB] 운영/배포 환경: .env 파일 로드하지 않음")
+
+print(f"😍[DB] ENV={ENV}")
+print(f"😍[DB] DATABASE_URL={os.getenv('DATABASE_URL')}")
 
 # Base 클래스 생성
 Base = declarative_base()
@@ -31,9 +42,7 @@ class DatabaseSingleton:
         """DB 엔진 및 세션 팩토리 초기화"""
         # 환경변수에서 DB URL 가져오기 (기본값 제공)
         database_url = os.getenv(
-            "DATABASE_URL", 
-            "postgresql+asyncpg://postgres:password@localhost:5432/weekly_db"
-        )
+            "DATABASE_URL" )
         
         print(f"🗄️ DB 초기화 - URL: {database_url}")
         
@@ -44,10 +53,10 @@ class DatabaseSingleton:
             pool_pre_ping=True,
             pool_recycle=3600,
             connect_args={
-                "server_settings": {
-                    "application_name": "weekly_services",
-                }
+            "server_settings": {
+                "application_name": "weekly_services",
             }
+        }
         )
         
         # 세션 팩토리 생성
