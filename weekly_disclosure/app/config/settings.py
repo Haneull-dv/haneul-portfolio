@@ -28,4 +28,4 @@ DART_BASE_URL = os.getenv("DART_BASE_URL", "https://opendart.fss.or.kr/api")
 
 # 기타 설정
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", 10))
-MAX_CONCURRENT_REQUESTS = int(os.getenv("MAX_CONCURRENT_REQUESTS", 5))
+MAX_CONCURRENT_REQUESTS = int(os.getenv("MAX_CONCURRENT_REQUESTS", 5))  # 임시 하드코딩

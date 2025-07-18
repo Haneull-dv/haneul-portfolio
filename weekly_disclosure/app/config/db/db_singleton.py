@@ -41,8 +41,7 @@ class DatabaseSingleton:
     def _initialize(self):
         """DB 엔진 및 세션 팩토리 초기화"""
         # 환경변수에서 DB URL 가져오기 (기본값 제공)
-        database_url = os.getenv(
-            "DATABASE_URL" )
+        database_url = os.getenv("DATABASE_URL")
         
         print(f"🗄️ DB 초기화 - URL: {database_url}")
         

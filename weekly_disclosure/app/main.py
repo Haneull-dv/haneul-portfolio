@@ -38,6 +38,20 @@ async def lifespan(app: FastAPI):
 # FastAPI 앱 정의
 app = FastAPI(title="Game Company Disclosure Service", lifespan=lifespan)
 
+@app.get("/debug/config")
+def debug_config():
+    """🔧 설정 디버깅용"""
+    from app.config import settings
+    return {
+        "env": ENV,
+        "database_url": settings.DATABASE_URL,
+        "dart_api_key": settings.DART_API_KEY,
+        "dart_api_key_length": len(settings.DART_API_KEY) if settings.DART_API_KEY else 0,
+        "dart_base_url": settings.DART_BASE_URL,
+        "hardcoded": False,
+        "message": "Configs loaded from environment variables"
+    }
+
 # CORS 설정
 if ENV == "production":
     allow_origins = [
