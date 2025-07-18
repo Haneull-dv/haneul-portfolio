@@ -1,0 +1,23 @@
+{
+    "$schema": "https://railway.app/railway.schema.json",
+    "build": {
+      "builder": "DOCKERFILE",
+      "dockerfilePath": "Dockerfile"
+    },
+    "deploy": {
+        "startCommand": "sh -c 'uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level info'",
+        "healthcheckPath": "/debug/dart-key",
+      "healthcheckTimeout": 300,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10
+    },
+    "environments": {
+      "production": {
+        "variables": {
+          "DART_API_KEY": "7c0bec1f1e1b81e5c11ed943e2be640cc0867823",
+          "ENV": "production"
+        }
+      }
+    }
+  }
+  

@@ -6,6 +6,7 @@ import ast
 from cachetools import TTLCache
 from fastapi import HTTPException
 import re
+from app.config.companies import SUPPORTED_COMPANIES
 
 # Railway 배포를 위한 환경변수 기반 dotenv 로드
 ENV = os.getenv("ENV", "development")
@@ -16,7 +17,23 @@ if ENV == "development":
 else:
     print(f"[서비스] 배포환경: .env 파일 로드하지 않음")
 
-DART_API_KEY = os.getenv("DART_API_KEY")
+# 🚀 Railway 환경변수 동적 로드 함수
+def get_dart_api_key():
+    """Railway에서 환경변수를 동적으로 가져오는 함수"""
+    dart_key = os.getenv("DART_API_KEY")
+    if not dart_key:
+        # Railway에서 환경변수가 늦게 로드되는 경우를 대비
+        print("⚠️ [Railway] DART_API_KEY 첫 번째 시도 실패, 재시도 중...")
+        import time
+        time.sleep(1)  # 1초 대기 후 재시도
+        dart_key = os.getenv("DART_API_KEY")
+        if dart_key:
+            print("✅ [Railway] DART_API_KEY 재시도 성공!")
+        else:
+            print("❌ [Railway] DART_API_KEY 재시도도 실패")
+    return dart_key
+
+DART_API_KEY = get_dart_api_key()
 DART_API_URL = "https://opendart.fss.or.kr/api"
 KPI_METADATA_PATH = os.path.join(os.path.dirname(__file__), '../../data/KPI_for_dashboard_final.csv')
 
@@ -36,8 +53,14 @@ cache = TTLCache(maxsize=100, ttl=600)
 
 class KpiCompareService:
     def __init__(self):
-        self.dart_api_key = DART_API_KEY
-        if not self.dart_api_key: self.dart_api_key = "test_key"
+        # 🚀 Railway에서 런타임 시 DART API 키 재확인
+        self.dart_api_key = get_dart_api_key()
+        if not self.dart_api_key:
+            print("⚠️ [Railway] KpiCompareService 초기화 시 DART_API_KEY 누락, test_key 사용")
+            self.dart_api_key = "test_key"
+        else:
+            print(f"✅ [Railway] KpiCompareService 초기화 성공, DART_API_KEY 길이: {len(self.dart_api_key)}")
+        
         self.kpi_meta = self._load_kpi_metadata()
 
     def _load_kpi_metadata(self):

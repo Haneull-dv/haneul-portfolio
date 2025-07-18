@@ -38,6 +38,19 @@ export default function IntroPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // 엔터 키로 대시보드 이동
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        router.push("/dashboard");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [router]);
+
   // 클릭 시 대시보드 이동
   const handleClick = () => {
     router.push("/dashboard");
