@@ -5,11 +5,16 @@ import operator
 import ast
 from cachetools import TTLCache
 from fastapi import HTTPException
-from dotenv import load_dotenv
-from app.config.companies import SUPPORTED_COMPANIES
 import re
 
-load_dotenv()
+# Railway 배포를 위한 환경변수 기반 dotenv 로드
+ENV = os.getenv("ENV", "development")
+if ENV == "development":
+    from dotenv import load_dotenv
+    load_dotenv()
+    print(f"[서비스] 개발환경: .env 파일 로드됨")
+else:
+    print(f"[서비스] 배포환경: .env 파일 로드하지 않음")
 
 DART_API_KEY = os.getenv("DART_API_KEY")
 DART_API_URL = "https://opendart.fss.or.kr/api"

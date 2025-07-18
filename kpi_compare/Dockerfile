@@ -17,5 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 6. 앱 실행 (uvicorn 사용 권장)
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-9007}"]
+
 # 7. 포트 노출
 EXPOSE 9007

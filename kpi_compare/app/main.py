@@ -11,8 +11,12 @@ if ENV == "development":
     print(f"[ENV] 개발환경: .env 파일 로드됨")
 else:
     print(f"[ENV] 배포환경: .env 파일 로드하지 않음")
+
 print(f"[ENV] ENV={ENV}")
-print(f"[ENV] DART_API_KEY={os.getenv('DART_API_KEY')}")
+dart_key = os.getenv('DART_API_KEY')
+print(f"[ENV] DART_API_KEY={'[설정됨]' if dart_key else '[누락]'}")
+if dart_key:
+    print(f"[ENV] DART_API_KEY 길이: {len(dart_key)}")
 
 app = FastAPI(title="KPI Compare Service")
 
@@ -21,7 +25,12 @@ app = FastAPI(title="KPI Compare Service")
 def debug_dart_key():
     dart_key = os.getenv("DART_API_KEY")
     print("📦 [DEBUG] DART_API_KEY =", dart_key)
-    return {"dart_key": dart_key}
+    return {
+        "dart_key": dart_key,
+        "dart_key_length": len(dart_key) if dart_key else 0,
+        "env": ENV,
+        "all_env_vars": {k: v for k, v in os.environ.items() if 'DART' in k.upper()}
+    }
 
 if ENV == "production":
     allow_origins = [
