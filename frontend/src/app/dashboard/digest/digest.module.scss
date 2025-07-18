@@ -282,14 +282,56 @@
 /* 로딩 및 에러 상태 */
 .stateContainer {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   width: 100%;
   background: #f8f9fa;
-  font-size: 20px;
+  gap: 20px;
+}
+
+.loadingContent {
+  text-align: center;
+  max-width: 400px;
+}
+
+.loadingTitle {
+  font-size: 1.1rem;
   color: #173e92;
   font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.loadingDescription {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* 모바일 로딩 화면 최적화 */
+@media (max-width: 768px) {
+  .stateContainer {
+    min-height: 80vh;
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .loadingContent {
+    max-width: 320px;
+  }
+  
+  .loadingTitle {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+  
+  .loadingDescription {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
 }
 
 .spinner {
@@ -654,5 +696,144 @@
   .digestStatsGrid {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+}
+
+/* 🚀 배포 준비 중 모달 스타일 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.deployModal {
+  background: white;
+  border-radius: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+  position: relative;
+  padding: 40px;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalCloseBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #333;
+  }
+}
+
+.modalContent {
+  padding: 30px 0 40px 0;
+  text-align: left;
+  line-height: 1.8;
+}
+
+.modalText {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+  word-break: keep-all;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.modalConfirmBtn {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 0;
+  padding: 14px 0;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-size: 14px;
+  
+  &:hover {
+    background: #1e40af;
+  }
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .deployModal {
+    width: 85%;
+    margin: 20px;
+    padding: 35px 25px;
+    max-width: 320px;
+  }
+  
+  .modalCloseBtn {
+    top: 15px;
+    right: 15px;
+    font-size: 20px;
+  }
+  
+  .modalContent {
+    padding: 25px 0 35px 0;
+  }
+  
+  .modalText {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  
+  .modalConfirmBtn {
+    padding: 16px 0;
+    font-size: 14px;
   }
 }

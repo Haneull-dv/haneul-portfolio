@@ -177,6 +177,7 @@ const DigestPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeployModal, setShowDeployModal] = useState(false);
 
   useEffect(() => {
     console.log('📦 Disclosure API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_DISCLOSURE);
@@ -187,9 +188,19 @@ const DigestPage: React.FC = () => {
   const integrateData = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setShowDeployModal(false);
+    
+    let hasApiError = false;
+    
     try {
       const safeFetch = async <T,>(fetcher: () => Promise<T>, fallback: T): Promise<T> => {
-        try { return await fetcher(); } catch (e) { return fallback; }
+        try { 
+          return await fetcher(); 
+        } catch (e) { 
+          hasApiError = true;
+          console.warn('🚨 [API 에러 감지]', e);
+          return fallback; 
+        }
       };
 
       console.log('🔗 [API 요청] STOCKPRICE:', `${STOCKPRICE_API_BASE}/db/all`);
@@ -270,8 +281,14 @@ const DigestPage: React.FC = () => {
         .map((item, index) => ({ ...item, marketCapRank: index + 1 }));
 
       setIntegratedData(finalData);
+      
+      // API 에러가 발생했거나 데이터가 비어있으면 배포 준비 모달 표시
+      if (hasApiError || finalData.length === 0) {
+        setShowDeployModal(true);
+      }
     } catch (e: any) {
-      setError(e.message || '데이터 로딩 실패');
+      console.error('🚨 [치명적 에러]', e);
+      setShowDeployModal(true);
     } finally {
       setLoading(false);
     }
@@ -298,16 +315,21 @@ const DigestPage: React.FC = () => {
   if (loading) return (
     <div className={styles.stateContainer}>
       <span className={styles.spinner}></span>
-      데이터를 불러오고 있습니다...
+      <div className={styles.loadingContent}>
+        <div className={styles.loadingTitle}>게임업계 데이터 수집 중</div>
+        <div className={styles.loadingDescription}>
+          금주 주가 변동 내역, 최신 공시, 주요 이슈를<br/>
+          여러 데이터 소스에서 통합하고 있습니다
+        </div>
+      </div>
     </div>
   );
-  if (error) return <div className={styles.stateContainer}>Error: {error}</div>;
 
   return (
     <div className={styles.pageContainer}>
       <PageHeader
         title="Market Digest"
-        description="주간 게임 업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
+        description="주간 게임업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Market Digest', active: true }
@@ -359,6 +381,34 @@ const DigestPage: React.FC = () => {
         </button>
       </div>
       <IntegratedTable data={integratedData} searchTerm={searchTerm} onSearch={setSearchTerm} />
+      
+      {/* 배포 준비 중 모달 */}
+      {showDeployModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowDeployModal(false)}>
+          <div className={styles.deployModal} onClick={(e) => e.stopPropagation()}>
+            <button 
+              className={styles.modalCloseBtn}
+              onClick={() => setShowDeployModal(false)}
+            >
+              ×
+            </button>
+            <div className={styles.modalContent}>
+              <p className={styles.modalText}>
+              해당 기능은 현재 서비스 준비 중입니다.</p>
+              <p className={styles.modalText}>
+              정식 제공을 위한 최종 점검을 진행하고 있습니다.
+              불편을 드려 죄송하며, 빠른 시일 내에 이용하실 수 있도록 하겠습니다.
+              </p>
+            </div>
+            <button 
+              className={styles.modalConfirmBtn}
+              onClick={() => setShowDeployModal(false)}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

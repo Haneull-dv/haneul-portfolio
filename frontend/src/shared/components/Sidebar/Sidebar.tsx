@@ -30,7 +30,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { id: 'dashboard', icon: 'bx-grid-alt', text: 'Dashboard', href: '/dashboard' },
       { id: 'digest', icon: 'bx-line-chart', text: 'Market Digest', href: '/dashboard/digest' },
-      { id: 'trends', icon: 'bx-trending-up', text: 'KPI Trends', href: '/dashboard/trends' },
+      { id: 'trends', icon: 'bx-trending-up', text: 'KPI Compare', href: '/dashboard/trends' },
       { id: 'validation', icon: 'bx-check-shield', text: 'Data Validation', href: '/dashboard/validation' },
       { id: 'dsd', icon: 'bx-transfer', text: 'DART Converter', href: '/dashboard/dsd' },
     ]

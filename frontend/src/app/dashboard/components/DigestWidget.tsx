@@ -85,7 +85,7 @@ const DigestWidget: React.FC = () => {
           시장 동향 요약
         </h3>
         <p className={styles.widgetDescription} style={{ fontSize: '12px', margin: 0 }}>
-          게임 업계 주요 지표와 실시간 동향을 한눈에 확인하세요
+          게임업계 주요 지표와 실시간 동향을 한눈에 확인하세요
         </p>
       </div>
       <div className={styles.widgetContent}>
