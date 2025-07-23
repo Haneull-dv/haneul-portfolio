@@ -1,33 +1,33 @@
 [
     {
       "symbol": "251270",
-      "today": 63500,
-      "changeRate": 3.76,
-      "marketCap": 530000
+      "today": 58900,
+      "changeRate": 2.26,
+      "marketCap": 517440
     },
     {
       "symbol": "259960",
       "today": 353000,
       "changeRate": -0.28,
-      "marketCap": 1680000
+      "marketCap": 1646870
     },
     {
       "symbol": "035720",
       "today": 244500,
       "changeRate": -2.20,
-      "marketCap": 1620000
+      "marketCap": 2422240
     },
     {
       "symbol": "036570",
       "today": 209500,
       "changeRate": -1.18,
-      "marketCap": 451000
+      "marketCap": 427860
     },
     {
       "symbol": "112040",
       "today": 33850,
       "changeRate": 0.30,
-      "marketCap": 340000
+      "marketCap": 108300
     },
     {
       "symbol": "293490",
@@ -37,15 +37,15 @@
     },
     {
       "symbol": "095660",
-      "today": 28000,
-      "changeRate": 0.18,
-      "marketCap": 61790
+      "today": 21500,
+      "changeRate": -1.83,
+      "marketCap": 55300
     },
     {
       "symbol": "462870",
       "today": 44550,
       "changeRate": -0.45,
-      "marketCap": 411890
+      "marketCap": 256580
     },
     {
       "symbol": "192080",
@@ -57,7 +57,7 @@
       "symbol": "181710",
       "today": 29050,
       "changeRate": 0.00,
-      "marketCap": 98090
+      "marketCap": 97080
     },
     {
       "symbol": "145720",
@@ -75,7 +75,7 @@
       "symbol": "194480",
       "today": 43600,
       "changeRate": -1.69,
-      "marketCap": 55930
+      "marketCap": 52230
     },
     {
       "symbol": "078340",
@@ -99,7 +99,7 @@
       "symbol": "225570",
       "today": 13200,
       "changeRate": -1.27,
-      "marketCap": 90410
+      "marketCap": 95100
     },
     {
       "symbol": "063080",
@@ -159,7 +159,7 @@
       "symbol": "263750",
       "today": 39400,
       "changeRate": -0.25,
-      "marketCap": 261410
+      "marketCap": 238040
     },
     {
       "symbol": "089500",
@@ -172,17 +172,5 @@
       "today": 3945,
       "changeRate": -1.38,
       "marketCap": 15570
-    },
-    {
-      "symbol": "095660",
-      "today": 21500,
-      "changeRate": -1.83,
-      "marketCap": 475600000000
-    },
-    {
-      "symbol": "251270",
-      "today": 58900,
-      "changeRate": 2.26,
-      "marketCap": 568000000000
     }
-  ]
+]

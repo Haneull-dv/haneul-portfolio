@@ -105,6 +105,35 @@ const apiClient = {
   }
 };
 
+// 시가총액 포맷팅 함수
+const formatMarketCap = (marketCap: number | null): string => {
+  if (!marketCap || marketCap === 0) return 'N/A';
+  
+  // 단위: 백만원 기준
+  if (marketCap >= 10000) {
+    // 1조 이상
+    const trillion = marketCap / 10000;
+    if (trillion >= 100) {
+      return `${Math.round(trillion)}조`;
+    } else if (trillion >= 10) {
+      return `${trillion.toFixed(1)}조`;
+    } else {
+      return `${trillion.toFixed(2)}조`;
+    }
+  } else if (marketCap >= 1000) {
+    // 1천억 이상 1조 미만
+    const billion = marketCap / 1000;
+    return `${billion.toFixed(0)}천억`;
+  } else if (marketCap >= 100) {
+    // 100억 이상 1천억 미만
+    const billion = marketCap / 100;
+    return `${billion.toFixed(0)}백억`;
+  } else {
+    // 100억 미만
+    return `${marketCap.toFixed(0)}억`;
+  }
+};
+
 const KPICard: React.FC<{ title: string; value: string; unit?: string; subtitle?: string; trend?: 'up' | 'down'; companyName?: string }> = ({ title, value, unit, subtitle, trend, companyName }) => {
   const trendIcon = trend === 'up' ? 'bx-trending-up' : 'bx-trending-down';
   const trendColor = trend === 'up' ? styles.textPositive : styles.textNegative;
@@ -193,14 +222,14 @@ const IntegratedTable: React.FC<{ data: IntegratedCompanyData[], searchTerm: str
             {sortedData.map((company) => (
               <tr key={company.symbol}>
                 <td><input type="checkbox" /></td>
-                <td className={styles.centerAlign}>{company.marketCapRank}</td>
+                <td className={styles.centerAlign}>{company.marketCapRank || '-'}</td>
                 <td>{company.companyName}</td>
                 <td className={styles.tdCountry}><span className={styles.countryBadge}>{company.country}</span></td>
                 <td className={styles.rightAlign}>{company.currentPrice !== null ? company.currentPrice.toLocaleString() : 'N/A'}</td>
                 <td className={clsx(styles.rightAlign, company.changeRate !== null && (company.changeRate > 0 ? styles.textPositive : styles.textNegative))}>
                   {company.changeRate !== null ? `${company.changeRate.toFixed(2)}%` : 'N/A'}
                 </td>
-                <td className={styles.rightAlign}>{company.marketCap ? `${(company.marketCap / 10000).toFixed(1)}조` : 'N/A'}</td>
+                <td className={styles.rightAlign}>{formatMarketCap(company.marketCap)}</td>
                 <td className={styles.disclosureCell}>
                   {company.disclosures.length > 0 ?
                     (
@@ -491,8 +520,27 @@ const DigestPage: React.FC = () => {
 
 
       const finalData = Array.from(companyDataMap.values())
-        .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
-        .map((item, index) => ({ ...item, marketCapRank: index + 1 }));
+        .sort((a, b) => {
+          // 시가총액이 없는 기업들은 맨 아래로
+          const aMarketCap = a.marketCap || 0;
+          const bMarketCap = b.marketCap || 0;
+          
+          if (aMarketCap === 0 && bMarketCap === 0) {
+            // 둘 다 시가총액이 없으면 기업명 순
+            return a.companyName.localeCompare(b.companyName);
+          } else if (aMarketCap === 0) {
+            return 1; // a를 뒤로
+          } else if (bMarketCap === 0) {
+            return -1; // b를 뒤로
+          } else {
+            // 시가총액 내림차순 (큰 것부터)
+            return bMarketCap - aMarketCap;
+          }
+        })
+        .map((item, index) => ({ 
+          ...item, 
+          marketCapRank: item.marketCap && item.marketCap > 0 ? index + 1 : undefined 
+        }));
 
       console.log('🔍 [디버깅] 최종 데이터:', finalData.length, finalData.slice(0, 5));
       console.log('🔍 [디버깅] 주가 데이터가 있는 기업:', finalData.filter(d => d.currentPrice !== null).length);
