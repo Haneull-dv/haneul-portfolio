@@ -19,7 +19,7 @@ const KOREAN_COMPANIES_MAP: Record<string, string> = {
     "181710": "NHN", "078340": "컴투스", "192080": "더블유게임즈", "145720": "더블다운인터액티브", "089500": "그라비티",
     "194480": "데브시스터즈", "069080": "웹젠", "217270": "넵튠", "101730": "위메이드맥스", "063080": "컴투스홀딩스",
     "067000": "조이시티", "950190": "미투젠", "123420": "위메이드플레이", "201490": "미투온", "348030": "모비릭스",
-    "052790": "액토즈소프트", "331520": "밸로프", "205500": "넥써쓰", "462870": "시프트업", "060240": "네오위즈", "299910": "넷마블",
+    "052790": "액토즈소프트", "331520": "밸로프", "205500": "넥써쓰", "462870": "시프트업",
 };
 const NAME_TO_CODE_MAP: Record<string, string> = Object.fromEntries(Object.entries(KOREAN_COMPANIES_MAP).map(([code, name]) => [name, code]));
 
@@ -633,7 +633,7 @@ const DigestPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <PageHeader
         title="Market Digest"
-        description="주간 게임업계 상장기업의 주가 변동, 주요 이슈 및 공시 내용을 요약해 제공합니다."
+        description="주간 게임업계 상장기업의 주가 변동, 공시 내용, 주요 이슈를 요약해 제공합니다."
         breadcrumbs={[
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Market Digest', active: true }
