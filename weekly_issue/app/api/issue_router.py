@@ -10,6 +10,7 @@ from weekly_db.db.db_builder import get_db_session
 
 # 서비스 모듈 import
 from app.domain.controller.issue_controller import IssueController
+from app.domain.service.fallback_service import IssueFallbackService
 from app.domain.schema.issue_schema import IssueAnalysisRequest, IssueResponse, ErrorResponse
 from app.domain.schema.issue_schema import IssueListResponse
 
@@ -95,17 +96,42 @@ async def get_recent_issues(
     days: int = Query(7, description="조회할 일수"),
     db: AsyncSession = Depends(get_db_session)
 ):
-    """📋 DB에서 최근 N일간의 이슈 정보 조회"""
+    """📋 DB에서 최근 N일간의 이슈 정보 조회 (DB 실패 시 fallback 데이터 제공)"""
     print(f"🤍1 DB 조회 라우터 진입 - 최근 {days}일")
     
+    # Fallback 서비스 초기화
+    fallback_service = IssueFallbackService()
+    
     try:
-        controller = IssueController(db_session=db)
-        result = await controller.get_recent_issues_from_db(days=days)
-        print("🤍2 DB 조회 라우터 - 컨트롤러 호출 완료")
-        return result
+        # 1. DB 연결 상태 확인 (1초 timeout)
+        db_available = await fallback_service.check_db_connection(db)
+        
+        if db_available:
+            # 2. DB 연결 성공 시 정상 로직 실행
+            print("✅ [DB] 연결 성공 - 정상 데이터 제공")
+            controller = IssueController(db_session=db)
+            result = await controller.get_recent_issues_from_db(days=days)
+            print("🤍2 DB 조회 라우터 - 컨트롤러 호출 완료")
+            return result
+        else:
+            # 3. DB 연결 실패 시 fallback 데이터 제공
+            print("📁 [Fallback] DB 연결 실패 - fallback 데이터 제공")
+            fallback_result = await fallback_service.get_fallback_recent_issues(days=days)
+            print("📁 [Fallback] fallback 데이터 제공 완료")
+            return fallback_result
+            
     except Exception as e:
         print(f"❌ DB 조회 라우터 에러: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"DB 조회 중 오류 발생: {str(e)}")
+        
+        # 4. 예외 발생 시에도 fallback 시도
+        try:
+            print("📁 [Fallback] 예외 발생으로 fallback 데이터 시도")
+            fallback_result = await fallback_service.get_fallback_recent_issues(days=days)
+            print("📁 [Fallback] 예외 시 fallback 데이터 제공 완료")
+            return fallback_result
+        except Exception as fallback_error:
+            print(f"❌ [Fallback] fallback도 실패: {str(fallback_error)}")
+            raise HTTPException(status_code=500, detail=f"DB 및 fallback 모두 실패: 원본 오류={str(e)}, fallback 오류={str(fallback_error)}")
 
 @router.get("/search", response_model=IssueListResponse)
 async def search_issues(

@@ -290,7 +290,7 @@ const DSDPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', fileParam);
       formData.append('sheet_name', sheetParam);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN}/dsdgen/upload`;
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DART_CONVERTER}/dart_converter/upload`;
       const response = await fetch(url, {
         method: 'POST',
         body: formData,

@@ -47,31 +47,31 @@ services:
     networks:
       - app-network
 
-  dsdgen:
-    container_name: gen
+  dart_converter:
+    container_name: dart_converter
     build:
-      context: ./conanai_dsdgen
+      context: ./dart_converter
       dockerfile: Dockerfile
     ports:
       - "8085:8085"
     volumes:
-      - ./conanai_dsdgen:/app
+      - ./dart_converter:/app
     env_file:
-      - ./conanai_dsdgen/.env
+      - ./dart_converter/.env
     networks:
       - app-network
 
-  dsdcheck:
-    container_name: check
+  validation:
+    container_name: validation
     build:
-      context: ./conanai_dsdcheck
+      context: ./validation
       dockerfile: Dockerfile
     ports:
       - "8086:8086"
     volumes:
-      - ./conanai_dsdcheck:/app
+      - ./validation:/app
     env_file:
-      - ./conanai_dsdcheck/.env
+      - ./validation/.env
     networks:
       - app-network
 
@@ -198,8 +198,6 @@ services:
       dockerfile: ./weekly_issue/Dockerfile
     ports:
       - "8089:8089"
-    volumes:
-      - .:/app
     environment:
       - RUNNING_IN_DOCKER=true
     env_file:

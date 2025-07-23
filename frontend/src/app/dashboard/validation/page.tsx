@@ -133,7 +133,7 @@ const ValidationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('📦 DSDCHECK API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK);
+    console.log('📦 VALIDATION API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_VALIDATION);
   }, []);
 
   useEffect(() => {
@@ -185,8 +185,8 @@ const ValidationPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK}/api/v1/dsdfooting/check-footing`;
-      console.log('🔗 [API 요청] DSDCHECK 합계검증:', url);
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_VALIDATION}/api/v1/dsdfooting/check-footing`;
+    console.log('🔗 [API 요청] VALIDATION 합계검증:', url);
       console.log('📄 [FormData] file:', file);
       const response = await fetch(url, { method: 'POST', body: formData });
       console.log('📥 [API 응답] status:', response.status, response.statusText);
@@ -212,7 +212,7 @@ const ValidationPage: React.FC = () => {
   };
 
   const handleDartComparison = () => {
-    showModal('🚧기능 준비 중🚧', '해당 기능은 현재 준비 중입니다.\n더 좋은 모습으로 찾아뵐게요!');
+    showModal('기능 준비 중', '해당 기능은 현재 준비 중입니다.\n더 좋은 모습으로 찾아뵐게요!');
   };
 
   const processedData = useMemo(() => {

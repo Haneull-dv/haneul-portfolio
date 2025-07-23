@@ -71,37 +71,47 @@ dev-weekly-stockprice:
 	docker-compose stop stockprice
 	docker-compose up -d stockprice
 
-## conanai_dsdgen
-build-conanai-dsdgen:
-	docker-compose build dsdgen
+## dart_converter
+build-dart-converter:
+	docker-compose build dart_converter
 
-up-conanai-dsdgen:
-	docker-compose up -d dsdgen
+up-dart-converter:
+	docker-compose up -d dart_converter
 
-down-conanai-dsdgen:
-	docker-compose stop dsdgen
+down-dart-converter:
+	docker-compose stop dart_converter
 
-logs-conanai-dsdgen:
-	docker-compose logs -f dsdgen
+logs-dart-converter:
+	docker-compose logs -f dart_converter
 
-restart-conanai-dsdgen:
-	docker-compose down dsdgen && docker-compose up -d --build dsdgen
+restart-dart-converter:
+	docker-compose down dart_converter && docker-compose up -d --build dart_converter
 
-## conanai_dsdcheck
-build-conanai-dsdcheck:
-	docker-compose build dsdcheck
+# 개발 전용 (빌드 없이 재시작)
+dev-dart-converter:
+	docker-compose stop dart_converter
+	docker-compose up -d dart_converter
 
-up-conanai-dsdcheck:
-	docker-compose up -d dsdcheck
+## validation
+build-validation:
+	docker-compose build validation
 
-down-conanai-dsdcheck:
-	docker-compose stop dsdcheck
+up-validation:
+	docker-compose up -d validation
 
-logs-conanai-dsdcheck:
-	docker-compose logs -f dsdcheck
+down-validation:
+	docker-compose stop validation
 
-restart-conanai-dsdcheck:
-	docker-compose down dsdcheck && docker-compose up -d --build dsdcheck
+logs-validation:
+	docker-compose logs -f validation
+
+restart-validation:
+	docker-compose down validation && docker-compose up -d --build validation
+
+# 개발 전용 (빌드 없이 재시작)
+dev-validation:
+	docker-compose stop validation
+	docker-compose up -d validation
 
 ## weekly_disclosure
 build-weekly-disclosure:

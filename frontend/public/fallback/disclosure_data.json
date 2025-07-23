@@ -1,0 +1,201 @@
+{
+    "disclosures": [
+      {
+        "id": 1,
+        "stock_code": "036570",
+        "disclosure_title": "최대주주등소유주식변동신고서"
+      },
+      {
+        "id": 2,
+        "stock_code": "263750",
+        "disclosure_title": "기업설명회(IR) 개최(안내공시)"
+      },
+      {
+        "id": 3,
+        "stock_code": "112040",
+        "disclosure_title": "주주총회소집공고"
+      },
+      {
+        "id": 4,
+        "stock_code": "293490",
+        "disclosure_title": "주요사항보고서 (타법인 주식 및 출자증권 양수결정)"
+      },
+      {
+        "id": 5,
+        "stock_code": "095660",
+        "disclosure_title": "임원ㆍ주요주주특정증권등소유상황보고서"
+      },
+      {
+        "id": 6,
+        "stock_code": "251270",
+        "disclosure_title": "[기재정정] 분기보고서"
+      },
+      {
+        "id": 7,
+        "stock_code": "078340",
+        "disclosure_title": "단일판매ㆍ공급계약체결"
+      },
+      {
+        "id": 8,
+        "stock_code": "462870",
+        "disclosure_title": "신규시설투자 등"
+      },
+      {
+        "id": 9,
+        "stock_code": "063080",
+        "disclosure_title": "전환사채권발행결정"
+      },
+      {
+        "id": 10,
+        "stock_code": "194480",
+        "disclosure_title": "영업(잠정)실적(공정공시)"
+      }
+    ],
+    "companies": [
+      {
+        "symbol": "035420",
+        "name": "네이버",
+        "country": "KR"
+      },
+      {
+        "symbol": "035720",
+        "name": "카카오",
+        "country": "KR"
+      },
+      {
+        "symbol": "259960",
+        "name": "크래프톤",
+        "country": "KR"
+      },
+      {
+        "symbol": "036570",
+        "name": "엔씨소프트",
+        "country": "KR"
+      },
+      {
+        "symbol": "251270",
+        "name": "넷마블",
+        "country": "KR"
+      },
+      {
+        "symbol": "263750",
+        "name": "펄어비스",
+        "country": "KR"
+      },
+      {
+        "symbol": "293490",
+        "name": "카카오게임즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "225570",
+        "name": "넥슨게임즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "112040",
+        "name": "위메이드",
+        "country": "KR"
+      },
+      {
+        "symbol": "095660",
+        "name": "네오위즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "181710",
+        "name": "NHN",
+        "country": "KR"
+      },
+      {
+        "symbol": "078340",
+        "name": "컴투스",
+        "country": "KR"
+      },
+      {
+        "symbol": "192080",
+        "name": "더블유게임즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "145720",
+        "name": "더블다운인터액티브",
+        "country": "KR"
+      },
+      {
+        "symbol": "089500",
+        "name": "그라비티",
+        "country": "KR"
+      },
+      {
+        "symbol": "194480",
+        "name": "데브시스터즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "069080",
+        "name": "웹젠",
+        "country": "KR"
+      },
+      {
+        "symbol": "067000",
+        "name": "조이시티",
+        "country": "KR"
+      },
+      {
+        "symbol": "950190",
+        "name": "미투젠",
+        "country": "KR"
+      },
+      {
+        "symbol": "123420",
+        "name": "위메이드플레이",
+        "country": "KR"
+      },
+      {
+        "symbol": "201490",
+        "name": "미투온",
+        "country": "KR"
+      },
+      {
+        "symbol": "348030",
+        "name": "모비릭스",
+        "country": "KR"
+      },
+      {
+        "symbol": "052790",
+        "name": "액토즈소프트",
+        "country": "KR"
+      },
+      {
+        "symbol": "331520",
+        "name": "밸로프",
+        "country": "KR"
+      },
+      {
+        "symbol": "205500",
+        "name": "넥써쓰",
+        "country": "KR"
+      },
+      {
+        "symbol": "462870",
+        "name": "시프트업",
+        "country": "KR"
+      },
+      {
+        "symbol": "060240",
+        "name": "네오위즈",
+        "country": "KR"
+      },
+      {
+        "symbol": "299910",
+        "name": "넷마블",
+        "country": "KR"
+      },
+      {
+        "symbol": "063080",
+        "name": "컴투스홀딩스",
+        "country": "KR"
+      }
+    ]
+  }

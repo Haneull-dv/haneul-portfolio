@@ -29,7 +29,7 @@ const ProjectsPage: React.FC = () => {
     {
       title: 'Conan AI',
       period: '2025.04 ~ 2025.05',
-      description: "IR팀 인턴으로 일하며 느낀 업무의 비효율을 해결하는 솔루션 Conan AI를 기획하여 스타트업 경진대회 본선까지 진출했습니다.",
+      description: "IR팀 인턴으로 일하며 느낀 업무의 비효율을 해결하는 솔루션 Conan AI를 기획·설계했습니다. 스타트업 경진대회 본선 진출과 회계법인의 미팅 요청을 통해 실무성과와 시장성을 검증받았습니다.",
       technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
       status: 'In Progress',
       image: '/projects/conanai.png',

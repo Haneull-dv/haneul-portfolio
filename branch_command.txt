@@ -8,8 +8,8 @@
 - **stockprice**: 주가 정보 조회 서비스 ⭐ NEW
 - **stocktrend**: 주가 트렌드 분석
 - **irsummary**: IR 보고서 요약
-- **dsdgen**: 재무제표 생성
-- **dsdcheck**: 재무제표 검증
+- **dart_converter**: 재무제표 생성
+- **validation**: 재무제표 검증
 - **n8n**: 워크플로우 자동화 ⭐ NEW
 
 ## 1. 🌿 새 기능 개발 시 브랜치 생성 작업

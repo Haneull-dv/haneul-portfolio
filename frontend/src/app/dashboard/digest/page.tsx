@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -42,6 +44,64 @@ const apiClient = {
     const response = await fetch(`${ISSUE_API_BASE}/recent`);
     if (!response.ok) throw new Error('이슈 데이터 로딩 실패');
     return response.json();
+  },
+  
+  // 📁 Fallback 데이터 로더
+  async loadFallbackIssueData(): Promise<{ data: WeeklyIssue[] }> {
+    try {
+      console.log('📁 [Fallback] 로컬 이슈 데이터 로딩 시도');
+      const response = await fetch('/fallback/issue_data.json');
+      if (!response.ok) {
+        throw new Error(`Fallback 파일 로딩 실패: ${response.status}`);
+      }
+      const issueArray: WeeklyIssue[] = await response.json();
+      console.log('📁 [Fallback] 로컬 이슈 데이터 로딩 성공:', issueArray.length, '개');
+      
+      // 백엔드 API 응답 형식에 맞춰 변환
+      return { data: issueArray };
+    } catch (error) {
+      console.error('📁 [Fallback] 로컬 이슈 데이터 로딩 실패:', error);
+      return { data: [] };
+    }
+  },
+  
+  async loadFallbackStockData(): Promise<{ data: WeeklyStockPrice[] }> {
+    try {
+      console.log('📁 [Fallback] 로컬 주가 데이터 로딩 시도');
+      const response = await fetch('/fallback/stockprice_data.json');
+      if (!response.ok) {
+        throw new Error(`Fallback 파일 로딩 실패: ${response.status}`);
+      }
+      const stockArray: WeeklyStockPrice[] = await response.json();
+      console.log('📁 [Fallback] 로컬 주가 데이터 로딩 성공:', stockArray.length, '개');
+      
+      // 백엔드 API 응답 형식에 맞춰 변환
+      return { data: stockArray };
+    } catch (error) {
+      console.error('📁 [Fallback] 로컬 주가 데이터 로딩 실패:', error);
+      return { data: [] };
+    }
+  },
+
+  async loadFallbackDisclosureData(): Promise<{ disclosures: WeeklyDisclosure[], companies: GameCompany[] }> {
+    try {
+      console.log('📁 [Fallback] 로컬 공시 데이터 로딩 시도');
+      const response = await fetch('/fallback/disclosure_data.json');
+      if (!response.ok) {
+        throw new Error(`Fallback 파일 로딩 실패: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📁 [Fallback] 로컬 공시 데이터 로딩 성공:', data.disclosures?.length || 0, '개 공시,', data.companies?.length || 0, '개 기업');
+      
+      // 백엔드 API 응답 형식에 맞춰 변환
+      return {
+        disclosures: data.disclosures || [],
+        companies: data.companies || []
+      };
+    } catch (error) {
+      console.error('📁 [Fallback] 로컬 공시 데이터 로딩 실패:', error);
+      return { disclosures: [], companies: [] };
+    }
   }
 };
 
@@ -135,10 +195,10 @@ const IntegratedTable: React.FC<{ data: IntegratedCompanyData[], searchTerm: str
                 <td><input type="checkbox" /></td>
                 <td className={styles.centerAlign}>{company.marketCapRank}</td>
                 <td>{company.companyName}</td>
-                <td className={styles.centerAlign}><span className={styles.countryBadge}>{company.country}</span></td>
-                <td className={styles.rightAlign}>{company.currentPrice?.toLocaleString() ?? 'N/A'}</td>
-                <td className={clsx(styles.rightAlign, company.changeRate && (company.changeRate > 0 ? styles.textPositive : styles.textNegative))}>
-                  {company.changeRate ? `${company.changeRate.toFixed(2)}%` : 'N/A'}
+                <td className={styles.tdCountry}><span className={styles.countryBadge}>{company.country}</span></td>
+                <td className={styles.rightAlign}>{company.currentPrice !== null ? company.currentPrice.toLocaleString() : 'N/A'}</td>
+                <td className={clsx(styles.rightAlign, company.changeRate !== null && (company.changeRate > 0 ? styles.textPositive : styles.textNegative))}>
+                  {company.changeRate !== null ? `${company.changeRate.toFixed(2)}%` : 'N/A'}
                 </td>
                 <td className={styles.rightAlign}>{company.marketCap ? `${(company.marketCap / 10000).toFixed(1)}조` : 'N/A'}</td>
                 <td className={styles.disclosureCell}>
@@ -157,7 +217,15 @@ const IntegratedTable: React.FC<{ data: IntegratedCompanyData[], searchTerm: str
                     (
                       Array.from(new Set(company.issues.map(i => i.summary)))
                         .slice(0, 2)
-                        .map((summary, index) => <div key={index} title={summary}>{summary}</div>)
+                        .map((summary, index) => (
+                          <div 
+                            key={index} 
+                            title={summary}
+                            style={{ whiteSpace: 'pre-line', lineHeight: '1.4' }}
+                          >
+                            {summary}
+                          </div>
+                        ))
                     ) : (
                       <span className={styles.noItems}>이슈 없음</span>
                     )
@@ -192,54 +260,138 @@ const DigestPage: React.FC = () => {
     
     let hasApiError = false;
     
+    console.log('🚀 [데이터 로딩 시작] Digest 페이지 초기화');
+    
     try {
-      const safeFetch = async <T,>(fetcher: () => Promise<T>, fallback: T): Promise<T> => {
+      // 타임아웃 헬퍼 함수
+      const timeoutPromise = (ms: number) => new Promise((_, reject) => 
+        setTimeout(() => reject(new Error(`요청 타임아웃 (${ms}ms)`)), ms)
+      );
+
+      const safeFetch = async <T,>(fetcher: () => Promise<T>, fallback: T | (() => Promise<T>), timeoutMs: number = 1000): Promise<T> => {
         try { 
-          return await fetcher(); 
+          console.log(`⏱️ [API 호출] ${timeoutMs}ms 타임아웃으로 시작`);
+          const result = await Promise.race([
+            fetcher(),
+            timeoutPromise(timeoutMs)
+          ]);
+          console.log('✅ [API 성공] 정상 응답 받음');
+          return result as T;
         } catch (e) { 
           hasApiError = true;
-          console.warn('🚨 [API 에러 감지]', e);
-          return fallback; 
+          console.warn('🚨 [API 에러 감지] fallback으로 전환:', e);
+          
+          // fallback이 함수인 경우(비동기 fallback) 실행
+          if (typeof fallback === 'function') {
+            try {
+              const fallbackResult = await (fallback as () => Promise<T>)();
+              console.log('📁 [Fallback 성공] 로컬 데이터 로딩 완료');
+              return fallbackResult;
+            } catch (fallbackError) {
+              console.error('🚨 [Fallback 에러]', fallbackError);
+              // fallback도 실패하면 빈 데이터 반환
+              return { data: [] } as T;
+            }
+          }
+          
+          return fallback as T; 
         }
       };
 
-      console.log('🔗 [API 요청] STOCKPRICE:', `${STOCKPRICE_API_BASE}/db/all`);
-      const stockRes = await safeFetch(async () => {
-        const res = await fetch(`${STOCKPRICE_API_BASE}/db/all`);
-        console.log('📥 [API 응답] STOCKPRICE status:', res.status, res.statusText);
-        return res.json();
-      }, { data: [] as WeeklyStockPrice[] });
-      console.log('🔗 [API 요청] DISCLOSURE:', `${DISCLOSURE_API_BASE}/recent-with-companies`);
-      const disclosureRes = await safeFetch(async () => {
-        const res = await fetch(`${DISCLOSURE_API_BASE}/recent-with-companies`);
-        console.log('📥 [API 응답] DISCLOSURE status:', res.status, res.statusText);
-        return res.json();
-      }, { disclosures: [] as WeeklyDisclosure[], companies: [] as GameCompany[] });
-      console.log('🔗 [API 요청] ISSUE:', `${ISSUE_API_BASE}/recent`);
-      const issueRes = await safeFetch(async () => {
-        const res = await fetch(`${ISSUE_API_BASE}/recent`);
-        console.log('📥 [API 응답] ISSUE status:', res.status, res.statusText);
-        return res.json();
-      }, { data: [] as WeeklyIssue[] });
+      const timestamp = Date.now();
+      
+      // 🚀 병렬 API 호출 (각각 1초 타임아웃)
+      console.log('🚀 [병렬 API 호출] 3개 서비스 동시 요청 시작 (각 1초 타임아웃)');
+      const [stockRes, disclosureRes, issueRes] = await Promise.all([
+        safeFetch(async () => {
+          console.log('🔗 [API 요청] STOCKPRICE:', `${STOCKPRICE_API_BASE}/db/all?_t=${timestamp}`);
+          const res = await fetch(`${STOCKPRICE_API_BASE}/db/all?_t=${timestamp}`);
+          console.log('📥 [API 응답] STOCKPRICE status:', res.status, res.statusText);
+          if (!res.ok) {
+            throw new Error(`Stockprice API 실패: ${res.status} ${res.statusText}`);
+          }
+          return res.json();
+        }, async () => {
+          console.log('📁 [Fallback] 주가 API 실패로 fallback 데이터 로딩');
+          return await apiClient.loadFallbackStockData();
+        }, 1000),
+        
+        safeFetch(async () => {
+          console.log('🔗 [API 요청] DISCLOSURE:', `${DISCLOSURE_API_BASE}/recent-with-companies`);
+          const res = await fetch(`${DISCLOSURE_API_BASE}/recent-with-companies`);
+          console.log('📥 [API 응답] DISCLOSURE status:', res.status, res.statusText);
+          if (!res.ok) {
+            throw new Error(`Disclosure API 실패: ${res.status} ${res.statusText}`);
+          }
+          return res.json();
+        }, async () => {
+          console.log('📁 [Fallback] 공시 API 실패로 fallback 데이터 로딩');
+          return await apiClient.loadFallbackDisclosureData();
+        }, 1000),
+        
+        safeFetch(async () => {
+          console.log('🔗 [API 요청] ISSUE:', `${ISSUE_API_BASE}/recent`);
+          const res = await fetch(`${ISSUE_API_BASE}/recent`);
+          console.log('📥 [API 응답] ISSUE status:', res.status, res.statusText);
+          if (!res.ok) {
+            throw new Error(`Issue API 실패: ${res.status} ${res.statusText}`);
+          }
+          return res.json();
+        }, async () => {
+          console.log('📁 [Fallback] 이슈 API 실패로 fallback 데이터 로딩');
+          return await apiClient.loadFallbackIssueData();
+        }, 1000)
+      ]);
+      
+      console.log('🎉 [병렬 API 완료] 모든 데이터 로딩 완료');
 
       const stockData: WeeklyStockPrice[] = stockRes?.data ?? [];
       const companies: GameCompany[] = disclosureRes?.companies ?? [];
       const disclosures: WeeklyDisclosure[] = disclosureRes?.disclosures ?? [];
       const issues: WeeklyIssue[] = issueRes?.data ?? [];
 
+      console.log('🔍 [디버깅] 백엔드 응답 데이터:');
+      console.log('📊 주가 데이터:', stockData.length, stockData.slice(0, 3));
+      console.log('📊 주가 데이터 전체 symbol 목록:', stockData.map(s => s.symbol));
+      console.log('🏢 기업 정보:', companies.length, companies.slice(0, 3));
+      console.log('📋 공시 정보:', disclosures.length, disclosures.slice(0, 3));
+      console.log('📰 이슈 정보:', issues.length);
+      
+      // 주가 데이터 상세 로그 (fallback 여부 확인)
+      if (stockData.length > 0) {
+        console.log('📊 [주가 데이터 상세]', stockData.slice(0, 3));
+        console.log('📊 [주가 데이터] 가격이 있는 종목:', stockData.filter(s => s.today !== null).length, '개');
+        console.log('📊 [주가 데이터] 시가총액 범위:', 
+          Math.min(...stockData.filter(s => s.marketCap).map(s => s.marketCap!)), '~',
+          Math.max(...stockData.filter(s => s.marketCap).map(s => s.marketCap!)));
+      } else {
+        console.log('📊 [주가 데이터] 데이터 없음 (API 및 fallback 모두 실패했을 가능성)');
+      }
+      
+      // 이슈 데이터 상세 로그 (fallback 여부 확인)
+      if (issues.length > 0) {
+        console.log('📰 [이슈 데이터 상세]', issues.slice(0, 3));
+        console.log('📰 [이슈 데이터] 기업 목록:', issues.map(i => i.corp));
+      } else {
+        console.log('📰 [이슈 데이터] 데이터 없음 (API 및 fallback 모두 실패했을 가능성)');
+      }
+
       const companyDataMap = new Map<string, IntegratedCompanyData>();
 
       const allCompanySymbols = new Set([
         ...companies.map(c => c.symbol),
-        ...stockData.map(s => NAME_TO_CODE_MAP[s.symbol]).filter(Boolean),
+        ...stockData.map(s => s.symbol).filter(Boolean),
         ...disclosures.map(d => d.stock_code)
       ]);
 
+      console.log('🔍 [디버깅] 전체 기업 심볼들:', Array.from(allCompanySymbols));
+      
       allCompanySymbols.forEach(symbol => {
         const companyInfoFromDisclosure = companies.find(c => c.symbol === symbol);
         const companyName = KOREAN_COMPANIES_MAP[symbol] || companyInfoFromDisclosure?.name || 'Unknown';
         
         if (KOREAN_COMPANIES_MAP[symbol]) {
+          console.log(`✅ [추가됨] ${symbol}: ${companyName}`);
           companyDataMap.set(symbol, {
             symbol: symbol,
             companyName: companyName,
@@ -248,43 +400,147 @@ const DigestPage: React.FC = () => {
             marketCapRank: undefined,
             disclosures: [], issues: [],
           });
+        } else {
+          console.log(`❌ [제외됨] ${symbol}: ${companyName} (KOREAN_COMPANIES_MAP에 없음)`);
         }
       });
+      
+      console.log('🔍 [디버깅] 생성된 companyDataMap 크기:', companyDataMap.size);
 
+      // 주가 데이터 적용 (API 또는 fallback)
+      console.log('📊 [주가 매핑 시작] 총', stockData.length, '개 주가 데이터 처리');
       stockData.forEach(stock => {
-        if (!stock || !stock.symbol) return;
-        const stockCode = NAME_TO_CODE_MAP[stock.symbol];
+        if (!stock || !stock.symbol) {
+          console.log('❌ [주가 매핑] 빈 데이터 또는 symbol 없음:', stock);
+          return;
+        }
+        
+        // 백엔드에서 symbol이 이제 종목코드로 반환되므로 직접 사용
+        const stockCode = stock.symbol;
         if (stockCode && companyDataMap.has(stockCode)) {
+          console.log(`✅ [주가 매핑] ${stockCode}: 현재가=${stock.today}, 등락률=${stock.changeRate}%, 시총=${stock.marketCap}`);
           const company = companyDataMap.get(stockCode)!;
           company.marketCap = stock.marketCap;
           company.currentPrice = stock.today;
           company.changeRate = stock.changeRate;
-        }
-      });
-
-      disclosures.forEach(d => {
-        if (d && d.stock_code && companyDataMap.has(d.stock_code)) {
-          companyDataMap.get(d.stock_code)!.disclosures.push(d);
+        } else {
+          console.log(`❌ [주가 매핑] ${stockCode}: companyDataMap에 없음`);
         }
       });
       
+      // 주가가 적용된 기업 수 확인
+      const companiesWithStockData = Array.from(companyDataMap.values()).filter(c => c.currentPrice !== null);
+      console.log('📊 [주가 매핑 완료] 주가가 있는 기업:', companiesWithStockData.length, '개');
+      if (companiesWithStockData.length > 0) {
+        console.log('📊 [주가 보유 TOP 5]');
+        companiesWithStockData
+          .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
+          .slice(0, 5)
+          .forEach((c, idx) => {
+            console.log(`  ${idx + 1}. ${c.companyName}: 현재가=${c.currentPrice?.toLocaleString()}원, 등락률=${c.changeRate}%, 시총=${c.marketCap?.toLocaleString()}백만원`);
+          });
+      }
+
+      // 공시 데이터 적용 (API 또는 fallback)
+      console.log('📋 [공시 매핑 시작] 총', disclosures.length, '개 공시 데이터 처리');
+      disclosures.forEach(d => {
+        if (!d || !d.stock_code) {
+          console.log('❌ [공시 매핑] 빈 데이터 또는 stock_code 없음:', d);
+          return;
+        }
+        if (companyDataMap.has(d.stock_code)) {
+          companyDataMap.get(d.stock_code)!.disclosures.push(d);
+          console.log(`✅ [공시 매핑] ${d.stock_code} <- 공시 추가: ${d.disclosure_title}`);
+        } else {
+          console.log(`❌ [공시 매핑] ${d.stock_code}: companyDataMap에 없음`);
+        }
+      });
+      
+      // 공시가 적용된 기업 수 확인
+      const companiesWithDisclosures = Array.from(companyDataMap.values()).filter(c => c.disclosures.length > 0);
+      console.log('📋 [공시 매핑 완료] 공시가 있는 기업:', companiesWithDisclosures.length, '개');
+      companiesWithDisclosures.forEach(c => {
+        console.log(`📋 [공시 보유] ${c.companyName}: ${c.disclosures.length}개 공시`);
+      });
+      
+
+
+      // 이슈 데이터 적용 (API 또는 fallback)
+      console.log('📰 [이슈 매핑 시작] 총', issues.length, '개 이슈 데이터 처리');
       issues.forEach(i => {
-        if (!i || !i.corp) return;
+        if (!i || !i.corp) {
+          console.log('❌ [이슈 매핑] 빈 데이터 또는 corp 없음:', i);
+          return;
+        }
         const stockCode = NAME_TO_CODE_MAP[i.corp];
         if (stockCode && companyDataMap.has(stockCode)) {
           companyDataMap.get(stockCode)!.issues.push(i);
+          console.log(`✅ [이슈 매핑] ${i.corp} (${stockCode}) <- 이슈 추가`);
+        } else {
+          console.log(`❌ [이슈 매핑] ${i.corp} -> 코드: ${stockCode} (companyDataMap에 없음)`);
         }
       });
+      
+      // 이슈가 적용된 기업 수 확인
+      const companiesWithIssues = Array.from(companyDataMap.values()).filter(c => c.issues.length > 0);
+      console.log('📰 [이슈 매핑 완료] 이슈가 있는 기업:', companiesWithIssues.length, '개');
+      companiesWithIssues.forEach(c => {
+        console.log(`📰 [이슈 보유] ${c.companyName}: ${c.issues.length}개 이슈`);
+      });
+
+
 
       const finalData = Array.from(companyDataMap.values())
         .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0))
         .map((item, index) => ({ ...item, marketCapRank: index + 1 }));
 
+      console.log('🔍 [디버깅] 최종 데이터:', finalData.length, finalData.slice(0, 5));
+      console.log('🔍 [디버깅] 주가 데이터가 있는 기업:', finalData.filter(d => d.currentPrice !== null).length);
+      console.log('🔍 [디버깅] 주가 데이터가 없는 기업:', finalData.filter(d => d.currentPrice === null));
+      
+      // 각 기업별 상세 데이터 확인
+      finalData.forEach((company, index) => {
+        if (index < 10) { // 처음 10개만
+          console.log(`🔍 [상세] ${index+1}. ${company.companyName} (${company.symbol}):`, {
+            marketCap: company.marketCap,
+            currentPrice: company.currentPrice,
+            changeRate: company.changeRate,
+            rank: company.marketCapRank
+          });
+        }
+      });
+
       setIntegratedData(finalData);
       
-      // API 에러가 발생했거나 데이터가 비어있으면 배포 준비 모달 표시
-      if (hasApiError || finalData.length === 0) {
-        setShowDeployModal(true);
+      // API 에러가 발생했는지 확인하고 적절한 알림 표시
+      if (hasApiError) {
+        console.log('🚨 [API 에러 발생] 일부 API 호출 실패, fallback 데이터 사용 중');
+        
+        // 주가 데이터 fallback 확인
+        const hasStockData = stockData.length > 0;
+        if (hasStockData) {
+          console.log('✅ [Fallback 성공] 주가 데이터 fallback이 정상 작동');
+        } else {
+          console.log('❌ [Fallback 실패] 주가 데이터 fallback도 실패');
+        }
+        
+        // 이슈 데이터 fallback 확인
+        const hasIssueData = companiesWithIssues.length > 0;
+        if (hasIssueData) {
+          console.log('✅ [Fallback 성공] 이슈 데이터 fallback이 정상 작동');
+        } else {
+          console.log('❌ [Fallback 실패] 이슈 데이터 fallback도 실패');
+        }
+        
+        // Fallback 상태 요약
+        console.log(`📋 [Fallback 요약] 주가: ${hasStockData ? '✅' : '❌'}, 이슈: ${hasIssueData ? '✅' : '❌'}`);
+        
+        // 데이터가 아예 없는 경우에만 모달 표시
+        if (finalData.length === 0) {
+          setShowDeployModal(true);
+        }
+      } else {
+        console.log('✅ [모든 API 성공] 정상 데이터 로딩 완료');
       }
     } catch (e: any) {
       console.error('🚨 [치명적 에러]', e);
@@ -382,7 +638,6 @@ const DigestPage: React.FC = () => {
       </div>
       <IntegratedTable data={integratedData} searchTerm={searchTerm} onSearch={setSearchTerm} />
       
-      {/* 배포 준비 중 모달 */}
       {showDeployModal && (
         <div className={styles.modalOverlay} onClick={() => setShowDeployModal(false)}>
           <div className={styles.deployModal} onClick={(e) => e.stopPropagation()}>

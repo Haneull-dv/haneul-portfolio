@@ -1,3 +1,7 @@
 """
-Controllers - Coordinate between services and repositories
-""" 
+Controllers - Coordinate between routers and services
+"""
+
+from .proxy_controller import ProxyController
+
+__all__ = ["ProxyController"] 

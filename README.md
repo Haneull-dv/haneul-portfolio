@@ -14,8 +14,8 @@ Gateway (API 게이트웨이)
 ├─ StockPrice (주가 정보 조회)                                  │
 ├─ StockTrend (주식 트렌드 분석)                                │
 ├─ IRSummary (IR 보고서 요약)                                 │
-├─ DSDGen (재무제표 생성)                                     │
-├─ DSDCheck (재무제표 검증)                                   │
+├─ DART Converter (재무제표 생성)                             │
+├─ Validation (재무제표 검증)                                │
 ├─ KPICompare (KPI 비교 분석)                                 │
 ├─ NewsClassifier (뉴스 분류 ai 모델)                                 │
 ├─ Summarizer (텍스트 요약 ai 모델)                                   │
@@ -38,8 +38,8 @@ portfolio/
 │
 ├── conanai_stocktrend/       # Stock Trend Analysis Service (Port: 8081)
 ├── conanai_irsummary/        # IR & Analyst Report Summarization (Port: 8083)
-├── conanai_dsdgen/           # DART DSD Financial Statement Generation (Port: 8085)
-├── conanai_dsdcheck/         # DART DSD Financial Statement Validation (Port: 8086)
+├── dart_converter/           # DART DSD Financial Statement Generation (Port: 8085)
+├── validation/               # DART DSD Financial Statement Validation (Port: 8086)
 │
 ├── weekly_stockprice/        # Weekly Stock Price Data Service (Port: 9006)
 ├── weekly_disclosure/        # Weekly Disclosures Collection (Port: 8090)
@@ -75,8 +75,8 @@ portfolio/
 | **Gateway**          | 8080 | `gateway`      | Main API Gateway                               | `/docs`                 |
 | **StockTrend**       | 8081 | `stock`        | Stock trend & competitor analysis              | `/docs`                 |
 | **IRSummary**        | 8083 | `summary`      | AI-powered report summarization                | `/docs`                 |
-| **DSDGen**           | 8085 | `gen`          | DART financial statement (DSD) generation      | `/docs`                 |
-| **DSDCheck**         | 8086 | `check`        | Financial statement validation & comparison    | `/docs`                 |
+| **DART Converter**   | 8085 | `dart_converter` | DART financial statement (DSD) generation    | `/docs`                 |
+| **Validation**       | 8086 | `validation`   | Financial statement validation & comparison    | `/docs`                 |
 | **NewsClassifier**   | 8087 | `newsclassifier`| News article classification (SLM)             | `/docs`                 |
 | **Summarizer**       | 8088 | `summarizer`   | Text summarization service (SLM)               | `/docs`                 |
 | **Issue**            | 8089 | `issue`        | Weekly market issue tracking service           | `/docs`                 |

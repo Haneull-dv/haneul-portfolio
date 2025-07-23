@@ -246,17 +246,29 @@
     background-color: #f9fafb;
   }
   
-  /* 컬럼 너비 지정 */
-  .thCheckbox { width: 3%; }
-  .thRank     { width: 4%; text-align: center; }
+  /* 컬럼 너비 지정 - 금주 공시/이슈 메인 강조 */
+  .thCheckbox { width: 2%; }
+  .thRank     { width: 3%; text-align: center; }
   .thCompany  { width: 12%; }
-  .thCountry  { width: 5%; text-align: center; }
+  .thCountry  { 
+    width: 3%; 
+    text-align: center; 
+    padding-left: 8px !important;  /* 기업명과 더 가까이 */
+    padding-right: 8px !important; 
+  }
   .thNumber   { width: 8%; text-align: right; }
-  .thDisclosure { width: 30%; }
-  .thIssue    { width: 30%; }
+  .thDisclosure { width: 36%; }  /* 메인 자료 - 더 넓게 */
+  .thIssue    { width: 36%; }    /* 메인 자료 - 더 넓게 */
 
   .centerAlign { text-align: center; }
   .rightAlign { text-align: right; }
+  
+  /* 국가 칼럼 데이터 셀 패딩 조정 */
+  .tdCountry {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    text-align: center;
+  }
 
   /* 긴 텍스트 말줄임 처리 */
   .disclosureCell div, .issueCell div {
