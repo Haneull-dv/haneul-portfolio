@@ -305,6 +305,32 @@ const ValidationPage: React.FC = () => {
             </label>
             {file && (<div className={styles.fileInfo}><i className='bx bxs-file-excel'></i><span>{file.name}</span></div>)}
           </div>
+          <div style={{ 
+            marginTop: '16px', 
+            padding: '12px 16px', 
+            background: '#f8f9fa', 
+            borderRadius: '0',
+            border: '1px solid #e9ecef'
+          }}>
+            <p style={{ 
+              margin: 0, 
+              fontSize: '13px', 
+              color: '#6b7280', 
+              lineHeight: '1.5',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
+              <i className='bx bx-info-circle' style={{ 
+                fontSize: '14px', 
+                color: '#3b82f6',
+                marginTop: '1px',
+                flexShrink: 0
+              }}></i>
+              <span style={{ flex: 1, minWidth: '200px' }}>편리한 시연을 위해 네오위즈 재무제표 샘플 파일이 미리 준비되어 있습니다. 바로 검증 버튼을 눌러보세요!</span>
+            </p>
+          </div>
         </div>
         <div className={styles.card}>
           <h3>검증 실행</h3>

@@ -5,8 +5,8 @@ import Layout from '@/shared/components/Layout/Layout';
 import PageHeader from '@/shared/components/PageHeader/PageHeader';
 import CardContainer from '@/shared/components/CardContainer/CardContainer';
 import Card from '@/shared/components/Card/Card';
-import { FaGithub, FaInstagram } from 'react-icons/fa';
-import styles from '../about/about.module.scss';
+import { FaGithub, FaInstagram, FaYoutube } from 'react-icons/fa';
+import styles from './contact.module.scss';
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -60,7 +60,8 @@ const ContactPage: React.FC = () => {
 
   const socialLinks = [
     { icon: <FaGithub size={28} />, name: 'GitHub', url: 'https://github.com/Haneull-dv/haneul-portfolio' },
-    { icon: <FaInstagram size={28} />, name: 'Instagram', url: 'https://instagram.com/skyyy_neul' }
+    { icon: <FaInstagram size={28} />, name: 'Instagram', url: 'https://instagram.com/skyyy_neul' },
+    { icon: <FaYoutube size={28} />, name: 'YouTube', url: 'https://youtu.be/9ANnZFn3a7g?si=1Jb-B_WiRjjMgWen' }
   ];
 
   return (
@@ -144,11 +145,26 @@ const ContactPage: React.FC = () => {
               <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
                 <h4 style={{ margin: '0 0 16px 0', color: 'var(--dark)', fontSize: '16px', fontWeight: '600' }}>Follow Me</h4>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  {socialLinks.map((link, idx) => (
-                    <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" style={{ width: '40px', height: '40px', backgroundColor: '#e5e7eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#173e92', fontSize: '18px', textDecoration: 'none', transition: 'all 0.3s ease' }}>
-                      {link.icon}
-                    </a>
-                  ))}
+                  {socialLinks.map((link, idx) => {
+                    // Determine the CSS class based on the platform
+                    let platformClass = '';
+                    if (link.name === 'GitHub') platformClass = 'github';
+                    else if (link.name === 'Instagram') platformClass = 'instagram';
+                    else if (link.name === 'YouTube') platformClass = 'youtube';
+                    
+                    return (
+                      <a 
+                        key={idx} 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`${styles.socialButton} ${styles[platformClass]}`}
+                        title={`Visit my ${link.name}`}
+                      >
+                        {link.icon}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             </div>

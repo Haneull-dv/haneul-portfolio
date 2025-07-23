@@ -117,3 +117,52 @@
   background: #173e92;
   color: #fff;
 }
+
+// Enhanced Social Media Button Styles
+.socialButton {
+  width: 40px;
+  height: 40px;
+  background-color: #e5e7eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  font-size: 18px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  // GitHub specific styles
+  &.github:hover {
+    background-color: #24292e;
+    color: white;
+  }
+
+  // Instagram specific styles  
+  &.instagram:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+  }
+
+  // YouTube specific styles
+  &.youtube:hover {
+    background-color: #ff0000;
+    color: white;
+  }
+}
+
+// Mobile responsive adjustments for social buttons
+@media (max-width: 480px) {
+  .socialButton {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

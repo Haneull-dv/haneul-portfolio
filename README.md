@@ -1,144 +1,147 @@
-# 🏢 SKYC Corp: Microservice Project
+# 🎮 Game Industry Market Intelligence Platform
 
-This project is a comprehensive enterprise management solution built on a microservice architecture, designed to automate and enhance financial analysis, reporting, and market intelligence for SKYC Corp.
+> **Demo Video:** [YouTube 시연 영상 바로가기](https://youtu.be/9ANnZFn3a7g?si=4qdm6uhpQciHHmNL)
+
+---
+
+## ✅ 한눈에 보는 프로젝트 개요
+
+### 프로젝트 목적 / 해결하고자 한 문제
+
+**게임업계 상장기업의 주가, 공시, 주요 이슈, 재무제표, KPI 등 다양한 데이터를 자동으로 수집·분석·비교·검증하여, 투자자·경영진·애널리스트가 한눈에 시장 동향과 기업별 경쟁력을 파악할 수 있도록 지원하는 통합 데이터 플랫폼입니다.**
+
+- **문제점:** 분산된 데이터(주가, 공시, 이슈, 리포트, 재무제표 등)를 수작업으로 모으고 분석하는 데 많은 시간과 노력이 소요됨
+- **해결:** 다양한 데이터 소스를 자동 수집·정제·분석·비교·검증하여, 실시간으로 시각화/요약/비교/검증 결과를 제공
+
+---
+
+## 🏆 주요 서비스/기능 (4대 핵심 모듈)
+
+### 1. **Market Digest**
+- **주간 게임업계 동향 대시보드**
+- 주가, 공시, 주요 이슈를 통합적으로 수집/시각화 (weekly_issue, weekly_disclosure, weekly_stockprice)
+- 기업별로 한눈에 비교/검색/필터링 가능
+
+### 2. **KPI Compare**
+- **상장사 KPI(핵심 재무지표) 비교 분석**
+- 여러 기업의 주요 재무지표(매출, 영업이익 등)를 기간별로 비교/시각화
+- 경쟁사 벤치마킹, 트렌드 분석 지원
+
+### 3. **DART Converter**
+- **DART 표준 재무제표 자동 생성**
+- 엑셀 업로드만으로 표준화된 DART 재무제표 생성
+- 다양한 기업/기간별 템플릿 지원
+
+### 4. **Validation**
+- **재무제표 자동 검증/비교**
+- 업로드된 재무제표의 무결성, 항목간 논리관계, 전기/당기 비교 등 자동 검증
+- 오류/불일치 항목 상세 리포트 제공
+
+---
 
 ## 🏗️ 시스템 아키텍처
 
 ```
-Frontend (Next.js)
+Frontend (Next.js 15, React 19)
     ↓
-Gateway (API 게이트웨이)
+Gateway (FastAPI, Nginx)
     ↓
-┌────────────────────────────────────────────────────────────┐
-│                      Microservices                         │
-├─ StockPrice (주가 정보 조회)                                  │
-├─ StockTrend (주식 트렌드 분석)                                │
-├─ IRSummary (IR 보고서 요약)                                 │
-├─ DART Converter (재무제표 생성)                             │
-├─ Validation (재무제표 검증)                                │
-├─ KPICompare (KPI 비교 분석)                                 │
-├─ NewsClassifier (뉴스 분류 ai 모델)                                 │
-├─ Summarizer (텍스트 요약 ai 모델)                                   │
-├─ Disclosure (공시 수집)                                     │
-├─ Issue (이슈 트래킹)                                   │
-└─ WeeklyDB (주간 데이터 통합)                                │
-└────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────┐
+│                Microservices                 │
+├─ dart_converter/    # DART 재무제표 생성 (8085)
+├─ validation/        # 재무제표 검증 (8086)
+├─ kpi_compare/       # KPI 비교 분석 (8092)
+├─ weekly_stockprice/ # 주간 주가 데이터 (9006)
+├─ weekly_disclosure/ # 주간 공시 데이터 (8090)
+├─ weekly_issue/      # 주간 이슈 데이터 (8089)
+├─ slm_newsclassifier_inference/ # 뉴스 분류 AI (8087)
+├─ slm_summarizer_inference/    # 텍스트 요약 AI (8088)
+├─ gateway/           # API 게이트웨이 (8080)
+├─ frontend/          # 대시보드 (3000)
+└─ ...
     ↓
-PostgreSQL (데이터베이스)
-
-N8N (워크플로우 자동화) ← → 모든 서비스들
+PostgreSQL (15)
 ```
 
-## 📁 Project Structure
+---
+
+## 🚀 기술 스택
+
+- **Frontend:** Next.js 15, React 19, TypeScript, SCSS Modules
+- **Backend:** Python 3.11, FastAPI, SQLAlchemy
+- **Database:** PostgreSQL 15
+- **AI/ML:** PyTorch, HuggingFace Transformers, OpenAI GPT-3.5
+- **Automation:** n8n, pdfplumber, Camelot
+- **Infra:** Docker, Docker Compose, Nginx
+
+---
+
+## ✨ 통합 플랫폼 주요 특징
+
+- **4대 핵심 서비스**가 독립적이면서도 통합된 대시보드에서 연동
+- **주가/공시/이슈 통합 Market Digest**: 게임업계 상장사별 주가, 공시, 이슈를 한눈에 비교/분석
+- **KPI 비교 분석**: 여러 기업의 주요 재무지표를 기간별로 비교
+- **DART 재무제표 자동 생성**: 엑셀 업로드만으로 표준 재무제표 생성
+- **재무제표 자동 검증**: 업로드된 재무제표의 무결성, 논리관계, 전기/당기 비교 등 자동 검증
+- **AI 기반 뉴스 분류/요약, PDF 리포트 요약**: 최신 시장 뉴스 자동 분류 및 요약, 애널리스트 리포트 등 PDF 문서 자동 요약
+- **n8n 기반 데이터 파이프라인**: 주간 데이터 자동 수집/정제/적재
+
+---
+
+## 🛠️ 로컬 실행 방법
+
+1. **레포지토리 클론**
+   ```bash
+   git clone <your-repo-url>
+   cd portfolio
+   ```
+2. **환경변수 파일(.env) 준비**
+   - 각 서비스별 `.env.example` 참고하여 `.env` 파일 생성
+3. **도커로 전체 서비스 실행**
+   ```bash
+   docker-compose up --build
+   ```
+4. **대시보드 접속**
+   - http://localhost:3000
+
+---
+
+## 📚 API 문서 & 시연 영상
+
+- **API 문서:** 각 서비스별 `/docs` (예: http://localhost:8080/docs)
+- **시연 영상:** [YouTube Demo](https://youtu.be/9ANnZFn3a7g?si=4qdm6uhpQciHHmNL)
+
+---
+
+## 📁 디렉토리 구조 (최신)
 
 ```
 portfolio/
-├── frontend/                 # Next.js 15 Dashboard (Port: 3000)
-├── gateway/                  # API Gateway (Port: 8080)
-│
-├── conanai_stocktrend/       # Stock Trend Analysis Service (Port: 8081)
-├── conanai_irsummary/        # IR & Analyst Report Summarization (Port: 8083)
-├── dart_converter/           # DART DSD Financial Statement Generation (Port: 8085)
-├── validation/               # DART DSD Financial Statement Validation (Port: 8086)
-│
-├── weekly_stockprice/        # Weekly Stock Price Data Service (Port: 9006)
-├── weekly_disclosure/        # Weekly Disclosures Collection (Port: 8090)
-├── weekly_issue/             # Weekly Market Issue Tracking (Port: 8089)
-├── weekly_db/                # Weekly Data CQRS Orchestrator (Port: 8091)
-│
-├── kpi_compare/              # Cross-Company KPI Comparison Service (Port: 8092)
-│
-├── slm_newsclassifier_inference/ # News Classification SLM Service (Port: 8087)
-├── slm_summarizer_inference/     # Text Summarization SLM Service (Port: 8088)
-│
-├── n8n_data/                 # n8n Workflow Automation Data (Port: 5678)
-├── postgres/                 # PostgreSQL Database (Port: 5432)
-│
-├── docker-compose.yml        # Docker Compose Configuration
+├── frontend/                 # Next.js 대시보드
+├── gateway/                  # API Gateway
+├── dart_converter/           # DART 재무제표 생성
+├── validation/               # 재무제표 검증
+├── kpi_compare/              # KPI 비교 분석
+├── weekly_stockprice/        # 주간 주가 데이터
+├── weekly_disclosure/        # 주간 공시 데이터
+├── weekly_issue/             # 주간 이슈 데이터
+├── slm_newsclassifier_inference/ # 뉴스 분류 AI
+├── slm_summarizer_inference/     # 텍스트 요약 AI
+├── n8n_data/                 # n8n 워크플로우
+├── postgres/                 # DB
+├── docker-compose.yml        # 도커 컴포즈
 └── README.md
 ```
 
-## 🚀 Tech Stack
+---
 
-- **Backend**: Python 3.11, FastAPI, SQLAlchemy
-- **Frontend**: Next.js 15, React 19, TypeScript, SCSS Modules
-- **Database**: PostgreSQL 15
-- **AI/ML**: PyTorch, HuggingFace Transformers (SLMs), OpenAI GPT-3.5
-- **Automation**: n8n, pdfplumber, Camelot
-- **Infrastructure**: Docker, Docker Compose, Nginx (in Gateway)
+## 💡 기타
+- **포트폴리오/시연/기술블로그 등에 활용하기 좋은 구조와 문서화**
+- **확장성/유지보수성 고려한 마이크로서비스 설계**
+- **실제 상장사 데이터 기반 데모**
 
-## 🌐 Service Ports & Endpoints
+---
 
-| Service              | Port | Container Name | Description                                    | API Docs                |
-|----------------------|------|----------------|------------------------------------------------|-------------------------|
-| **Frontend**         | 3000 | `frontend`     | User-facing dashboard                          | -                       |
-| **Gateway**          | 8080 | `gateway`      | Main API Gateway                               | `/docs`                 |
-| **StockTrend**       | 8081 | `stock`        | Stock trend & competitor analysis              | `/docs`                 |
-| **IRSummary**        | 8083 | `summary`      | AI-powered report summarization                | `/docs`                 |
-| **DART Converter**   | 8085 | `dart_converter` | DART financial statement (DSD) generation    | `/docs`                 |
-| **Validation**       | 8086 | `validation`   | Financial statement validation & comparison    | `/docs`                 |
-| **NewsClassifier**   | 8087 | `newsclassifier`| News article classification (SLM)             | `/docs`                 |
-| **Summarizer**       | 8088 | `summarizer`   | Text summarization service (SLM)               | `/docs`                 |
-| **Issue**            | 8089 | `issue`        | Weekly market issue tracking service           | `/docs`                 |
-| **Disclosure**       | 8090 | `disclosure`   | Weekly disclosure collection service           | `/docs`                 |
-| **WeeklyDB**         | 8091 | `weekly_data`  | CQRS orchestrator for weekly batch jobs        | `/docs`                 |
-| **KPICompare**       | 8092 | `kpi_compare`  | Cross-company financial KPI comparison         | `/docs`                 |
-| **StockPrice**       | 9006 | `stockprice`   | Historical stock price data service            | `/docs`                 |
-| **n8n**              | 5678 | `n8n`          | Workflow automation engine                     | -                       |
-| **PostgreSQL**       | 5432 | `db`           | Main application database                      | -                       |
-
-*   **Access API Docs**: `http://localhost:{PORT}/docs` (e.g., `http://localhost:8080/docs`)
-
-## ✨ Key Features
-
-### Financial Analysis & Automation
-- **Cross-Company KPI Comparison**: Interactively compare financial KPIs across multiple companies and reporting periods.
-- **Automated Financial Statement (DSD) Generation**: Create standardized DART-compliant financial statements from Excel templates.
-- **Financial Data Validation**: Verify integrity between financial statements and compare against previous periods.
-
-### AI-Powered Insights
-- **Analyst Report Summarization**: Automatically extracts key insights, performance forecasts, and investment opinions from PDF reports using OCR and AI.
-- **Small Language Model (SLM) Services**:
-    - **News Classifier**: Classifies financial news into categories like "M&A," "Earnings," "Stock," etc.
-    - **Text Summarizer**: Provides concise summaries of long articles and reports.
-
-### Market & Stock Intelligence
-- **Weekly Data Collection**: Automated weekly collection of stock prices, corporate disclosures, and major market issues.
-- **Stock Trend Analysis**: Provides analysis of stock trends and key indicators.
-- **n8n Workflow Automation**: Automates complex data pipelines, such as orchestrating weekly data collection and report generation.
-
-### Modern User Interface
-- **Interactive Dashboard**: A responsive and intuitive Next.js frontend to visualize data and interact with services.
-- **Secure Authentication**: JWT-based authentication managed by the API Gateway.
-- **Dynamic Content**: Features like PDF viewers and video modals for rich content display.
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- `make` utility
-
-### Running the System
-1.  **Clone the repository.**
-2.  **Set up environment files**: Create `.env` files for each service based on their respective `.env.example` files.
-3.  **Start all services**:
-    ```bash
-    make up
-    ```
-4.  **Access the dashboard**: Open `http://localhost:3000` in your browser.
-
-## 🔧 Key `make` Commands
-
-- `make up`: Build and start all services.
-- `make down`: Stop all services.
-- `make ps`: View the status of all running services.
-- `make logs service=<service_name>`: View logs for a specific service (e.g., `make logs service=gateway`).
-- `make restart service=<service_name>`: Restart a specific service.
-- `make clean`: Remove stopped containers and dangling images.
-
-## 🤖 N8N Workflow Examples
-
-- **Weekly Data Pipeline**: A master workflow triggered every Friday that orchestrates `weekly_disclosure`, `weekly_issue`, and `weekly_stockprice` services to collect, process, and store the week's data.
-- **Report Analysis Pipeline**: An n8n workflow that listens for file uploads (e.g., analyst reports), sends them to the `irsummary` service for analysis, and then notifies users via Slack or email with the summary.
+> 문의/협업/기술문의: skyc.corp@gmail.com
 
 
