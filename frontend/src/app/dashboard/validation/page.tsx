@@ -188,7 +188,7 @@ const ValidationPage: React.FC = () => {
       
       // 환경에 따른 API URL 설정 (Railway/Vercel 환경변수명은 DSDCHECK로 고정)
       const dsdcheckApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK || 
-        (process.env.NODE_ENV === 'production' ? 'https://portfolio-validation.up.railway.app' : 'http://localhost:8086');
+        (process.env.NODE_ENV === 'production' ? 'https://portfolio-dsdcheck.up.railway.app' : 'http://localhost:8086');
       
       const url = `${dsdcheckApiUrl}/api/v1/dsdfooting/check-footing`;
       console.log('🔗 [API 요청] DSDCHECK 합계검증:', url);

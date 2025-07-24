@@ -6,7 +6,7 @@ import os
 from .api.xsldsd_router import router as xsldsd_router
 
 load_dotenv()
-app = FastAPI(title="DSDGen Service")
+app = FastAPI(title="Dart_Converter Service")
 
 # 환경에 따라 origins 다르게 관리
 ENV = os.getenv("ENV", "development")  # 기본값 development

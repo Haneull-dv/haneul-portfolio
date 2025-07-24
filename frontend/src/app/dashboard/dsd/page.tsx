@@ -316,7 +316,14 @@ const DSDPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', fileParam);
       formData.append('sheet_name', sheetParam);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_DART_CONVERTER}/dart_converter/upload`;
+      // 환경에 따른 API URL 설정 (Railway/Vercel 환경변수명은 DSDGEN으로 고정)
+      const dsdgenApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN || 
+        (process.env.NODE_ENV === 'production' ? 'https://portfolio-dsdgen.up.railway.app' : 'http://localhost:8085');
+      
+      const url = `${dsdgenApiUrl}/dsdgen/upload`;
+      console.log('🔗 [API 요청] DSDGEN 변환:', url);
+      console.log('🌍 [환경 정보] NODE_ENV:', process.env.NODE_ENV);
+      console.log('🔧 [환경변수] DSDGEN API URL:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN);
       const response = await fetch(url, {
         method: 'POST',
         body: formData,
