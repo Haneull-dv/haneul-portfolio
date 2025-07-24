@@ -209,7 +209,7 @@ const DSDPage: React.FC = () => {
             marginTop: '1px',
             flexShrink: 0
           }}></i>
-          <span style={{ flex: 1, minWidth: '200px' }}>편리한 시연을 위해 네오위즈 재무제표 샘플 파일이 미리 준비되어 있습니다. 바로 변환 버튼을 눌러보세요!</span>
+          <span style={{ flex: 1, minWidth: '200px' }}>시연을 위해 네오위즈 재무제표 샘플 파일이 미리 준비되어 있습니다. 바로 변환 버튼을 눌러보세요!</span>
         </p>
       </div>
     </div>
