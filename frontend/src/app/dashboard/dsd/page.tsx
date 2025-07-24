@@ -316,14 +316,27 @@ const DSDPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', fileParam);
       formData.append('sheet_name', sheetParam);
-      // 환경에 따른 API URL 설정 (Railway/Vercel 환경변수명은 DSDGEN으로 고정)
-      const dsdgenApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN || 
-        (process.env.NODE_ENV === 'production' ? 'https://portfolio-dsdgen.up.railway.app' : 'http://localhost:8085');
+      // 환경에 따른 API URL 설정 - 간단하고 확실하게
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN;
+      let apiUrl;
       
-      const url = `${dsdgenApiUrl}/dsdgen/upload`;
-      console.log('🔗 [API 요청] DSDGEN 변환:', url);
+      if (baseUrl) {
+        // 환경변수가 있으면 사용 (trailing slash 제거)
+        apiUrl = baseUrl.replace(/\/$/, '');
+      } else {
+        // 환경변수가 없으면 환경에 따라 fallback
+        apiUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://dsdgen.haneull.com' 
+          : 'http://localhost:8085';
+      }
+      
+      // 백엔드 라우터 prefix는 항상 /dsdgen 사용 (폴더명과 무관)
+      const url = `${apiUrl}/dsdgen/upload`;
+      
+      console.log('🔗 [API 요청] DART Converter (dsdgen):', url);
       console.log('🌍 [환경 정보] NODE_ENV:', process.env.NODE_ENV);
-      console.log('🔧 [환경변수] DSDGEN API URL:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN);
+      console.log('🔧 [환경변수] BASE URL:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDGEN);
+      console.log('📍 [최종 API URL]:', url);
       const response = await fetch(url, {
         method: 'POST',
         body: formData,
