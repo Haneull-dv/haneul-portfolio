@@ -52,7 +52,11 @@ const ValidationWidget: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8086/api/v1/dsdfooting/check-footing', {
+      // 환경에 따른 API URL 설정 (Railway/Vercel 환경변수명은 DSDCHECK로 고정)
+      const dsdcheckApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK || 
+        (process.env.NODE_ENV === 'production' ? 'https://portfolio-dsdcheck.up.railway.app' : 'http://localhost:8086');
+      
+      const response = await fetch(`${dsdcheckApiUrl}/api/v1/dsdfooting/check-footing`, {
         method: 'POST',
         body: formData,
       });

@@ -133,7 +133,7 @@ const ValidationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('📦 VALIDATION API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_VALIDATION);
+    console.log('📦 DSDCHECK API Base:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK);
   }, []);
 
   useEffect(() => {
@@ -185,8 +185,15 @@ const ValidationPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL_VALIDATION}/api/v1/dsdfooting/check-footing`;
-    console.log('🔗 [API 요청] VALIDATION 합계검증:', url);
+      
+      // 환경에 따른 API URL 설정 (Railway/Vercel 환경변수명은 DSDCHECK로 고정)
+      const dsdcheckApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK || 
+        (process.env.NODE_ENV === 'production' ? 'https://portfolio-validation.up.railway.app' : 'http://localhost:8086');
+      
+      const url = `${dsdcheckApiUrl}/api/v1/dsdfooting/check-footing`;
+      console.log('🔗 [API 요청] DSDCHECK 합계검증:', url);
+      console.log('🌍 [환경 정보] NODE_ENV:', process.env.NODE_ENV);
+      console.log('🔧 [환경변수] DSDCHECK API URL:', process.env.NEXT_PUBLIC_API_BASE_URL_DSDCHECK);
       console.log('📄 [FormData] file:', file);
       const response = await fetch(url, { method: 'POST', body: formData });
       console.log('📥 [API 응답] status:', response.status, response.statusText);
