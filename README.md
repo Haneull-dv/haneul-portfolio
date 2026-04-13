@@ -111,6 +111,6 @@ portfolio/
 
 ---
 
-> 문의/협업/기술문의: skyc.corp@gmail.com
+> 문의/협업/기술문의: haneull.dv@gmail.com
 
 
